@@ -1,0 +1,180 @@
+from django.db import models
+from projects.models import Project
+from components.models import Initiatives, SettingsStatusInitiative
+
+from django.utils import timezone
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+
+class CoordinationInitiativeHistory(models.Model):
+    initiative = models.ForeignKey(
+        Initiatives,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="history_coordination",
+    )
+    status = models.ForeignKey(
+        SettingsStatusInitiative,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
+    coordinator = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+    )
+    date = models.DateTimeField(
+        verbose_name="Дата и время сообщения",
+        default=timezone.now,
+    )
+    author_text = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="author_comment",
+        blank=True,
+        null=True,
+    )
+    text = models.CharField(max_length=300)
+
+    TYPE_VALUE = [
+        ("Отправить на согласование", "Отправить на согласование"),
+        ("Новый комментарий", "Новый комментарий"),
+        ("Инициатива согласована", "Инициатива согласована"),
+        ("Служебное сообщение", "Служебное сообщение"),
+        ("Withdrew the initiative", "Withdrew the initiative"),
+    ]
+    action = models.CharField(
+        max_length=30,
+        choices=TYPE_VALUE,
+    )
+
+    class Meta:
+        db_table = "coordination_initiative_history"
+        ordering = ["date"]
+
+    @classmethod
+    def create(cls, info):
+        cls.objects.create(**info)
+
+    @classmethod
+    def check_person_add_comment(cls, initiative_id, user):
+        initiative: Initiatives = Initiatives.get_by_id(initiative_id)
+        if initiative.author == user:
+            return True
+
+        return StagesCoordinationInitiative.user_is_coordinator(
+            initiative_id, user
+        )
+
+
+class StagesCoordinationInitiative(models.Model):
+    initiative = models.ForeignKey(
+        Initiatives,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="stages_coordination",
+    )
+    status = models.ForeignKey(
+        SettingsStatusInitiative,
+        on_delete=models.CASCADE,
+    )
+    coordinator_stage = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        # related_name="coordinator_initiatives",
+    )
+    activate = models.BooleanField(default=False)
+
+    @classmethod
+    def add_stage(cls, info):
+        print("info", info)
+        stage = (
+            cls.objects.filter(initiative_id=info.get("initiative_id"))
+            .filter(coordinator_stage=info.get("coordinator_stage"))
+            .filter(status=info.get("status"))
+            .first()
+        )
+        print("stage", stage)
+        if not stage:
+            return cls.objects.create(**info)
+        return stage
+
+    @classmethod
+    def check_update_status(cls, initiative):
+        status_old = initiative.status
+        if all(
+            x.activate
+            for x in cls.objects.filter(initiative=initiative)
+            .filter(status=status_old)
+            .all()
+        ):
+            new_status = (
+                SettingsStatusInitiative.get_next_statuses_by_id_initiative(
+                    initiative.id
+                )
+            )
+            initiative.status = new_status
+            initiative.save()
+            return True
+        return False
+
+    @classmethod
+    def check_coordinator_status(cls, initiative_id, coordinator, status):
+        return (
+            cls.objects.filter(initiative_id=initiative_id)
+            .filter(coordinator_stage=coordinator)
+            .filter(status=status)
+            .first()
+        )
+
+    @classmethod
+    def user_is_coordinator(cls, initiative_id, user) -> bool:
+        print(cls.objects.filter(initiative_id=initiative_id).all())
+        return (
+            cls.objects.filter(initiative_id=initiative_id)
+            .filter(coordinator_stage_id=user.id)
+            .exists()
+        )
+
+    @classmethod
+    def get_coordinators(cls, initiative):
+        items = (
+            cls.objects.filter(initiative=initiative)
+            .filter(status=initiative.status)
+            .all()
+        )
+        if not items:
+            return []
+        return [item.coordinator_stage for item in items]
+
+    @classmethod
+    def get_coordinators_all_status(cls, initiative_id):
+        items = cls.objects.filter(initiative_id=initiative_id).all()
+        if not items:
+            return []
+        return [item.coordinator_stage for item in items]
+
+    @classmethod
+    def check_person_approval(cls, initiative_id, user):
+        initiative: Initiatives = Initiatives.get_by_id(initiative_id)
+        return (
+            cls.objects.filter(initiative=initiative)
+            .filter(status=initiative.status)
+            .filter(coordinator_stage=user)
+            .exists()
+        )
+
+    class Meta:
+        db_table = "stages_coordination_initiative"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["initiative", "status", "coordinator_stage"],
+                name="unique status coordinator_stage",
+            )
+        ]

@@ -1,0 +1,18 @@
+Content-Type: multipart/alternative;
+ boundary="===============6482533021335858822=="
+MIME-Version: 1.0
+Subject: Password Reset for Site name
+From: Alset.Nikolas@gmail.com
+To: Alset.Nikolas@yandex.ru
+Date: Sat, 29 Oct 2022 14:12:44 -0000
+Message-ID: <166705276435.30571.6147432937979846117@AlsetPk>
+
+--===============6482533021335858822==
+Content-Type: text/html; charset="utf-8"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 8bit
+
+Для смены своего пароля нажмите на ссылку: http://localhost:8000/api/auth/login/?token=37fd80c3e022fd4ef84e256ad80c979b
+--===============6482533021335858822==--
+
+-------------------------------------------------------------------------------
