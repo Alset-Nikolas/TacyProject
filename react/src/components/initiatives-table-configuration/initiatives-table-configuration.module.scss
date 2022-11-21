@@ -1,0 +1,27 @@
+.content {
+  display: flex;
+  gap: 20px;
+}
+
+.addfieldsHeader {
+  margin-bottom: 16px;
+}
+
+.addfieldInputWrapper {
+  display: flex;
+  gap: 20px;
+  margin-bottom: 8px;
+}
+
+.colHeader {
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 30px;
+  color: #504F4F;
+}
+
+.listWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}

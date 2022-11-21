@@ -1,0 +1,16 @@
+.header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  // gap: 24px;
+
+  &.edit {
+    color: #504F4F;
+  }
+}
+
+.wrapperBorder {
+  background: #FFFFFF;
+  box-shadow: 0px 2px 22px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+}

@@ -1,0 +1,14 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.tableWrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.button {
+  align-self: flex-end;
+}

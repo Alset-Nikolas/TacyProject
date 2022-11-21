@@ -1,0 +1,10 @@
+FROM node:16.15.1
+WORKDIR /react
+COPY package.json /react/
+RUN npm install
+RUN apt-get update && apt-get install -y dos2unix
+COPY . /react
+RUN find . -type f -print0 | xargs -0 dos2unix && apt-get --purge remove -y dos2unix && rm -rf /var/lib/apt/lists/*
+EXPOSE 3000
+RUN npm run build
+CMD [ "npm", "start" ]
