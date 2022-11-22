@@ -152,3 +152,5 @@ export const mockTeam = [
     unit: ['П2'],
   },
 ];
+
+export const REACT_APP_BACKEND_URL = 'http://158.160.19.111:8000/api';

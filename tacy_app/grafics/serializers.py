@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import GraficsProject
-from projects.models import PropertiesProject
+from projects.models import PropertiesProject, MetricsProject
 
 
 class GraficsProjectSerializerItem(serializers.ModelSerializer):
@@ -9,7 +9,8 @@ class GraficsProjectSerializerItem(serializers.ModelSerializer):
         model = GraficsProject
         fields = (
             "propertie",
-            "metrics",
+            "metric",
+            "activate",
         )
 
     def validate_metrics(self, metrics):
@@ -39,31 +40,34 @@ class GraficsProjectSerializerItem(serializers.ModelSerializer):
         return super().validate(attrs)
 
 
-class GraficsProjectInfoSerializerItem(GraficsProjectSerializerItem):
+class PropertieSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MetricsProject
+        fields = ("id", "title")
+
+
+class GraficsProjectInfoSerializerItem(serializers.ModelSerializer):
+    metric = PropertieSerializer()
+
     class Meta:
         depth = 1
         model = GraficsProject
         fields = (
-            "propertie",
-            "metrics",
+            "metric",
+            "activate",
         )
 
 
+class PropertieSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PropertiesProject
+        fields = ("id", "title")
+
+
+class GraficsProjectInfoSerializerBigItem(serializers.Serializer):
+    propertie = PropertieSerializer()
+    metrics = GraficsProjectInfoSerializerItem(many=True)
+
+
 class GraficsProjectSerializer(serializers.Serializer):
-    grafics = GraficsProjectSerializerItem(many=True)
-
-
-class GraficsProjectInfoSerializer(serializers.Serializer):
-    grafics = GraficsProjectInfoSerializerItem(many=True)
-
-
-class PropertieSerializer(serializers.Serializer):
-    propertie = serializers.IntegerField()
-
-    def validate_id(self, attrs_id):
-        propertie = PropertiesProject.get_property_by_id(attrs_id)
-        if not propertie:
-            return serializers.ValidationError({"not exist"})
-        if propertie.project != self.context.get("project"):
-            raise serializers.ValidationError("Это емкость у другого проекта")
-        return super().validate(attrs_id)
+    grafics = GraficsProjectInfoSerializerBigItem(many=True)

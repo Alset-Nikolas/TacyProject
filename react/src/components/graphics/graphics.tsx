@@ -10,60 +10,6 @@ import SectionHeader from "../section/section-header/section-header";
 // Styles
 import styles from './graphics.module.scss';
 
-const data = [];
-// {
-//   value1: [
-//     {
-//       name: 'metric1',
-//       value: 0.0,
-//     },
-//     {
-//       name: 'metric2',
-//       value: 0.0,
-//     },
-//   ],
-//   value2: [
-//     {
-//       name: 'metric1',
-//       value: 0.0,
-//     },
-//     {
-//       name: 'metric2',
-//       value: 0.0,
-//     },
-//   ],
-
-// }
-//   {
-//     "name": "A",
-//     "uv": 4000,
-//   },
-//   {
-//     "name": "B",
-//     "uv": 3000,
-//   },
-//   {
-//     "name": "C",
-//     "uv": 2000,
-//   },
-//   {
-//     "name": "D",
-//     "uv": 2780,
-//   },
-//   {
-//     "name": "E",
-//     "uv": 1890,
-//   },
-//   {
-//     "name": "F",
-//     "uv": 2390,
-//   },
-//   {
-//     "name": "G",
-//     "uv": 3490,
-//   }
-// ]
-
 export default function Graphics() {
   const dispatch = useAppDispatch();
   const { graphics } = useAppSelector((store) => store.graphics);
@@ -84,8 +30,10 @@ export default function Graphics() {
         className={`${styles.content}`}
       >
         {/* <GanttD3 data={ganttData} /> */}
-
-      {graphics.length && (
+      {!graphics.length && (
+        <div>Ёмкости отвутствуют</div>
+      )}
+      {!!graphics.length && (
       <div>
         {/* <div>
           {graphics[currentPropertieIndex].propertieName}

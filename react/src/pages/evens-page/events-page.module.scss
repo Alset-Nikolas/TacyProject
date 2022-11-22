@@ -32,19 +32,47 @@
 }
 
 .modalWrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 217px;
-    gap: 26.47px;
-  }
-  
-  .modalButtonsWrapper {
-    display: flex;
-    gap: 20px;
-  }
-  
-  .modalButton {
-    width: 102px;
-  }
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 217px;
+  gap: 26.47px;
+}
+
+.modalButtonsWrapper {
+  display: flex;
+  gap: 20px;
+}
+
+.modalButton {
+  width: 102px;
+}
+
+.inProgress {
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 28px;
+  color: #17598C;
+}
+
+.outdated {
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 28px;
+  color: #B04040;
+}
+
+.ready {
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 28px;
+  color: #8DB040;
+}
+
+.planned {
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 28px;
+  color: #504F4F;
+}

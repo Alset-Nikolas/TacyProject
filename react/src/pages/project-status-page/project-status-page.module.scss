@@ -1,5 +1,5 @@
 .wrapper {
-  width: 100vw;
+  width: 100%;
 
   display: flex;
   flex-direction: column;
@@ -19,4 +19,9 @@
   width: 100%;
   gap: 40px;
   margin-bottom: 40px;
+
+  div,
+  section {
+    flex-shrink: 1;
+  }
 }

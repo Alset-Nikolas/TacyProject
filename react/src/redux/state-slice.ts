@@ -1,7 +1,7 @@
 /* eslint-disable arrow-body-style */
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { AxiosError, AxiosResponse } from 'axios';
-import { TProject } from '../types';
+import { TProject, TProjectForEdit } from '../types';
 import { createProjectRequest, deleteProject, getProjectInfo, getProjectsList } from '../utils/requests';
 import { AppDispatch, AppThunk, RootState } from './store';
 
@@ -14,7 +14,7 @@ type TState = {
     isGetRequestFailed: boolean;
   };
   backupProjectState: TProject | null;
-  projectForEdit: any,
+  projectForEdit: TProjectForEdit | null,
   projectsList: {
     value: Array<{
       id: number;
@@ -431,7 +431,7 @@ export const getProjectsListThunk = () => (dispatch: AppDispatch) => {
   );
 };
 
-export const createProjectThunk = (body: TProject) => (dispatch: AppDispatch) => {
+export const createProjectThunk = (body: TProject | TProjectForEdit) => (dispatch: AppDispatch) => {
   dispatch(projectCreateRequest());
   createProjectRequest(
     body,

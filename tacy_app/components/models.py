@@ -101,7 +101,7 @@ class Initiatives(models.Model):
         default=timezone.now,
     )
     activate = models.BooleanField(
-        default=True,
+        default=False,
         verbose_name="Флаг Инициатва прошла согласование",
     )
     failure = models.BooleanField(
@@ -209,7 +209,12 @@ class Initiatives(models.Model):
     @classmethod
     def get_user_initiatievs(cls, user, project):
         list_inits = []
-        for init in cls.objects.filter(project=project).all():
+        for init in (
+            cls.objects.filter(project=project).filter(failure=False).all()
+        ):
+            print(init)
+            print(user)
+            print(init.author)
             if init.author == user:
                 list_inits.append(init)
             elif any(
@@ -459,13 +464,14 @@ class Events(models.Model):
             .first()
         )
 
-    def get_status(self):
-        if self.ready:
+    @classmethod
+    def get_status(cls, event):
+        if event.ready:
             return "Выполнено"
         t = timezone.now().date()
-        if t < self.date_start:
+        if t < event.date_start:
             return "Запланировано"
-        if self.date_start <= t <= self.date_end:
+        if event.date_start <= t <= event.date_end:
             return "В работе"
         return "Просрочено"
 

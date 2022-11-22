@@ -223,10 +223,10 @@ class InfoEventView(views.APIView):
         if not id_event:
             return Response("get id event", 404)
         event = get_object_or_404(Events, id=id_event)
-        print(event.metric_fields.all())
         s = EventSerializer(
             instance={
                 "event": event,
+                "event_status": event.get_status(event),
                 "addfields": event.addfields.all(),
                 "metric_fields": event.metric_fields.all(),
             }

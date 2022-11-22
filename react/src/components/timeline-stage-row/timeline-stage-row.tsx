@@ -25,7 +25,7 @@ export default function TimelineStageRow({
   const projectForEdit = useAppSelector((store) => store.state.projectForEdit);
   const { textInput } = inputStyles;
 
-  if (!project) return null;
+  if (!project || !projectForEdit) return null;
 
   return (
     <div

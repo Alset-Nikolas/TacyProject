@@ -32,7 +32,7 @@ export default function Properties({
 
   if (edit) {
     if (!projectForEdit) return null;
-    if (!isPropertieEdit(projectForEdit.properties)) return null;
+    // if (!isPropertieEdit(projectForEdit.properties)) return null;
     return (
       <section className={`${styles.wrapper} ${styles.edit}`}>
         <div className={`${styles.header} ${styles.edit}`}>
@@ -82,7 +82,10 @@ export default function Properties({
                 )}
               />
               {el.values.map((itemProp: string, itemIndex: number) => (
-                <div key={`prop_${index}_${itemIndex}`}>
+                <div
+                  key={`prop_${index}_${itemIndex}`}
+                  style={{ display: 'flex', alignItems: 'center' }}
+                >
                   <input
                     className={`${inputStyles.textInput} ${styles.input}`}
                     value={itemProp}
@@ -96,6 +99,15 @@ export default function Properties({
                       itemIndex,
                     )}
                   />
+                  {(itemIndex === el.values.length - 1) && (
+                    <div style={{ marginRight: '15px' }}>
+                      <Pictogram
+                        type="delete"
+                        cursor="pointer"
+                        onClick={() => removePropertieValue(projectForEdit, el.title, itemIndex, dispatch)}
+                      />
+                    </div>
+                  )}
                   <Pictogram
                     type={`${itemIndex === el.values.length - 1 ? 'add' : 'delete'}`}
                     cursor="pointer"

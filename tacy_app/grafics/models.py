@@ -23,26 +23,60 @@ class GraficsProject(models.Model):
         verbose_name="Проект",
     )
     propertie = models.ForeignKey(PropertiesProject, on_delete=models.CASCADE)
-    metrics = models.ManyToManyField(MetricsProject)
+    metric = models.ForeignKey(MetricsProject, on_delete=models.CASCADE)
+    activate = models.BooleanField(default=False)
 
     class Meta:
         db_table = "grafics_project"
 
     @classmethod
     def create_or_update_grafics_in_project(cls, project, grafics: list):
-        cls.objects.filter(project=project).delete()
         for graf in grafics:
-            propertie = graf.get("propertie")
-            graf_obj = cls.objects.create(
-                project=project, propertie_id=propertie
-            )
-            for m in graf.get("metrics"):
-                graf_obj.metrics.add(m)
-            graf_obj.save()
+
+            propertie_id = graf["propertie"]["id"]
+            for m_obj in graf.get("metrics"):
+                metric_id = m_obj["metric"]["id"]
+
+                graf_obj = (
+                    cls.objects.filter(project=project)
+                    .filter(propertie_id=propertie_id)
+                    .filter(metric_id=metric_id)
+                    .first()
+                )
+                if not graf_obj:
+                    graf_obj = cls.objects.create(
+                        project=project,
+                        propertie_id=propertie_id,
+                        metric_id=metric_id,
+                        activate=graf.get("activate"),
+                    )
+                graf_obj.activate = m_obj.get("activate")
+                graf_obj.save()
 
     @classmethod
     def get_by_project(cls, project):
-        return cls.objects.filter(project=project).all()
+        prop_list = PropertiesProject.objects.filter(project=project).all()
+        metrics_list = MetricsProject.objects.filter(project=project).all()
+        res = []
+        for p in prop_list:
+            item = {}
+            item["propertie"] = p
+            item["metrics"] = []
+            for m in metrics_list:
+                graf_obj = (
+                    cls.objects.filter(project=project)
+                    .filter(propertie=p)
+                    .filter(metric=m)
+                    .first()
+                )
+                if not graf_obj:
+                    graf_obj = cls.objects.create(
+                        project=project, propertie=p, metric=m
+                    )
+                item["metrics"].append(graf_obj)
+            res.append(item)
+
+        return res
 
     @classmethod
     def generate_start_statistic(cls, project):

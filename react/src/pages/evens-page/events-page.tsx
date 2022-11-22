@@ -4,8 +4,9 @@ import CustomizedButton from "../../components/button/button";
 import Modal from "../../components/modal/modal";
 import Pictogram from "../../components/pictogram/pictogram";
 import { paths } from "../../consts";
-import { deleteEventByIdThunk, getEventsListThunk, setEventsList } from "../../redux/evens-slice";
+import { addEventThunk, deleteEventByIdThunk, getEventsListThunk, postEventByIdThunk, setEventsList } from "../../redux/evens-slice";
 import { closeModal, openDeleteEventModal } from "../../redux/state-slice";
+import { TEvent } from "../../types";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 
 // Styles
@@ -17,7 +18,14 @@ export default function EventsPage() {
   const eventsList = useAppSelector((store) => store.events.list);
   const initiative = useAppSelector((store) => store.initiatives.initiative);
   const modal = useAppSelector((store) => store.state.app.modal);
+  const { userRights } = useAppSelector((store) => store.auth);
   const [deleteIndex, setDeleteIndex] = useState(-1);
+  const statusStyles = new Map([
+    ['В работе', styles.inProgress],
+    ['Просрочено', styles.outdated],
+    ['Выполнено', styles.ready],
+    ['Запланировано', styles.planned],
+  ]);
 
   const onRemoveClickHandler = (index: number) => {
     setDeleteIndex(index);
@@ -41,6 +49,14 @@ export default function EventsPage() {
     dispatch(closeModal());
   };
 
+  const checkboxChengeHandler = (event: TEvent) => () => {
+    const newEventState = { ...event };
+    const newEventInfo = { ...event.event };
+    newEventInfo.ready = !newEventInfo.ready;
+    newEventState.event = newEventInfo;
+    dispatch(addEventThunk(newEventState));
+  }
+
   useEffect(() => {
     if (initiative) dispatch(getEventsListThunk(initiative.initiative.id));
   } ,[]);
@@ -62,18 +78,28 @@ export default function EventsPage() {
       >
         <table>
           <thead>
-            <th>
-              Название мероприятия
-            </th>
-            <th>
-              Дата начала
-            </th>
-            <th>
-              Дата окончания
-            </th>
-            <th
-              className={`${styles.deleteCell}`}
-            />
+            <tr>
+              <th>
+                Название мероприятия
+              </th>
+              <th>
+                Статус
+              </th>
+              <th>
+                Дата начала
+              </th>
+              <th>
+                Дата окончания
+              </th>
+              {userRights?.user_is_author && (
+                <th>
+                  Отметить как выполненное
+                </th>
+              )}
+              <th
+                className={`${styles.deleteCell}`}
+              />
+            </tr>
           </thead>
           <tbody>
             {eventsList.map((event, index) => {
@@ -84,12 +110,26 @@ export default function EventsPage() {
                   <td>
                     {event.event.name}
                   </td>
+                  <td
+                    className={`${statusStyles.get(event.event.get_status)}`}
+                  >
+                    {event.event.get_status}
+                  </td>
                   <td>
                     {event.event.date_start}
                   </td>
                   <td>
                     {event.event.date_end}
                   </td>
+                  {userRights?.user_is_author && (
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={event.event.ready}
+                        onChange={() => checkboxChengeHandler(event)}
+                      />
+                    </td>
+                  )}
                   <td
                     className={`${styles.deleteCell}`}
                   >

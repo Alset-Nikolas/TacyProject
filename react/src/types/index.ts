@@ -22,6 +22,7 @@ export type TStageEdit = {
 
 export type TMetrica = {
   [prop: string]: unknown;
+  id: number;
   title: string;
   value: number;
   target_value: number;
@@ -385,6 +386,8 @@ export type TEvent = {
     name: string;
     date_start: string;
     date_end: string;
+    ready: boolean;
+    get_status: string;
   },
   addfields: Array<{
     id: number;

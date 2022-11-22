@@ -36,7 +36,7 @@ export default function TimelineTableRow({ item, index, pictogramType }: TTimeli
     }
   };
 
-  if (!project) return null
+  if (!project || !projectForEdit) return null
   return (
     <div
       className={`${styles.tableRow}`}

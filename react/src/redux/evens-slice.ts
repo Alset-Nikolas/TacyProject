@@ -107,6 +107,28 @@ export const stateSlice = createSlice({
         eventByIdRequestFailed: true,
       }
     },
+    postEventByIdRequest: (state) => {
+      return {
+        ...state,
+        postEventByIdRequest: true,
+        postEventByIdRequestSuccess: false,
+        postEventByIdRequestFailed: false,
+      }
+    },
+    postEventByIdRequestSuccess: (state) => {
+      return {
+        ...state,
+        postEventByIdRequest: false,
+        postEventByIdRequestSuccess: true,
+      }
+    },
+    postEventByIdRequestFailed: (state) => {
+      return {
+        ...state,
+        postEventByIdRequest: false,
+        postEventByIdRequestFailed: true,
+      }
+    },
     clearEvent: (state) => {
       state.event = null;
     },
@@ -166,6 +188,9 @@ export const {
   eventByIdRequest,
   eventByIdRequestSuccess,
   eventByIdRequestFailed,
+  postEventByIdRequest,
+  postEventByIdRequestSuccess,
+  postEventByIdRequestFailed,
   clearEvent,
   addEventRequest,
   addEventRequestSuccess,
@@ -221,6 +246,28 @@ export const getEventByIdThunk = (eventId: number) => (dispatch: AppDispatch, ge
     },
     () => {
       dispatch(eventByIdRequestFailed());
+    }
+  );
+};
+
+export const postEventByIdThunk = (eventId: number, body: any) => (dispatch: AppDispatch, getState: () => RootState) => {
+  // const project = getState().state.project.value;
+
+  dispatch(postEventByIdRequest());
+  postRequest(
+    `components/event/info/list/?id=${eventId}`,
+    body,
+    (res: AxiosResponse) => {
+      try {
+        console.log(res.data);         
+        dispatch(postEventByIdRequestSuccess());
+      } catch (error) {
+        console.log(error);
+        dispatch(postEventByIdRequestFailed());
+      }
+    },
+    () => {
+      dispatch(postEventByIdRequestFailed());
     }
   );
 };

@@ -104,3 +104,14 @@
   background: #FFFFFF;
   border-radius: 10px;
 }
+
+.checkboxInput {
+  display: flex;
+  align-items: center;
+  height: 32px;
+
+  input {
+    height: 28px;
+    margin: 0;
+  }
+}

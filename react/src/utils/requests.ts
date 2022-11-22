@@ -1,4 +1,5 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
+import { REACT_APP_BACKEND_URL } from '../consts';
 
 export async function getProjectInfo(
   successCallback: (response: AxiosResponse) => void,
@@ -12,8 +13,7 @@ export async function getProjectInfo(
   // Object.entries(body).forEach((el) => {
   //   formData.append(el[0], el[1]);
   // });
-
-  const client = axios.create({ baseURL: process.env.REACT_APP_BACKEND_URL });
+  const client = axios.create({ baseURL: REACT_APP_BACKEND_URL });
   const token = localStorage.getItem('token');
 
   // Повторение запроса
@@ -58,7 +58,7 @@ export async function getProjectsList(
   //   formData.append(el[0], el[1]);
   // });
 
-  const client = axios.create({ baseURL: process.env.REACT_APP_BACKEND_URL });
+  const client = axios.create({ baseURL: REACT_APP_BACKEND_URL });
   const token = localStorage.getItem('token');
 
   // Повторение запроса
@@ -96,7 +96,7 @@ export function createProjectRequest(
   successCallback: (response: AxiosResponse) => void,
   errorCallback: (error: AxiosError) => void,
 ) {
-  const client = axios.create({ baseURL: process.env.REACT_APP_BACKEND_URL });
+  const client = axios.create({ baseURL: REACT_APP_BACKEND_URL });
   const token = localStorage.getItem('token');
 
   client
@@ -125,7 +125,9 @@ export function authUser(
   successCallback: (response: AxiosResponse) => void,
   errorCallback: (error: AxiosError) => void,
 ) {
-  const client = axios.create({ baseURL: process.env.REACT_APP_BACKEND_URL });
+  console.log(REACT_APP_BACKEND_URL);
+
+  const client = axios.create({ baseURL: REACT_APP_BACKEND_URL });
   
   client
     .post(
@@ -134,7 +136,7 @@ export function authUser(
       {
         headers: {
           Accept: 'application/json',
-          // Authorization: `Token ${process.env.REACT_APP_BEARER_TOKEN}`,
+          // Authorization: `Token ${REACT_APP_BEARER_TOKEN}`,
         },
       }
     )
@@ -153,7 +155,7 @@ export function resetPassword(
   successCallback: (response: AxiosResponse) => void,
   errorCallback: (error: AxiosError) => void,
 ) {
-  const client = axios.create({ baseURL: process.env.REACT_APP_BACKEND_URL });
+  const client = axios.create({ baseURL: REACT_APP_BACKEND_URL });
   const token = localStorage.getItem('token');
 
   client
@@ -182,7 +184,7 @@ export function confirmPassword(
   successCallback: (response: AxiosResponse) => void,
   errorCallback: (error: AxiosError) => void,
 ) {
-  const client = axios.create({ baseURL: process.env.REACT_APP_BACKEND_URL });
+  const client = axios.create({ baseURL: REACT_APP_BACKEND_URL });
   const token = localStorage.getItem('token');
 
   client
@@ -215,7 +217,7 @@ export function deleteProject(
 
   axios({
     method: 'delete',
-    url: `${process.env.REACT_APP_BACKEND_URL}/project/delete/`,
+    url: `${REACT_APP_BACKEND_URL}/project/delete/`,
     data: { id },
     headers: {
       Accept: 'application/json',
@@ -235,7 +237,7 @@ export function getTeamList(
   successCallback: (response: AxiosResponse) => void,
   errorCallback: (error: AxiosError) => void,
 ) {
-  const client = axios.create({ baseURL: process.env.REACT_APP_BACKEND_URL });
+  const client = axios.create({ baseURL: REACT_APP_BACKEND_URL });
   const token = localStorage.getItem('token');
 
   client
@@ -264,7 +266,7 @@ export function postTeamList(
   successCallback: (response: AxiosResponse) => void,
   errorCallback: (error: AxiosError) => void,
 ) {
-  const client = axios.create({ baseURL: process.env.REACT_APP_BACKEND_URL });
+  const client = axios.create({ baseURL: REACT_APP_BACKEND_URL });
   const token = localStorage.getItem('token');
 
   client
@@ -293,7 +295,7 @@ export function getComponents(
   successCallback: (response: AxiosResponse) => void,
   errorCallback: (error: AxiosError) => void,
 ) {
-  const client = axios.create({ baseURL: process.env.REACT_APP_BACKEND_URL });
+  const client = axios.create({ baseURL: REACT_APP_BACKEND_URL });
   const token = localStorage.getItem('token');
 
   client
@@ -321,7 +323,7 @@ export function getInitiativesList(
   successCallback: (response: AxiosResponse) => void,
   errorCallback: (error: AxiosError) => void,
 ) {
-  const client = axios.create({ baseURL: process.env.REACT_APP_BACKEND_URL });
+  const client = axios.create({ baseURL: REACT_APP_BACKEND_URL });
   const token = localStorage.getItem('token');
 
   client
@@ -350,7 +352,7 @@ export function getRequest(
   successCallback: (response: AxiosResponse) => void,
   errorCallback: (error: AxiosError) => void,
 ) {
-  const client = axios.create({ baseURL: process.env.REACT_APP_BACKEND_URL });
+  const client = axios.create({ baseURL: REACT_APP_BACKEND_URL });
   const token = localStorage.getItem('token');
 
   client
@@ -380,7 +382,7 @@ export function postRequest(
   successCallback: (response: AxiosResponse) => void,
   errorCallback: (error: AxiosError) => void,
 ) {
-  const client = axios.create({ baseURL: process.env.REACT_APP_BACKEND_URL });
+  const client = axios.create({ baseURL: REACT_APP_BACKEND_URL });
   const token = localStorage.getItem('token');
 
   client

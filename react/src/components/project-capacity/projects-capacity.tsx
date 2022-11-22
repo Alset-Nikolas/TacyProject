@@ -12,7 +12,7 @@ export default function ProjectCapacity({ edit }: TProjectCapacityProps) {
   const project = useAppSelector((store) => store.state.project.value);
   const projectForEdit = useAppSelector((store) => store.state.projectForEdit);
 
-  if (!project) return null;
+  if (!project || !projectForEdit) return null;
   
   if (edit) {
     return (

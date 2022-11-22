@@ -20,7 +20,7 @@ import {
 
 export const handleInputChange = (
   e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  project: TProject,
+  project: TProject | TProjectForEdit,
   dispatch: AppDispatch,
 ) => {
   if (Object.prototype.hasOwnProperty.call(project, e.target.name)) {
@@ -78,7 +78,7 @@ export const handlePropertieInutChange = (
 };
 
 export const addPropertie = (
-  newProjectState: TProject,
+  newProjectState: TProjectForEdit,
   key: keyof TProject,
   dispatch: AppDispatch,
 ) => {
@@ -87,6 +87,7 @@ export const addPropertie = (
   switch (key) {
     case 'metrics':
       newPropertyElement = {
+        id:-1,
         title: '',
         value: 0,
         target_value: 0,
@@ -133,7 +134,7 @@ export const addPropertie = (
 
 export const removePropertie = (
   removeIndex: number,
-  newProjectState: TProject,
+  newProjectState: TProject | TProjectForEdit,
   key: keyof TProject,
   dispatch: AppDispatch
 ) => {

@@ -656,7 +656,6 @@ class MainEventSerializer(serializers.ModelSerializer):
             "date_start",
             "date_end",
             "ready",
-            "get_status",
         ]
 
     def validate(self, attrs):
@@ -738,6 +737,7 @@ class EventMetricsFieldsSerializer(serializers.ModelSerializer):
 
 class EventSerializer(serializers.Serializer):
     event = MainEventSerializer()
+    event_status = serializers.CharField(required=False)
     addfields = AddFieldEventSerializer(many=True)
     metric_fields = EventMetricsFieldsSerializer(many=True)
 

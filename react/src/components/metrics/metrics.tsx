@@ -46,13 +46,25 @@ export default function Metrics({
               onClick={clearMetrics}
             />
           </div> */}
-          {projectForEdit.metrics.map((el: any, index:number) => (
-            <div key={index}>
+          {projectForEdit.metrics.map((el, index) => (
+            <div
+              key={index}
+              style={{ display: 'flex', alignItems: 'center' }}
+            >
               <input
                 className={`${inputStyles.textInput} ${styles.input}`}
                 value={el.title}
                 onChange={(e: ChangeEvent<HTMLInputElement>) => handlePropertieInutChange(index, projectForEdit, 'metrics', 'title', e.target.value, dispatch)}
               />
+              {index === projectForEdit.metrics.length - 1 && (
+                <div style={{ marginRight: '15px' }}>
+                  <Pictogram
+                    type="delete"
+                    cursor="pointer"
+                    onClick={() => removePropertie(index, projectForEdit, 'metrics', dispatch)}
+                  />
+                </div>
+              )}
               <Pictogram
                 type={`${index === projectForEdit.metrics.length - 1 ? 'add' : 'delete'}`}
                 cursor="pointer"
@@ -69,6 +81,7 @@ export default function Metrics({
   }
 
   if (create) {
+    if (!projectForEdit) return null;
     return (
       <section className={`${styles.wrapper}`}>
         <SectionHeader>
@@ -82,7 +95,7 @@ export default function Metrics({
               onClick={clearMetrics}
             />
           </div>
-          {projectForEdit.metrics.map((el: any, index: number) => (
+          {projectForEdit.metrics.map((el, index) => (
             <div
               key={index}
               style={{ display: 'flex', alignItems: 'center' }}
