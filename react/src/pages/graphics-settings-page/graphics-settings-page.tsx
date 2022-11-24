@@ -90,7 +90,12 @@ export default function GraphicsSettingsPage() {
       >
         Построение графиков
       </SectionHeader>
-      <div>
+      <div
+        className={`${styles.settingsWrapper}`}
+      >
+        {!newSettingState.length && (
+          <div>Емкости отсутствуют</div>
+        )}
         {newSettingState.map((settingsItem, index) => {
           return (
             <div
@@ -98,14 +103,16 @@ export default function GraphicsSettingsPage() {
               style={{display: 'flex', alignItems: 'center', gap: '8px'}}
             >
               <div>
-                По оси Х
+                По оси Х:
                 &nbsp;
                 <span>
                   {settingsItem.propertie.title}
                 </span>
               </div>
-              <div>
-                По оси Y
+              <div
+                className={`${styles.buttonWrapper}`}
+              >
+                По оси Y:
                 &nbsp;
                 {/* <SelectUnits
                   value={[]}
@@ -136,17 +143,21 @@ export default function GraphicsSettingsPage() {
           );
         })}
       </div>
-      <div>
-        <CustomizedButton
-          value="Отменить"
-          color="transparent"
-        />
-        <CustomizedButton
-          value="Сохранить"
-          color="blue"
-          onClick={saveButtonClickHandler}
-        />
-      </div>
+      {!!newSettingState.length && (
+        <div
+          className={`${styles.buttonWrapper}`}
+        >
+          <CustomizedButton
+            value="Отменить"
+            color="transparent"
+          />
+          <CustomizedButton
+            value="Сохранить"
+            color="blue"
+            onClick={saveButtonClickHandler}
+          />
+        </div>
+      )}
     </div>
   );
 }

@@ -18,7 +18,7 @@ export default function EventsPage() {
   const eventsList = useAppSelector((store) => store.events.list);
   const initiative = useAppSelector((store) => store.initiatives.initiative);
   const modal = useAppSelector((store) => store.state.app.modal);
-  const { userRights } = useAppSelector((store) => store.auth);
+  const { userRights, user } = useAppSelector((store) => store.auth);
   const [deleteIndex, setDeleteIndex] = useState(-1);
   const statusStyles = new Map([
     ['В работе', styles.inProgress],
@@ -65,14 +65,17 @@ export default function EventsPage() {
     <div
       className={styles.wrapper}
     >
-      <div
-      >
-        <CustomizedButton
-          value="Добавить мероприятие"
-          color="blue"
-          onClick={() => navigate(`add`)}
-        />
+      {(userRights?.user_is_author || user?.user.is_superuser) && (
+        <div
+        >
+          <CustomizedButton
+            value="Добавить мероприятие"
+            color="blue"
+            onClick={() => navigate(`add`)}
+          />
       </div>
+      )}
+
       <div
         className={`${styles.tableWrapper}`}
       >

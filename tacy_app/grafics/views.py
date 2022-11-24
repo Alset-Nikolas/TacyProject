@@ -38,9 +38,9 @@ class StatisticMetricsView(views.APIView):
         return Response(stat, 200)
 
 
-class StatisticProjectView(views.APIView):
+class StatisticMetricsUserView(views.APIView):
     def get(self, request, format=None):
         project = get_object_or_404(Project, id=request.GET.get("id", None))
-
-        stat = GraficsProject.get_statistic_by_project(project)
+        user = request.user
+        stat = GraficsProject.get_statistic_user(user, project)
         return Response(stat, 200)

@@ -6,12 +6,17 @@ import { TComponentsSettings, TInitiative } from '../types';
 
 type TState = {
   list: Array<TInitiative>;
-  // currentInitiativeId: number | null;
+  personalList: Array<TInitiative>;
+
   initiative: TInitiative | null;
 
   initiativesListRequest: boolean,
   initiativesListRequestSuccess: boolean,
   initiativesListRequestFailed: boolean,
+
+  personalInitiativesListRequest: boolean,
+  personalInitiativesListRequestSuccess: boolean,
+  personalInitiativesListRequestFailed: boolean,
 
   initiativesByIdRequest: boolean,
   initiativesByIdRequestSuccess: boolean,
@@ -24,12 +29,17 @@ type TState = {
 
 const initialState: TState = {
   list: [],
-  // currentInitiativeId: null,
+  personalList: [],
+
   initiative: null,
 
   initiativesListRequest: false,
   initiativesListRequestSuccess: false,
   initiativesListRequestFailed: false,
+
+  personalInitiativesListRequest: false,
+  personalInitiativesListRequestSuccess: false,
+  personalInitiativesListRequestFailed: false,
 
   initiativesByIdRequest: false,
   initiativesByIdRequestSuccess: false,
@@ -96,6 +106,29 @@ export const stateSlice = createSlice({
         initiativesByIdRequestFailed: true,
       }
     },
+    personalInitiativesListRequest: (state) => {
+      return {
+        ...state,
+        personalInitiativesListRequest: true,
+        personalInitiativesListRequestSuccess: false,
+        personalInitiativesListRequestFailed: false,
+      }
+    },
+    personalInitiativesListRequestSuccess: (state, action) => {
+      return {
+        ...state,
+        personalList: action.payload,
+        personalInitiativesListRequest: false,
+        personalInitiativesListRequestSuccess: true,
+      }
+    },
+    personalInitiativesListRequestFailed: (state) => {
+      return {
+        ...state,
+        personalInitiativesListRequest: false,
+        personalInitiativesListRequestFailed: true,
+      }
+    },
     clearInitiative: (state) => {
       state.initiative = null;
     },
@@ -129,6 +162,9 @@ export const {
   initiativesListRequest,
   initiativesListRequestSuccess,
   initiativesListRequestFailed,
+  personalInitiativesListRequest,
+  personalInitiativesListRequestSuccess,
+  personalInitiativesListRequestFailed,
   initiativesByIdRequest,
   initiativesByIdRequestSuccess,
   initiativesByIdRequestFailed,
@@ -162,6 +198,31 @@ export const getInitiativesListThunk = (id: number) => (dispatch: AppDispatch, g
     },
     () => {
       dispatch(initiativesListRequestFailed());
+    }
+  );
+};
+
+export const getPersonalInitiativesListThunk = (projectId: number) => (dispatch: AppDispatch, getState: () => RootState) => {
+  const project = getState().state.project.value;
+
+  if (!project) return;
+  if (projectId !== project.id) return;
+
+  dispatch(personalInitiativesListRequest());
+  getRequest(
+    `components/initiative/info/list/user/?id=${projectId}`,
+    (res: AxiosResponse<{ project_initiatives: Array<TInitiative> }>) => {
+      try {
+        console.log(res.data);
+        dispatch(getInitiativeByIdThunk(res.data.project_initiatives[0].initiative.id));
+      } catch (error) {
+        console.log(error);
+        dispatch(personalInitiativesListRequestFailed());
+      }
+      dispatch(personalInitiativesListRequestSuccess(res.data.project_initiatives));
+    },
+    () => {
+      dispatch(personalInitiativesListRequestFailed());
     }
   );
 };

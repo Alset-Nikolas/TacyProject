@@ -136,9 +136,9 @@ export default function AdminPage() {
           <li className={`${flag.team ? styles.active : ''}`}>
             <Link to={paths.settings.team.relative}>Настройки команды</Link>
           </li>
-          <li className={`${flag.adjustment ? styles.active : ''}`}>
+          {/* <li className={`${flag.adjustment ? styles.active : ''}`}>
             <Link to={paths.settings.adjustment.relative}>Настройки этапов согласования</Link>
-          </li>
+          </li> */}
           <li className={`${flag.graphics ? styles.active : ''}`}>
             <Link to={paths.settings.graphics.relative}>Настройки графиков</Link>
           </li>

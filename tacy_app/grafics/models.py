@@ -48,9 +48,9 @@ class GraficsProject(models.Model):
                         project=project,
                         propertie_id=propertie_id,
                         metric_id=metric_id,
-                        activate=graf.get("activate"),
+                        activate=graf.get("activate", False),
                     )
-                graf_obj.activate = m_obj.get("activate")
+                graf_obj.activate = m_obj.get("activate", False)
                 graf_obj.save()
 
     @classmethod
@@ -130,19 +130,36 @@ class GraficsProject(models.Model):
         return res
 
     @classmethod
-    def update_format(cls, res):
+    def update_format(cls, res, project):
         grafics = res["grafics"]
         status_grafic = res["status_grafic"]
-        new_format_res = copy.copy(grafics)
-        new_format_status_grafic = copy.copy(status_grafic)
+        new_format_res = copy.deepcopy(grafics)
+        new_format_status_grafic = copy.deepcopy(status_grafic)
         if grafics:
             # если есть обьемы
-            for v_id, m_dict in grafics.items():
-                for m_id, grafic_item in m_dict.items():
-                    new_format = []
-                    for x_name, y_value in grafic_item.items():
-                        new_format.append({"name": x_name, "value": y_value})
-                    new_format_res[v_id][m_id] = new_format
+            if (
+                cls.objects.filter(project=project)
+                .filter(activate=True)
+                .exists()
+            ):
+                for v_id, m_dict in grafics.items():
+                    for m_id, grafic_item in m_dict.items():
+                        if m_id != "enum" and (
+                            not cls.objects.filter(project=project)
+                            .filter(activate=True)
+                            .filter(propertie_id=v_id)
+                            .filter(metric_id=m_id)
+                            .exists()
+                        ):
+                            new_format_res[v_id].pop(m_id)
+                        else:
+                            new_format = []
+                            for x_name, y_value in grafic_item.items():
+                                new_format.append(
+                                    {"name": x_name, "value": y_value}
+                                )
+                            new_format_res[v_id][m_id] = new_format
+
         for m_id, grafic_item in new_format_status_grafic.items():
             new_format = []
             for x_name, y_value in grafic_item.items():
@@ -154,10 +171,11 @@ class GraficsProject(models.Model):
         }
 
     @classmethod
-    def get_statistic_metrics_by_project(cls, project):
+    def get_statistic_metrics_by_project(cls, project, inits=None):
+        inits = inits or Initiatives.objects.filter(project=project).all()
         res = GraficsProject.generate_start_statistic(project)
         res_status = GraficsProject.generate_start_statistic_status(project)
-        for init in Initiatives.objects.filter(project=project).all():
+        for init in inits:
             status_name = init.status.name
             res_status["enum"][status_name] += 1
             for init_propertie_field in init.properties_fields.all():
@@ -178,7 +196,14 @@ class GraficsProject(models.Model):
                 metric_value = init_metric_field.value
                 res_status[metric_id][status_name] += metric_value
         res = {"grafics": res, "status_grafic": res_status}
-        return GraficsProject.update_format(res)
+        return GraficsProject.update_format(res, project)
+
+    @classmethod
+    def get_statistic_user(cls, user, project):
+        return GraficsProject.get_statistic_metrics_by_project(
+            project=project,
+            inits=Initiatives.get_user_initiatievs(user, project),
+        )
 
     @classmethod
     def get_statistic_by_project(cls, project):

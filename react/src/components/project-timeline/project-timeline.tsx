@@ -147,6 +147,15 @@ export default function ProjectTimeline({
 
   if (!timeline || !stages) return null;
 
+  const listForDiagram = stages.map((item) => {
+    return {
+      id: item.id,
+      start: item.date_start,
+      end: item.date_end,
+      name: item.name_stage,
+    }
+  });
+
   return (
     <div className={`${styles.wrapper}`}>
       <SectionHeader>
@@ -161,7 +170,7 @@ export default function ProjectTimeline({
           </div>
         ))} */}
         <GanttD3
-          data={stages}
+          data={listForDiagram}
           intermediateDates={timeline}  
         />
       </div>

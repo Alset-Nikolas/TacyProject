@@ -6,7 +6,12 @@ import { getCoordinate, setWidth } from "../../utils/utilities";
 import { fills } from "../../utils/fills";
 
 type TGanttD3BarsProps = {
-  data: Array<TStage>;
+  data: Array<{
+    name: string;
+    start: string;
+    end: string;
+    id: number;
+  }>;
 }
 
 export const GanttD3Bars = ({ data }: TGanttD3BarsProps) => {
@@ -21,9 +26,9 @@ export const GanttD3Bars = ({ data }: TGanttD3BarsProps) => {
       <rect
         key={stage.id}
         id={stage.id.toString()}
-        x={getCoordinate(stage.date_start) < 0 ? 0 : getCoordinate(stage.date_start)}
+        x={getCoordinate(stage.start) < 0 ? 0 : getCoordinate(stage.start)}
         y={y}
-        width={setWidth(getCoordinate(stage.date_start), getCoordinate(stage.date_end))}
+        width={setWidth(getCoordinate(stage.start), getCoordinate(stage.end))}
         height={rectHeight}
         fill={RED}
       />

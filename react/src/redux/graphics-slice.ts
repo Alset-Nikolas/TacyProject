@@ -17,6 +17,14 @@ type TState = {
       }>;
     }>;
   }>;
+  statusGraphics: Array<{
+    metricName: string;
+    data: Array<{
+      name: string;
+      value: number;
+    }>;
+  }>;
+
   settings: Array<{
     propertie: { id: number, title: string };
     metrics: Array<{ 
@@ -28,9 +36,31 @@ type TState = {
     }>
   }>;
 
+  personalGraphics: Array<{
+    propertieName: string;
+    graphicData: Array<{
+      metricName: string;
+      data: Array<{
+        name: string;
+        value: number;
+      }>;
+    }>;
+  }>;
+  personalStatusGraphics: Array<{
+    metricName: string;
+    data: Array<{
+      name: string;
+      value: number;
+    }>;
+  }>;
+
   getGraphicsRequest: boolean,
   getGraphicsRequestSuccess: boolean,
   getGraphicsRequestFailed: boolean,
+
+  getPersonalGraphicsRequest: boolean,
+  getPersonalGraphicsRequestSuccess: boolean,
+  getPersonalGraphicsRequestFailed: boolean,
 
   getGraphicsSettingsRequest: boolean,
   getGraphicsSettingsRequestSuccess: boolean,
@@ -43,11 +73,19 @@ type TState = {
 
 const initialState: TState = {
   graphics: [],
+  statusGraphics: [],
   settings: [],
+
+  personalGraphics: [],
+  personalStatusGraphics: [],
 
   getGraphicsRequest: false,
   getGraphicsRequestSuccess: false,
   getGraphicsRequestFailed: false,
+
+  getPersonalGraphicsRequest: false,
+  getPersonalGraphicsRequestSuccess: false,
+  getPersonalGraphicsRequestFailed: false,
 
   getGraphicsSettingsRequest: false,
   getGraphicsSettingsRequestSuccess: false,
@@ -79,7 +117,7 @@ export const stateSlice = createSlice({
     getGraphicsRequestSuccess: (state, action) => {
       return {
         ...state,
-        graphics: action.payload,
+        ...action.payload,
         getGraphicsRequest: false,
         getGraphicsRequestSuccess: true,
       }
@@ -89,6 +127,29 @@ export const stateSlice = createSlice({
         ...state,
         getGraphicsRequest: false,
         getGraphicsRequestFailed: true,
+      }
+    },
+    getPersonalGraphicsRequest: (state) => {
+      return {
+        ...state,
+        getPersonalGraphicsRequest: true,
+        getPersonalGraphicsRequestSuccess: false,
+        getPersonalGraphicsRequestFailed: false,
+      }
+    },
+    getPersonalGraphicsRequestSuccess: (state, action) => {
+      return {
+        ...state,
+        ...action.payload,
+        getPersonalGraphicsRequest: false,
+        getPersonalGraphicsRequestSuccess: true,
+      }
+    },
+    getPersonalGraphicsRequestFailed: (state) => {
+      return {
+        ...state,
+        getPersonalGraphicsRequest: false,
+        getPersonalGraphicsRequestFailed: true,
       }
     },
     getGraphicsSettingsRequest: (state) => {
@@ -144,6 +205,9 @@ export const {
   getGraphicsRequest,
   getGraphicsRequestSuccess,
   getGraphicsRequestFailed,
+  getPersonalGraphicsRequest,
+  getPersonalGraphicsRequestSuccess,
+  getPersonalGraphicsRequestFailed,
   getGraphicsSettingsRequest,
   getGraphicsSettingsRequestSuccess,
   getGraphicsSettingsRequestFailed,
@@ -156,30 +220,70 @@ export default stateSlice.reducer;
 
 export const getGraphicsThunk = (projectId: number) => (dispatch: AppDispatch, getState: () => RootState) => {
   const project = getState().state.project.value;
+
+  const parseGraphicData = (graphics: Array<any>) => {
+    const data: Array<any> = []
+    if (!project) return [];
+    const propertiesEntries = Object.entries(graphics);
+    propertiesEntries.forEach((el) => {
+      const propGraphic = {} as any;
+      const propertieName = project.properties.find((properie) => properie.id === +el[0])?.title;
+      propGraphic.propertieName = propertieName;
+      const metricssEntries = Object.entries(el[1]);
+      const graphicData = metricssEntries.map((el) => {
+        const metricName = project.metrics.find((metric) => metric.id === +el[0])?.title;
+        return {
+          metricName: metricName ? metricName : 'Сумма',
+          data: el[1],
+        };
+      });
+      propGraphic.graphicData = graphicData;
+      data.push(propGraphic);
+    });
+    return data;
+  };
+  const parseStatusGraphics = (graphics: Array<any>) => {
+    if (!project) return [];
+    const metricssEntries = Object.entries(graphics);
+    const graphicData = metricssEntries.map((el) => {
+      const metricName = project.metrics.find((metric) => metric.id === +el[0])?.title;
+      return {
+        metricName: metricName ? metricName : 'Сумма',
+        data: el[1],
+      };
+    });
+    return graphicData;
+  }
+
   dispatch(getGraphicsRequest());
   getRequest(
     `grafics/statistic/metrics/?id=${projectId}`,
-    (res: AxiosResponse<{ grafics: Array<any> }>) => {
+    (res: AxiosResponse<{ grafics: Array<any>, status_grafic: Array<any> }>) => {
       try {
-        const data: Array<any> = [];
-        const graphics = res.data.grafics; 
-        const propertiesEntries = Object.entries(graphics);
+        const data = {graphics: [] as Array<any>, statusGraphics: [] as Array<any>};
+        const graphics = res.data.grafics;
+        const statusGraphics = res.data.status_grafic;
+
+        data.graphics = parseGraphicData(graphics);
+        data.statusGraphics = parseStatusGraphics(statusGraphics);
+
+        // const propertiesEntries = Object.entries(graphics);
         if (project) {
-          propertiesEntries.forEach((el) => {
-            const propGraphic = {} as any;
-            const propertieName = project.properties.find((properie) => properie.id === +el[0])?.title;
-            propGraphic.propertieName = propertieName;
-            const metricssEntries = Object.entries(el[1]);
-            const graphicData = metricssEntries.map((el) => {
-              const metricName = project.metrics.find((metric) => metric.id === +el[0])?.title;
-              return {
-                metricName: metricName ? metricName : 'Сумма',
-                data: el[1],
-              };
-            })
-            propGraphic.graphicData = graphicData;
-            data.push(propGraphic);
-          });
+        //   propertiesEntries.forEach((el) => {
+        //     const propGraphic = {} as any;
+        //     const propertieName = project.properties.find((properie) => properie.id === +el[0])?.title;
+        //     propGraphic.propertieName = propertieName;
+        //     const metricssEntries = Object.entries(el[1]);
+        //     const graphicData = metricssEntries.map((el) => {
+        //       const metricName = project.metrics.find((metric) => metric.id === +el[0])?.title;
+        //       return {
+        //         metricName: metricName ? metricName : 'Сумма',
+        //         data: el[1],
+        //       };
+        //     })
+        //     propGraphic.graphicData = graphicData;
+        //     data.push(propGraphic);
+        //   });
           dispatch(getGraphicsRequestSuccess(data));
         } else {
           throw new Error('Project doesn\'t exist');
@@ -194,6 +298,90 @@ export const getGraphicsThunk = (projectId: number) => (dispatch: AppDispatch, g
     },
     () => {
       dispatch(getGraphicsRequestFailed());
+    }
+  );
+};
+
+export const getPersonalGraphicsThunk = (projectId: number) => (dispatch: AppDispatch, getState: () => RootState) => {
+  const project = getState().state.project.value;
+
+  const parseGraphicData = (graphics: Array<any>) => {
+    const data: Array<any> = []
+    if (!project) return [];
+    const propertiesEntries = Object.entries(graphics);
+    propertiesEntries.forEach((el) => {
+      const propGraphic = {} as any;
+      const propertieName = project.properties.find((properie) => properie.id === +el[0])?.title;
+      propGraphic.propertieName = propertieName;
+      const metricssEntries = Object.entries(el[1]);
+      const graphicData = metricssEntries.map((el) => {
+        const metricName = project.metrics.find((metric) => metric.id === +el[0])?.title;
+        return {
+          metricName: metricName ? metricName : 'Сумма',
+          data: el[1],
+        };
+      });
+      propGraphic.graphicData = graphicData;
+      data.push(propGraphic);
+    });
+    return data;
+  };
+  const parseStatusGraphics = (graphics: Array<any>) => {
+    if (!project) return [];
+    const metricssEntries = Object.entries(graphics);
+    const graphicData = metricssEntries.map((el) => {
+      const metricName = project.metrics.find((metric) => metric.id === +el[0])?.title;
+      return {
+        metricName: metricName ? metricName : 'Сумма',
+        data: el[1],
+      };
+    });
+    return graphicData;
+  }
+
+  dispatch(getPersonalGraphicsRequest());
+  getRequest(
+    `grafics/statistic/metrics/user/?id=${projectId}`,
+    (res: AxiosResponse<{ grafics: Array<any>, status_grafic: Array<any> }>) => {
+      try {
+        const data = {personalGraphics: [] as Array<any>, personalStatusGraphics: [] as Array<any>};
+        const graphics = res.data.grafics;
+        const statusGraphics = res.data.status_grafic;
+
+        data.personalGraphics = parseGraphicData(graphics);
+        data.personalStatusGraphics = parseStatusGraphics(statusGraphics);
+
+        // const propertiesEntries = Object.entries(graphics);
+        if (project) {
+        //   propertiesEntries.forEach((el) => {
+        //     const propGraphic = {} as any;
+        //     const propertieName = project.properties.find((properie) => properie.id === +el[0])?.title;
+        //     propGraphic.propertieName = propertieName;
+        //     const metricssEntries = Object.entries(el[1]);
+        //     const graphicData = metricssEntries.map((el) => {
+        //       const metricName = project.metrics.find((metric) => metric.id === +el[0])?.title;
+        //       return {
+        //         metricName: metricName ? metricName : 'Сумма',
+        //         data: el[1],
+        //       };
+        //     })
+        //     propGraphic.graphicData = graphicData;
+        //     data.push(propGraphic);
+        //   });
+          dispatch(getPersonalGraphicsRequestSuccess(data));
+        } else {
+          throw new Error('Project doesn\'t exist');
+        }
+        
+
+      } catch (error) {
+        console.log(error);
+        dispatch(getPersonalGraphicsRequestFailed());
+      }
+      
+    },
+    () => {
+      dispatch(getPersonalGraphicsRequestFailed());
     }
   );
 };

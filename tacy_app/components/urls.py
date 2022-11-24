@@ -10,7 +10,8 @@ urlpatterns = [
     path("initiative/info/", views.InfoInitiativeView.as_view()),
     path("initiative/info/list/", views.ListInitiativesView.as_view()),
     path(
-        "initiative/info/list/user/", views.ListUserInitiativesView.as_view()
+        "initiative/user/statistics/",
+        views.UserStatisticsInitiativesView.as_view(),
     ),
     path("risk/create/", views.CreateRiskView.as_view()),
     path("risk/info/", views.InfoRiskView.as_view()),

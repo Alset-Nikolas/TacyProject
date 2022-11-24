@@ -209,22 +209,25 @@ class Initiatives(models.Model):
     @classmethod
     def get_user_initiatievs(cls, user, project):
         list_inits = []
+        ids = set()
         for init in (
             cls.objects.filter(project=project).filter(failure=False).all()
         ):
-            print(init)
-            print(user)
-            print(init.author)
+
             if init.author == user:
-                list_inits.append(init)
+                if init.id not in ids:
+                    ids.add(init.id)
+                    list_inits.append(init)
             elif any(
-                (
-                    info_coordination.stages_coordination == user
+                list(
+                    info_coordination.coordinator_stage == user
                     and info_coordination.activate
+                    for info_coordination in init.stages_coordination.all()
                 )
-                for info_coordination in init.stages_coordination.all()
             ):
-                list_inits.append(init)
+                if init.id not in ids:
+                    ids.add(init.id)
+                    list_inits.append(init)
         return list_inits
 
     @classmethod

@@ -5,10 +5,16 @@ import { fills } from "../../utils/fills";
 import classes from '../styles/Gantt.module.sass'; 
 
 type TGanttD3YAxisProps = {
-  data: Array<TStage>;
+  data: Array<{
+    name: string;
+    start: string;
+    end: string;
+    id?: number;
+  }>;
+  itemsCount?: number;
 }
 
-export const GanttD3YAxis = ({ data }: TGanttD3YAxisProps) => {
+export const GanttD3YAxis = ({ data, itemsCount }: TGanttD3YAxisProps) => {
   const {
     rowHeight,
     marginTop,
@@ -21,9 +27,9 @@ export const GanttD3YAxis = ({ data }: TGanttD3YAxisProps) => {
 
   const { text } = classes;
 
-  const stagesList = data.map(({ id, name_stage }, i) => {
+  const stagesList = data.map(({ id, name }, i) => {
     const y = i * rowHeight + marginTop + xAxisHeight;
-    const stageTitle = `${name_stage}`;
+    const stageTitle = `${name}`;
     return (
       <text
         key={id}
@@ -39,12 +45,12 @@ export const GanttD3YAxis = ({ data }: TGanttD3YAxisProps) => {
 
   return (
     <g>
-      <rect x={0} y={0} width={yAxisWidth} height={chartHeight-200} fill={GREY} />
+      <rect x={0} y={0} width={yAxisWidth} height={chartHeight-200 + 32 * (itemsCount || 0)} fill={GREY} />
       <rect
         x={0}
         y={marginTop}
         width={yAxisWidth}
-        height={xAxisHeight}
+        height={xAxisHeight + 32 * (itemsCount || 0)}
         fill={GREY}
         fillOpacity={0.5}
       />

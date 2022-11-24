@@ -1,7 +1,7 @@
 .wrapper {
   display: flex;
   flex-direction: column;
-  width: 100%;
+  width: 60%;
 
   box-sizing: border-box;
 }
@@ -41,4 +41,21 @@
   width: 100%;
   gap: 19px;
   margin: 0 0 48px 0;
+}
+
+.buttonWrapper {
+  display: flex;
+  gap: 20px;
+  justify-content: flex-end;
+}
+
+.settingsWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-bottom: 40px;
+
+  div {
+    flex: 1 1;
+  }
 }

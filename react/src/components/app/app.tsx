@@ -14,6 +14,7 @@ import InitiativesRegistryPage from '../../pages/initiatives-registry-page/initi
 import LoginPage from '../../pages/login-page/login-page';
 import NewPasswordPage from '../../pages/new-password-page/new-password-page';
 import NotificationsPage from '../../pages/notifications-page/notifications-page';
+import PersonalStatsPage from '../../pages/personal-stats/personal-stats';
 import ProjectStatusPage from '../../pages/project-status-page/project-status-page';
 import ResetPasswordPage from '../../pages/reset-password-page/reset-password-page';
 import RootPage from '../../pages/root-page/root-page';
@@ -82,7 +83,7 @@ const router = createBrowserRouter([
       },
       {
         path: paths.personalStats,
-        element: <ProjectStatusPage />,
+        element: <PersonalStatsPage />,
       },
       {
         path: paths.team,

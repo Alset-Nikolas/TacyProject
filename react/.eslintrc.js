@@ -10,7 +10,7 @@ module.exports = {
     ],
     overrides: [
         {
-          files: ['*.js', '*.ts', '*.tsx'],
+          files: ['*.js', '*.jsx', '*.ts', '*.tsx'],
           rules: {
             'no-undef': 'off',
           },
@@ -29,6 +29,7 @@ module.exports = {
         'linebreak-style': ['error', (process.platform === 'win32' ? 'windows' : 'unix')],
         'react/react-in-jsx-scope': 0,
         'react/prop-types': 0,
+        'prefer-const': 0,
     },
     "settings": {
         "react": {

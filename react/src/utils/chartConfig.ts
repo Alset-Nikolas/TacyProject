@@ -6,7 +6,7 @@ export const chartConfig = {
   ganttPadding: 40,
   lineWidth: 1,
   tickWidth: 2,
-  daysBeforeCurrentDate: 0,
+  daysBeforeCurrentDate: 365,
   daysAfterCurrentDate: 365,
   chartHeight: 400,
   yAxisWidth: 120,

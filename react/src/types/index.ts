@@ -404,24 +404,24 @@ export type TEvent = {
 
 export type TCoordinationHistoryItem = {
   id: number;
-  // coordinator: {
-  //   id: number;
-  //   first_name: string;
-  //   last_name: string;
-  //   second_name: string;
-  //   email: string;
-  //   phone: string;
-  // };
-  coordinator:number;
-  // author_text: {
-  //   id: number;
-  //   first_name: string;
-  //   last_name: string;
-  //   second_name: string;
-  //   email: string;
-  //   phone: string;
-  // };
-  author_text: number;
+  coordinator: {
+    id: number;
+    first_name: string;
+    last_name: string;
+    second_name: string;
+    email: string;
+    phone: string;
+  } | null;
+  // coordinator:number;
+  author_text: {
+    id: number;
+    first_name: string;
+    last_name: string;
+    second_name: string;
+    email: string;
+    phone: string;
+  } | null;
+  // author_text: number;
   date: string;
   text: string;
   action: string;
@@ -475,4 +475,21 @@ export type TBoss = {
   first_name: string;
   second_name: string;
   last_name: string;
+}
+
+export type TPersonalStats = {
+  user_initiatives: Array<TInitiative>;
+  events: Array<{
+    id: number;
+    initiative: number;
+    name: string;
+    date_start: string;
+    date_end: string;
+    ready: boolean;
+    get_status: string;
+  }>;
+  metrics_user_stat: Array<{
+    title: string;
+    value: number;
+  }>;
 }

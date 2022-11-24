@@ -7,10 +7,11 @@ import { dateScale, getCoordinate } from "../../utils/utilities";
 import { TIntermediateDate } from "../../types";
 
 type TGanttD3XAxisProps = {
-  data: Array<TIntermediateDate>;
+  data?: Array<TIntermediateDate>;
+  itemsCount?: number;
 }
 
-export const GanttD3XAxis = ({ data }: TGanttD3XAxisProps) => {
+export const GanttD3XAxis = ({ data, itemsCount }: TGanttD3XAxisProps) => {
   const {
     marginTop,
     weekdays,
@@ -58,7 +59,7 @@ export const GanttD3XAxis = ({ data }: TGanttD3XAxisProps) => {
   });
 
   const monthLabels = dateArray.map(date => {
-    if (date.getDate() === 1 || date.setHours(0, 0, 0, 0) === chartConfig.currentDate) {
+    if (date.getDate() === 1/* || date.setHours(0, 0, 0, 0) === chartConfig.currentDate*/) {
       return (
         <text
           className="month"
@@ -74,14 +75,14 @@ export const GanttD3XAxis = ({ data }: TGanttD3XAxisProps) => {
     return null;
   });
 
-  const intermediateDatesLabels = data.map((item) => {
+  const intermediateDatesLabels = data?.map((item) => {
     return (
       <g key={item.title+item.date}>
         <line
           x1={getCoordinate(item.date)}
           y1={40}
           x2={getCoordinate(item.date)}
-          y2={190}
+          y2={(32 * (itemsCount || 0) + 78)}
           strokeWidth={1}
           stroke={BLACK}
           strokeDasharray={4}
@@ -89,7 +90,7 @@ export const GanttD3XAxis = ({ data }: TGanttD3XAxisProps) => {
         <text
           x={getCoordinate(item.date)}
           dx={dayWidth / 2}
-          y={222}
+          y={(32 * (itemsCount || 0) + 93)}
           textAnchor="middle"
           fill={BLACK}
           fontSize={16}
@@ -99,7 +100,7 @@ export const GanttD3XAxis = ({ data }: TGanttD3XAxisProps) => {
         <text
           x={getCoordinate(item.date)}
           dx={dayWidth / 2}
-          y={242}
+          y={(32 * (itemsCount || 0) + 118)}
           textAnchor="middle"
           fill={BLACK}
           fontSize={16}
@@ -151,23 +152,26 @@ export const GanttD3XAxis = ({ data }: TGanttD3XAxisProps) => {
       {/* <g>{axisLines}</g> */}
       <g className="months">{monthLabels}</g>
       {/* <g>{dayLabels}</g>s */}
-      <rect
-        x={-200}
-        y={200}
-        width={chartConfig.chartWidth + 300}
-        height={60}
-        fill={WHITE}
-        
-      />
+      {!!data && (
+        <rect
+          x={-200}
+          y={(32 * (itemsCount || 0) + 73)}
+          width={chartConfig.chartWidth + 300}
+          height={60}
+          fill={WHITE}
+          
+        />
+      )}
       <g>{intermediateDatesLabels}</g>
-      <rect
-        x={-200}
-        y={200}
-        width={200}
-        height={60}
-        fill={WHITE}
-        
-      />
+      {!!data && (
+        <rect
+          x={-200}
+          y={200}
+          width={200}
+          height={60}
+          fill={WHITE}
+        />
+      )}
     </g>
   );
 };

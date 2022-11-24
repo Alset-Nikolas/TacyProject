@@ -9,6 +9,7 @@ import eventsReducer from '../redux/evens-slice';
 import coordinationReducer from '../redux/coordination-slice';
 import notificationsReducer from '../redux/notifications-slice';
 import graphicsReducer from '../redux/graphics-slice';
+import personalReducer from '../redux/personal-slice';
 
 export const store = configureStore({
   reducer: {
@@ -22,6 +23,7 @@ export const store = configureStore({
     coordination: coordinationReducer,
     notifications: notificationsReducer,
     graphics: graphicsReducer,
+    personal: personalReducer,
   },
 });
 

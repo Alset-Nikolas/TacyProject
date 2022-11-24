@@ -10,8 +10,13 @@ import classes from "../styles/Gantt.module.sass";
 import { TIntermediateDate, TStage } from "../../types";
 
 type TGantD3Props = {
-  data: Array<TStage>;
-  intermediateDates: Array<TIntermediateDate>;
+  data: Array<{
+    name: string;
+    start: string;
+    end: string;
+    id: number;
+  }>;
+  intermediateDates?: Array<TIntermediateDate>;
 };
 
 export function GanttD3({ data, intermediateDates }: TGantD3Props) {
@@ -65,21 +70,36 @@ export function GanttD3({ data, intermediateDates }: TGantD3Props) {
   const onScroll = (scrollGroup: any, ganttContainer: any) => {
     const ganttContainerWidth = ganttContainer.getBoundingClientRect().width;
     const marginLeft = yAxisWidth + lineWidth;
-    const transform = zoomTransform(scrollGroup.node());
+    let transform = zoomTransform(scrollGroup.node());
     const { type, deltaY, wheelDeltaX } = event;
-    const maxStartTranslate = chartWidth / 2;
-    const maxEndTranslate = ganttContainerWidth - chartWidth / 2 - marginLeft;
+    // const maxStartTranslate = chartWidth / 2;
+    // const maxEndTranslate = ganttContainerWidth - chartWidth / 2 - marginLeft;
+
+    const maxX = marginLeft;
+    const minX = ganttContainerWidth - chartWidth;
 
     if (type === "wheel") {
       if (deltaY !== 0) return null;
       transform.applyX(transform.x + wheelDeltaX);
     }
-    transform.applyX(Math.max(transform.x, maxEndTranslate));
-    transform.applyX(Math.min(transform.x, maxStartTranslate));
+    // transform.applyX(Math.max(transform.x, maxEndTranslate));
+    // transform.applyX(Math.min(transform.x, maxStartTranslate));
     // transform.x = Math.max(transform.x, maxEndTranslate);
     // transform.x = Math.min(transform.x, maxStartTranslate);
+    // console.log(transform.applyX(Math.max(transform.x, maxEndTranslate)));
+    // transform = transform.translate(Math.max(transform.x, maxEndTranslate), 0);
+    // transform = transform.translate(Math.min(transform.x, maxStartTranslate), 0);
 
-    const translateX = defaultTranslate + transform.x;
+    if (transform.x > maxX) {
+      transform = transform.translate(maxX - transform.x, 0);
+    }
+    if (transform.x < minX) {
+      transform = transform.translate(minX - transform.x, 0);
+    }
+    const translateX = transform.x;
+    // if (translateX > maxStartTranslate) translateX = maxStartTranslate;
+    // if (translateX < maxEndTranslate) translateX = maxEndTranslate;
+
     scrollGroup.attr("transform", `translate( ${translateX} , 0)`);
   };
 
@@ -89,24 +109,24 @@ export function GanttD3({ data, intermediateDates }: TGantD3Props) {
 
     const d3Zoom = zoom()
       .scaleExtent([1, 1])
-      .on("zoom", () => onScroll(scrollGroup, ganttContainer));
+      .on("zoom", () => onScroll(scrollGroup, ganttContainer)) as any;
 
-    // select(ganttContainer)
-    //   .call(d3Zoom)
-    //   .on("touchstart", onTouchStart, true)
-    //   .on("touchmove", onTouchMove, true)
-    //   .on(
-    //     "touchend",
-    //     () => {
-    //       onTouchEnd(d3Zoom);
-    //     },
-    //     true
-    //   )
-    //   .on("wheel.zoom", () => {
-    //     onScroll(scrollGroup, ganttContainer);
-    //   });
+    select(ganttContainer)
+      .call(d3Zoom)
+      .on("touchstart", onTouchStart, true)
+      .on("touchmove", onTouchMove, true)
+      .on(
+        "touchend",
+        () => {
+          onTouchEnd(d3Zoom);
+        },
+        true
+      )
+      .on("wheel.zoom", () => {
+        onScroll(scrollGroup, ganttContainer);
+      });
 
-    // select(ganttContainer).call(d3Zoom.transform, zoomIdentity);
+    select(ganttContainer).call(d3Zoom.transform, zoomIdentity);
 
     scrollGroup.attr("transform", `translate(${defaultTranslate} , 0)`);
   });
@@ -114,15 +134,17 @@ export function GanttD3({ data, intermediateDates }: TGantD3Props) {
   return (
     <div ref={ganttContainerRef} className={gantt}>
       {/* <div className={gantt__title}>D3</div> */}
-      <svg className={gantt__chart} ref={svgRef}>
+      <svg className={gantt__chart} ref={svgRef}
+        style={{ height: 135 + 32 * (data.length || 0) }}
+      >
         <g
           className="scroll" 
           ref={scrollGroupRef}
         >
-          <GanttD3XAxis data={intermediateDates}/>
           <GanttD3Bars data={data} />
+          <GanttD3XAxis data={intermediateDates} itemsCount={data.length} />
         </g>
-        <GanttD3YAxis data={data} />
+        <GanttD3YAxis data={data} itemsCount={data.length} />
       </svg>
     </div>
   );

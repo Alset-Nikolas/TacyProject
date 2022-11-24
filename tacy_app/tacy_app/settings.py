@@ -6,7 +6,7 @@ SECRET_KEY = (
     "django-insecure-kaqkqa27i$9yn560@(_fxi0#(d4=i70mlg#w)a5ekfj-dswmyy"
 )
 
-DEBUG = True
+DEBUG = False
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
@@ -136,9 +136,10 @@ EMAIL_HOST_PASSWORD = "yvnpbguliarvmuhi"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-SITE_DOMAIN = "http://localhost"
+SITE_DOMAIN = "http://158.160.19.111"
 SITE_FULL_NAME = "Site name"
 
-
-EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
-EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
+if DEBUG:
+    SITE_DOMAIN = "http://127.0.0.1:3000/"
+    EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+    EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")

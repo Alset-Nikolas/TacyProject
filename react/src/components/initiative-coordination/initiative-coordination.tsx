@@ -180,9 +180,15 @@ export default function InitiativeCoordination() {
             <div>История пуста</div>
           )}
           {coordinationHistory && coordinationHistory.map((element) => {
-            const author = teamList.find((member) => member.id === element.author_text);
-            const authorName = author?.name ? author.name : 'Админ';
-            const coordinator = teamList.find((member) => member.id === element.coordinator)?.name;
+            // const author = teamList.find((member) => member.id === element.author_text);
+            const authorName = element.author_text?.first_name ?
+              `${element.author_text.last_name} ${element.author_text.first_name} ${element.author_text.second_name}`
+              :
+              'Админ';
+            const coordinator = element.coordinator?.first_name ?
+             `${element.coordinator.last_name} ${element.coordinator.first_name} ${element.coordinator.second_name}`
+             :
+             '';
             const date = new Date(element.date);
             // const statusName = components?.settings?.initiative_status.find((status) => status.id === element.status)?.name;
             return (
@@ -203,7 +209,6 @@ export default function InitiativeCoordination() {
                         &nbsp;  
                       </span>
                     )}
-                    
                   </div>
                   <div
                     className={`${styles.metaDataStatus}`}

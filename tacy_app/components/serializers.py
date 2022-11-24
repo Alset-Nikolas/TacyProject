@@ -782,3 +782,18 @@ class EventSerializer(serializers.Serializer):
 class ListEventSerializer(serializers.Serializer):
 
     initiative_events = EventSerializer(many=True)
+
+
+class MetricItemUserStat(serializers.Serializer):
+    title = serializers.CharField()
+    value = serializers.FloatField()
+
+
+class UserPersonStatisticSerializer(serializers.Serializer):
+    """
+    Настройка инициатив в проекте
+    """
+
+    user_initiatives = InitiativeSerializer(many=True)
+    events = MainEventSerializer(many=True)
+    metrics_user_stat = MetricItemUserStat(many=True)

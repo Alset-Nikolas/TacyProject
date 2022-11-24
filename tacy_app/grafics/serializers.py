@@ -3,51 +3,36 @@ from .models import GraficsProject
 from projects.models import PropertiesProject, MetricsProject
 
 
-class GraficsProjectSerializerItem(serializers.ModelSerializer):
-    class Meta:
-        # depth = 1
-        model = GraficsProject
-        fields = (
-            "propertie",
-            "metric",
-            "activate",
-        )
+class MetricsSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
 
-    def validate_metrics(self, metrics):
-        project = self.context.get("project")
-        if any(metric.project != project for metric in metrics):
-            raise serializers.ValidationError(
-                {
-                    "metric": f"Not exist metric pk in project",
-                    "msg_er": "В этом проекте таких метрик нет",
-                }
-            )
-        return metrics
-
-    def validate_propertie(self, propertie):
-
-        project = self.context.get("project")
-        if propertie.project != project:
-            raise serializers.ValidationError(
-                {
-                    "propertie": f"Not exist propertie pk in project",
-                    "msg_er": "В этом проекте таких емкостей (свойств) нет",
-                }
-            )
-        return propertie
-
-    def validate(self, attrs):
-        return super().validate(attrs)
-
-
-class PropertieSerializer(serializers.ModelSerializer):
     class Meta:
         model = MetricsProject
         fields = ("id", "title")
 
+    def validate_id(self, id):
+
+        project = self.context.get("project")
+        metric = MetricsProject.get_metric_by_id(id)
+        if not metric:
+            raise serializers.ValidationError(
+                {
+                    "metric": f"Not exist metric",
+                    "msg_er": "В этом проекте таких емкостей (свойств) нет",
+                }
+            )
+        if metric.project != project:
+            raise serializers.ValidationError(
+                {
+                    "metric": f"Not exist metric pk in project",
+                    "msg_er": "В этом проекте таких емкостей (свойств) нет",
+                }
+            )
+        return id
+
 
 class GraficsProjectInfoSerializerItem(serializers.ModelSerializer):
-    metric = PropertieSerializer()
+    metric = MetricsSerializer()
 
     class Meta:
         depth = 1
@@ -59,9 +44,31 @@ class GraficsProjectInfoSerializerItem(serializers.ModelSerializer):
 
 
 class PropertieSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+
     class Meta:
         model = PropertiesProject
         fields = ("id", "title")
+
+    def validate_id(self, id):
+
+        project = self.context.get("project")
+        p = PropertiesProject.get_property_by_id(id)
+        if not p:
+            raise serializers.ValidationError(
+                {
+                    "propertie": f"Not exist",
+                    "msg_er": "В этом проекте таких емкостей (свойств) нет",
+                }
+            )
+        if p.project != project:
+            raise serializers.ValidationError(
+                {
+                    "propertie": f"Not exist propertie pk in project",
+                    "msg_er": "В этом проекте таких емкостей (свойств) нет",
+                }
+            )
+        return id
 
 
 class GraficsProjectInfoSerializerBigItem(serializers.Serializer):

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import CustomizedButton from "../../components/button/button";
 import EventManagement from "../../components/event-management/event-management";
 import InitiativeCoordination from "../../components/initiative-coordination/initiative-coordination";
+import EventsDiagram from "../../components/initiative-events/initiative-events";
 import InitiativeManagement from "../../components/initiative-management/initiative-management";
 import InitiativesTable from "../../components/initiatives-table/initiatives-table";
 import ProjectTimeline from "../../components/project-timeline/project-timeline";
@@ -23,6 +24,8 @@ export default function InitiativesRegistryPage() {
   const project = useAppSelector((store) => store.state.project.value);
   const { user, userRights } = useAppSelector((store) => store.auth);
   const initiative = useAppSelector((store) => store.initiatives.initiative);
+  const initiativesList = useAppSelector((store) => store.initiatives.list);
+  const isInitiativeApproved = initiative?.initiative.status?.value === -1;
 
   const onAddClickHandler = () => {
     // dispatch(addInitiativeThunk());
@@ -44,7 +47,9 @@ export default function InitiativesRegistryPage() {
       <section
         className={`${styles.tableWrapper}`}
       >
-        <InitiativesTable />
+        <InitiativesTable
+          initiativesList={initiativesList}
+        />
         {(user && user.user_flags_in_project?.is_create || user?.user.is_superuser) && (
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '40px'}}>
             <CustomizedButton
@@ -65,37 +70,19 @@ export default function InitiativesRegistryPage() {
               style={{ flex: '1 1' }}
             >
               <InitiativeManagement
-                editButton={user?.user.is_superuser ? true : false}
+                editButton={(userRights?.user_is_author || user?.user.is_superuser) && !isInitiativeApproved ? true : false}
               />
             </div>
             <div
               style={{ flex: '1 1' }}
             >
               <RiskManagement
-                editButton={user?.user.is_superuser ? true : false}
+                editButton={(userRights?.user_is_author || user?.user.is_superuser) && !isInitiativeApproved ? true : false}
               />
             </div>
           </section>
           <section>
-            <div>
-              <Link
-                to={`/${paths.events}`}
-              >
-                К списку мероприятий
-              </Link>
-            </div>
-            <ProjectTimeline />
-            <div>
-              {userRights?.user_is_author && (
-                <CustomizedButton
-                  value="Добавить"
-                  color="blue"
-                  onClick={() => {
-                    navigate(`/${paths.events}/add`);
-                  }}
-                />
-              )}
-            </div>
+            <EventsDiagram />
           </section>
           <section>
             <InitiativeCoordination />

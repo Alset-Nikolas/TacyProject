@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404, render
 from rest_framework import status, views
 from rest_framework.response import Response
-from projects.models import Project
+from projects.models import Project, MetricsProject
 from .serializers import (
     ListInitiativeSerializer,
     SettingsInitiativeSerializer,
@@ -16,6 +16,7 @@ from .serializers import (
     ListRiskSerializer,
     EventSerializer,
     ListEventSerializer,
+    UserPersonStatisticSerializer,
 )
 from projects.serializers import UserProjectIdSerializer
 from .models import (
@@ -165,10 +166,40 @@ class ListInitiativesView(views.APIView):
         return Response(s.data, 200)
 
 
-class ListUserInitiativesView(views.APIView):
+class UserStatisticsInitiativesView(views.APIView):
     """
     Выдать список инициатив проекта (в которых пользователь был задействован)
     """
+
+    def _get_user_statistic(self, project, inits):
+        metrics_user_stat = {}
+        user_initiatives = []
+        events = []
+        for m in MetricsProject.objects.filter(project=project).all():
+            if m.active:
+                metrics_user_stat[m.title] = 0
+        for initiative in inits:
+            user_initiatives.append(
+                {
+                    "initiative": initiative,
+                    "addfields": initiative.addfields.all(),
+                    "properties_fields": initiative.properties_fields.all(),
+                    "metric_fields": initiative.metric_fields.all(),
+                }
+            )
+            for m_obj in initiative.metric_fields.all():
+                title = m_obj.metric.title
+                if title in metrics_user_stat:
+                    metrics_user_stat[m_obj.metric.title] += m_obj.value
+            events += initiative.events.all()
+        metrics_user_stat_format = []
+        for k, v in metrics_user_stat.items():
+            metrics_user_stat_format.append({"title": k, "value": v})
+        return {
+            "user_initiatives": user_initiatives,
+            "metrics_user_stat": metrics_user_stat_format,
+            "events": events,
+        }
 
     def get(self, request):
         project = get_project_by_id_or_active(request)
@@ -177,18 +208,11 @@ class ListUserInitiativesView(views.APIView):
         list_inits = Initiatives.get_user_initiatievs(user, project)
 
         [x.check_updates() for x in list_inits]
-        inst = {
-            "project_initiatives": [
-                {
-                    "initiative": initiative,
-                    "addfields": initiative.addfields.all(),
-                    "properties_fields": initiative.properties_fields.all(),
-                    "metric_fields": initiative.metric_fields.all(),
-                }
-                for initiative in list_inits
-            ]
-        }
-        s = ListInitiativeSerializer(instance=inst)
+
+        s = UserPersonStatisticSerializer(
+            instance=self._get_user_statistic(project, list_inits)
+        )
+        self._get_user_statistic(project, list_inits)
         return Response(s.data, 200)
 
 

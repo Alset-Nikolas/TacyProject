@@ -12,7 +12,7 @@ import styles from './graphics.module.scss';
 
 export default function Graphics() {
   const dispatch = useAppDispatch();
-  const { graphics } = useAppSelector((store) => store.graphics);
+  const { graphics, statusGraphics } = useAppSelector((store) => store.graphics);
   const project = useAppSelector((store) => store.state.project.value);
   const chartsProperties = graphics.map((el) => el.propertieName);
   const [ currentPropertieIndex, setCurrentPropertieIndex ] = useState<number>(0);
@@ -38,28 +38,53 @@ export default function Graphics() {
         {/* <div>
           {graphics[currentPropertieIndex].propertieName}
         </div> */}
-        <div
-          className={`${styles.chartsWrapper}`}
-        >
-          {graphics[currentPropertieIndex].graphicData.map((el, index) => {
-            return (
-              <div
-                key={index}
-              >
+        {currentPropertieIndex === chartsProperties.length ? (
+          <div
+            className={`${styles.chartsWrapper}`}
+          >
+            {statusGraphics.map((el, index) => {
+              return (
                 <div
-                  className={`${styles.metricNameGraphic}`}
+                  key={index}
                 >
-                  {el.metricName}
+                  <div
+                    className={`${styles.metricNameGraphic}`}
+                  >
+                    {el.metricName}
+                  </div>
+                  <div
+                    className={`${styles.chartWrapper}`}
+                  >
+                    <CustomBarChart data={el.data} />
+                  </div>
                 </div>
+              )
+            })}
+          </div>
+        ) : (
+          <div
+            className={`${styles.chartsWrapper}`}
+          >
+            {graphics[currentPropertieIndex].graphicData.map((el, index) => {
+              return (
                 <div
-                  className={`${styles.chartWrapper}`}
+                  key={index}
                 >
-                  <CustomBarChart data={el.data} />
+                  <div
+                    className={`${styles.metricNameGraphic}`}
+                  >
+                    {el.metricName}
+                  </div>
+                  <div
+                    className={`${styles.chartWrapper}`}
+                  >
+                    <CustomBarChart data={el.data} />
+                  </div>
                 </div>
-              </div>
-            )
-          })}
-        </div>
+              )
+            })}
+          </div>
+        )}
         <div style={{display: 'flex',  gap: '20px'}}>
           {chartsProperties.map((el: string, index: number) => {
             return (
@@ -73,6 +98,13 @@ export default function Graphics() {
               </div>
             )
           })}
+          <div
+            className={`${styles.propertieGraphic} ${currentPropertieIndex === chartsProperties.length ? styles.active : ''}`}
+            style={{cursor: 'pointer'}}
+            onClick={() => setCurrentPropertieIndex(chartsProperties.length)}
+          >
+            Статус
+          </div>
         </div>
       </div>)}
       </SectionContent>

@@ -8,9 +8,13 @@ import sectionStyles from '../../styles/sections.module.scss';
 import { TInitiative } from "../../types";
 import { getInitiativeByIdThunk } from "../../redux/initiatives-slice";
 
-export default function InitiativesTable() {
+type TInitiativesTableProps = {
+  initiativesList: Array<TInitiative>;
+};
+
+export default function InitiativesTable({ initiativesList }: TInitiativesTableProps) {
   const dispatch = useAppDispatch();
-  const initiativesList = useAppSelector((store) => store.initiatives.list);
+  // const initiativesList = useAppSelector((store) => store.initiatives.list);
   const initiative = useAppSelector((store) => store.initiatives.initiative);
   const components = useAppSelector((store) => store.components.value);
   const project = useAppSelector((store) => store.state.project.value);

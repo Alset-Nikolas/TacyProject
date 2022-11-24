@@ -19,9 +19,9 @@ export default function ComponentsSettingsPage() {
   const dispatch = useAppDispatch();
   const { currentId, value } = useAppSelector((store) => store.state.project);
   const components = useAppSelector((store) => store.components.value);
+  const initiativesList = useAppSelector((store) => store.initiatives.list);
 
   const onEditClick = () => {
-    console.log('test');
     navigate(paths.settings.components.edit.absolute);
   }
 
@@ -60,7 +60,9 @@ export default function ComponentsSettingsPage() {
         <StatusManagement />
       </section>
       <section className={`${styles.tableSectionWrapper}`}>
-        <InitiativesTable />
+        <InitiativesTable
+          initiativesList={initiativesList}
+        />
       </section>
     </div>
   );
