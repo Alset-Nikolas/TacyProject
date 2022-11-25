@@ -16,6 +16,7 @@ from .models import (
 )
 from notifications.email import EmailManage
 from notifications.models import NotificationsUser
+from coordination.models import StagesCoordinationInitiative
 
 User = get_user_model()
 
@@ -534,8 +535,11 @@ class UpdateCommunityProjectSerializer(serializers.ModelSerializer):
                 del_person.user, context={"project": project}
             )
             NotificationsUser.create(
-                user=user,
+                user=del_person.user,
                 text=f"Спасибо что учавствовали в проекте {project.name}",
+            )
+            StagesCoordinationInitiative.delete_user_in_project(
+                project, del_person.user
             )
             del_person.delete()
 

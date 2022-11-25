@@ -181,6 +181,8 @@ export default function InitiativeCoordination() {
           )}
           {coordinationHistory && coordinationHistory.map((element) => {
             // const author = teamList.find((member) => member.id === element.author_text);
+            const isServiceMessage = element.action === 'Служебное сообщение';
+            const isComment = element.action === 'Новый комментарий'
             const authorName = element.author_text?.first_name ?
               `${element.author_text.last_name} ${element.author_text.first_name} ${element.author_text.second_name}`
               :
@@ -196,20 +198,26 @@ export default function InitiativeCoordination() {
                 <div
                   className={`${styles.metaData}`}
                 >
-                  <div
-                    className={`${styles.metaDataName}`}
-                  >
-                    {authorName}
-                    &nbsp;
-                    {coordinator && (
-                      <span>
-                        ответил(а)
-                        &nbsp;
-                        {coordinator}
-                        &nbsp;  
-                      </span>
-                    )}
-                  </div>
+                  {isServiceMessage ? (
+                    <div
+                      className={`${styles.metaDataName}`}
+                    />
+                  ) : (
+                    <div
+                      className={`${styles.metaDataName}`}
+                    >
+                      {authorName}
+                      &nbsp;
+                      {coordinator && (
+                        <span>
+                          ответил(а)
+                          &nbsp;
+                          {coordinator}
+                          &nbsp;  
+                        </span>
+                      )}
+                    </div>
+                  )}
                   <div
                     className={`${styles.metaDataStatus}`}
                   >
@@ -222,7 +230,7 @@ export default function InitiativeCoordination() {
                   </div>
                 </div>
                 <div
-                  className={`${styles.commentWrapper}`}
+                  className={`${styles.messageWrapper} ${isComment ? styles.comment : ''}`}
                 >
                   {element.text}
                 </div>

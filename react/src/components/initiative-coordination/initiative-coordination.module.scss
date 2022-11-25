@@ -56,6 +56,7 @@
   display: flex;
   justify-content: space-between;
   margin-bottom: 8px;
+  gap: 8px;
 }
 
 .metaDataName {
@@ -68,11 +69,15 @@
   text-align: right;
 }
 
-.commentWrapper {
+.messageWrapper {
   width: 100%;
-  background: #FFFFFF;
+  background: linear-gradient(180deg, rgba(141, 176, 64, 0.1) 0%, rgba(23, 89, 140, 0.1) 100%);
   border: 1px solid #504F4F;
   border-radius: 3px;
   margin-bottom: 13px;
   padding: 8px;
+
+  &.comment {
+    background: #FFFFFF;
+  }
 }

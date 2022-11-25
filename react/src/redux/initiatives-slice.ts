@@ -179,6 +179,7 @@ export default stateSlice.reducer;
 
 export const getInitiativesListThunk = (id: number) => (dispatch: AppDispatch, getState: () => RootState) => {
   const project = getState().state.project.value;
+  const initiative = getState().initiatives.initiative?.initiative;
 
   if (!project) return;
   if (id !== project.id) return;
@@ -189,7 +190,13 @@ export const getInitiativesListThunk = (id: number) => (dispatch: AppDispatch, g
     (res: AxiosResponse<{ project_initiatives: Array<TInitiative> }>) => {
       try {
         console.log(res.data);
-        dispatch(getInitiativeByIdThunk(res.data.project_initiatives[0].initiative.id));
+        if (!project) {
+          throw new Error('Project is Missing');
+        }
+        if (id !== project.id) {
+          throw new Error('Wrong project id');
+        }
+        if (!initiative) dispatch(getInitiativeByIdThunk(res.data.project_initiatives[0].initiative.id));
       } catch (error) {
         console.log(error);
         dispatch(initiativesListRequestFailed());
@@ -213,13 +220,19 @@ export const getPersonalInitiativesListThunk = (projectId: number) => (dispatch:
     `components/initiative/info/list/user/?id=${projectId}`,
     (res: AxiosResponse<{ project_initiatives: Array<TInitiative> }>) => {
       try {
+        if (!project) {
+          throw new Error('Project is Missing');
+        }
+        if (projectId !== project.id) {
+          throw new Error('Wrong project id');
+        }
         console.log(res.data);
         dispatch(getInitiativeByIdThunk(res.data.project_initiatives[0].initiative.id));
+        dispatch(personalInitiativesListRequestSuccess(res.data.project_initiatives));
       } catch (error) {
         console.log(error);
         dispatch(personalInitiativesListRequestFailed());
       }
-      dispatch(personalInitiativesListRequestSuccess(res.data.project_initiatives));
     },
     () => {
       dispatch(personalInitiativesListRequestFailed());

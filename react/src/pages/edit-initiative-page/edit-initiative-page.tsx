@@ -39,10 +39,21 @@ export default function EditInitiativePage() {
         ) : (
           <>
             {!risksList.length && (
-              <CustomizedButton
-                value="Добавить"
-                onClick={() => setAddRisk(true)}
-              />
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 20,
+                }}
+              >
+                <CustomizedButton
+                  value="Отменить"
+                  onClick={() => navigate(`/${paths.registry}`)}
+                />
+                <CustomizedButton
+                  value="Добавить"
+                  onClick={() => setAddRisk(true)}
+                />
+              </div>
             )}
             {!!risksList.length && (
               <>

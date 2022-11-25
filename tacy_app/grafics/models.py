@@ -137,30 +137,26 @@ class GraficsProject(models.Model):
         new_format_status_grafic = copy.deepcopy(status_grafic)
         if grafics:
             # если есть обьемы
-            if (
-                cls.objects.filter(project=project)
-                .filter(activate=True)
-                .exists()
-            ):
-                for v_id, m_dict in grafics.items():
-                    for m_id, grafic_item in m_dict.items():
-                        if m_id != "enum" and (
-                            not cls.objects.filter(project=project)
-                            .filter(activate=True)
-                            .filter(propertie_id=v_id)
-                            .filter(metric_id=m_id)
-                            .exists()
-                        ):
-                            new_format_res[v_id].pop(m_id)
-                        else:
-                            new_format = []
-                            for x_name, y_value in grafic_item.items():
-                                new_format.append(
-                                    {"name": x_name, "value": y_value}
-                                )
-                            new_format_res[v_id][m_id] = new_format
 
-        for m_id, grafic_item in new_format_status_grafic.items():
+            for v_id, m_dict in grafics.items():
+                for m_id, grafic_item in m_dict.items():
+                    if m_id != "enum" and (
+                        not cls.objects.filter(project=project)
+                        .filter(activate=False)
+                        .filter(propertie_id=v_id)
+                        .filter(metric_id=m_id)
+                        .exists()
+                    ):
+                        new_format_res[v_id].pop(m_id)
+                    else:
+                        new_format = []
+                        for x_name, y_value in grafic_item.items():
+                            new_format.append(
+                                {"name": x_name, "value": y_value}
+                            )
+                        new_format_res[v_id][m_id] = new_format
+
+        for m_id, grafic_item in status_grafic.items():
             new_format = []
             for x_name, y_value in grafic_item.items():
                 new_format.append({"name": x_name, "value": y_value})

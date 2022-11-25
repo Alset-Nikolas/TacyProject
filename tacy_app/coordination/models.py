@@ -4,8 +4,15 @@ from components.models import Initiatives, SettingsStatusInitiative
 
 from django.utils import timezone
 from django.contrib.auth import get_user_model
+from notifications.models import NotificationsUser
 
 User = get_user_model()
+
+TYPE_SERVICE_MESSAGE = "Служебное сообщение"
+TYPE_SEND_APPROVAL = "Отправить на согласование"
+TYPE_NEW_COMMENT = "Новый комментарий"
+TYPE_INITIATIVE_AGREED = "Инициатива согласована"
+TYPE_INITIATIVE_WITHDREW = "Инициатива отозвана"
 
 
 class CoordinationInitiativeHistory(models.Model):
@@ -42,11 +49,11 @@ class CoordinationInitiativeHistory(models.Model):
     text = models.CharField(max_length=300)
 
     TYPE_VALUE = [
-        ("Отправить на согласование", "Отправить на согласование"),
-        ("Новый комментарий", "Новый комментарий"),
-        ("Инициатива согласована", "Инициатива согласована"),
-        ("Служебное сообщение", "Служебное сообщение"),
-        ("Withdrew the initiative", "Withdrew the initiative"),
+        (TYPE_SEND_APPROVAL, TYPE_SEND_APPROVAL),
+        (TYPE_NEW_COMMENT, TYPE_NEW_COMMENT),
+        (TYPE_INITIATIVE_AGREED, TYPE_INITIATIVE_AGREED),
+        (TYPE_SERVICE_MESSAGE, TYPE_SERVICE_MESSAGE),
+        (TYPE_INITIATIVE_WITHDREW, TYPE_INITIATIVE_WITHDREW),
     ]
     action = models.CharField(
         max_length=30,
@@ -135,7 +142,6 @@ class StagesCoordinationInitiative(models.Model):
 
     @classmethod
     def user_is_coordinator(cls, initiative_id, user) -> bool:
-        print(cls.objects.filter(initiative_id=initiative_id).all())
         return (
             cls.objects.filter(initiative_id=initiative_id)
             .filter(coordinator_stage_id=user.id)
@@ -169,6 +175,37 @@ class StagesCoordinationInitiative(models.Model):
             .filter(coordinator_stage=user)
             .exists()
         )
+
+    @classmethod
+    def delete_user_in_project(cls, project, user):
+        for init in project.initiatives.all():
+            if cls.user_is_coordinator(init.id, user):
+                StagesCoordinationInitiative.delete_now_stage_null_coordinator(
+                    init, user
+                )
+
+    @classmethod
+    def delete_now_stage_null_coordinator(cls, initiative, user):
+        coordinmattor_info = (
+            cls.objects.filter(initiative=initiative)
+            .filter(coordinator_stage=user)
+            .filter(activate=False)
+            .first()
+        )
+        if coordinmattor_info:
+            CoordinationInitiativeHistory.create(
+                {
+                    "initiative": initiative,
+                    "status": initiative.status,
+                    "text": f"Пользователь {user.email} был удален из команды проекта. Согласуйте у другого координатора.",
+                    "action": TYPE_SERVICE_MESSAGE,
+                }
+            )
+            NotificationsUser.create(
+                user,
+                f"В проектке: {initiative.project.name}, был удален куратор {user.email}",
+            )
+            coordinmattor_info.delete()
 
     class Meta:
         db_table = "stages_coordination_initiative"

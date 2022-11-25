@@ -8,7 +8,14 @@ from .serializers import (
     ApprovalSerializer,
     SwitchSerializer,
 )
-from .models import CoordinationInitiativeHistory, StagesCoordinationInitiative
+from .models import (
+    CoordinationInitiativeHistory,
+    StagesCoordinationInitiative,
+    TYPE_SERVICE_MESSAGE,
+    TYPE_SEND_APPROVAL,
+    TYPE_INITIATIVE_AGREED,
+    TYPE_NEW_COMMENT,
+)
 from components.models import Initiatives
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
@@ -64,7 +71,7 @@ class SentForApproval(views.APIView):
             "coordinator": coordinator_obj,
             "author_text": request.user,
             "text": request.data.get("text"),
-            "action": "Отправить на согласование",
+            "action": TYPE_SEND_APPROVAL,
         }
         print(instace)
         CoordinationInitiativeHistory.create(instace)
@@ -144,7 +151,7 @@ class AddComment(views.APIView):
             "coordinator": None,
             "author_text": request.user,
             "text": request.data.get("text"),
-            "action": "Новый комментарий",
+            "action": TYPE_NEW_COMMENT,
         }
 
         CoordinationInitiativeHistory.create(instace)
@@ -174,7 +181,7 @@ class Approval(views.APIView):
             "coordinator": request.user,
             "author_text": request.user,
             "text": request.data.get("text"),
-            "action": "Инициатива согласована",
+            "action": TYPE_INITIATIVE_AGREED,
         }
         CoordinationInitiativeHistory.create(instace)
         NotificationsUser.init_approval(initiative)
@@ -187,7 +194,7 @@ class Approval(views.APIView):
             "coordinator": None,
             "author_text": None,
             "text": f"Инициатива одобрена на очередном этапе. Пройден этап: {state_name}",
-            "action": "Служебное сообщение",
+            "action": TYPE_SERVICE_MESSAGE,
         }
         CoordinationInitiativeHistory.create(instace)
         NotificationsUser.change_stage(initiative, state_name)
@@ -200,7 +207,7 @@ class Approval(views.APIView):
             "coordinator": None,
             "author_text": None,
             "text": f"Инициатива согласована!",
-            "action": "Служебное сообщение",
+            "action": TYPE_SERVICE_MESSAGE,
         }
         CoordinationInitiativeHistory.create(instace)
         NotificationsUser.init_approval(initiative)
@@ -236,7 +243,7 @@ class Approval(views.APIView):
         self._update_stage_initiative(request)
 
         return Response(
-            "Инициатива согласована",
+            TYPE_INITIATIVE_AGREED,
             200,
         )
 
