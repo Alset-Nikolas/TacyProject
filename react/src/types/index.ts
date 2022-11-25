@@ -387,8 +387,8 @@ export type TEvent = {
     date_start: string;
     date_end: string;
     ready: boolean;
-    get_status: string;
   },
+  event_status: string;
   addfields: Array<{
     id: number;
     value: string;

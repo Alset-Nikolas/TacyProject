@@ -25,16 +25,27 @@ import CustomizedButton from '../button/button';
 export default function LoginForm() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { authRequestSuccess } = useAppSelector((store) => store.auth);
+  const { authRequestSuccess, authRequestFailed } = useAppSelector((store) => store.auth);
   const [ formData, setFormData ] = useState({ email: '', password: ''});
+  const [ validationError, setValidationError ] = useState(false);
 
   const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
+    setValidationError(false);
     setFormData({ ...formData, [e.target.name]: e.target.value})
   }
 
   const onSubmitHandler = (e: FormEvent) => {
     e.preventDefault();
-    dispatch(authThunk(formData));
+    const formDataEntries = Object.entries(formData);
+    let validationErrorTemp = false;
+    formDataEntries.forEach((el) => {
+      if (!el[1]) validationErrorTemp = true;
+    });
+    if (validationErrorTemp) {
+      setValidationError(validationErrorTemp);
+    } else {
+      dispatch(authThunk(formData));
+    }
   };
 
   useEffect(() => {
@@ -63,7 +74,7 @@ export default function LoginForm() {
         <span>*</span>
       </label>
       <input
-        className={`${styles.input}`}
+        className={`${styles.input} ${authRequestFailed ? styles.error : ''}`}
         name="email"
         id="email"
         value={formData.email}
@@ -77,13 +88,23 @@ export default function LoginForm() {
         <span>*</span>
       </label>
       <input
-        className={`${styles.input}`}
+        className={`${styles.input} ${authRequestFailed ? styles.error : ''}`}
         name="password"
         id="password"
         value={formData.password}
         onChange={onChangeHandler}
         type="password"
       />
+      {authRequestFailed && (
+        <div className={`${styles.error}`}>
+          Неверное имя пользователя или пароль
+        </div>
+      )}
+      {validationError && (
+        <div className={`${styles.error}`}>
+          Заполните обязательные поля
+        </div>
+      )}
       {/* <FormControl>
         <InputLabel htmlFor="email">E-mail</InputLabel>
         <Input

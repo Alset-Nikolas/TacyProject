@@ -33,7 +33,7 @@ export default function EventsPage() {
   };
 
   const removeEvent = (index: number) => {
-    const newList = [ ...eventsList ];
+    const newList = [...eventsList];
     newList.splice(index, 1);
     dispatch(setEventsList(newList));
   };
@@ -49,7 +49,7 @@ export default function EventsPage() {
     dispatch(closeModal());
   };
 
-  const checkboxChengeHandler = (event: TEvent) => () => {
+  const checkboxChangeHandler = (event: TEvent) => {
     const newEventState = { ...event };
     const newEventInfo = { ...event.event };
     newEventInfo.ready = !newEventInfo.ready;
@@ -59,7 +59,7 @@ export default function EventsPage() {
 
   useEffect(() => {
     if (initiative) dispatch(getEventsListThunk(initiative.initiative.id));
-  } ,[]);
+  }, []);
 
   return (
     <div
@@ -73,7 +73,7 @@ export default function EventsPage() {
             color="blue"
             onClick={() => navigate(`add`)}
           />
-      </div>
+        </div>
       )}
 
       <div
@@ -114,9 +114,9 @@ export default function EventsPage() {
                     {event.event.name}
                   </td>
                   <td
-                    className={`${statusStyles.get(event.event.get_status)}`}
+                    className={`${statusStyles.get(event.event_status)}`}
                   >
-                    {event.event.get_status}
+                    {event.event_status}
                   </td>
                   <td>
                     {event.event.date_start}
@@ -129,7 +129,7 @@ export default function EventsPage() {
                       <input
                         type="checkbox"
                         checked={event.event.ready}
-                        onChange={() => checkboxChengeHandler(event)}
+                        onChange={() => checkboxChangeHandler(event)}
                       />
                     </td>
                   )}
@@ -158,7 +158,7 @@ export default function EventsPage() {
           />
         </div>
       </div>
-      
+
       {modal.isOpen && modal.type.deleteEvent && (
         <Modal>
           <div className={`${styles.modalWrapper}`}>

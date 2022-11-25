@@ -351,8 +351,25 @@ export function removeComponentItem(
   key: keyof TSettings,
   dispatch: AppDispatch,
 ) {
-  const newItemsArray = [...itemsArray];
+  let newItemsArray = [...itemsArray];
   newItemsArray.splice(index, 1);
+
+  if (key === 'initiative_status') {
+    newItemsArray = newItemsArray.map((el, index) => {
+      const newEl = { ...el } as {
+        id: number;
+        value: number;
+        name: string;
+        settings_project: number;
+      };
+      
+      newEl.value = index - 2;
+      if (newEl.name === 'Согласовано') newEl.value = -1;
+      if (newEl.name === 'Отозвано') newEl.value = -2;
+      
+      return newEl;
+    });
+  }
 
   dispatch(updateSettings({
     [key]: newItemsArray,

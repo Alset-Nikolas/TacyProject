@@ -489,6 +489,7 @@ class Events(models.Model):
         event.name = info.get("name", None)
         event.date_start = info.get("date_start", None)
         event.date_end = info.get("date_end", None)
+        event.ready = info.get("ready", False)
         event.save()
         return event.id
 
@@ -754,7 +755,7 @@ class SettingsStatusInitiative(models.Model):
         return f'<SettingsStatusInitiative: name="{self.name}"; id={self.id}>'
 
     class Meta:
-        db_table = "status_initiative"
+        db_table = "settings_status_initiative"
         constraints = [
             models.UniqueConstraint(
                 fields=["settings_project", "name"],

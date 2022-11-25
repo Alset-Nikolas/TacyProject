@@ -292,6 +292,7 @@ class ListEventView(views.APIView):
             "initiative_events": [
                 {
                     "event": event,
+                    "event_status": event.get_status(event),
                     "metric_fields": initiative.metric_fields.all(),
                     "addfields": event.addfields.all(),
                 }

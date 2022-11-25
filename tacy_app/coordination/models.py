@@ -179,6 +179,8 @@ class StagesCoordinationInitiative(models.Model):
     @classmethod
     def delete_user_in_project(cls, project, user):
         for init in project.initiatives.all():
+            print(init)
+            print(cls.user_is_coordinator(init.id, user))
             if cls.user_is_coordinator(init.id, user):
                 StagesCoordinationInitiative.delete_now_stage_null_coordinator(
                     init, user

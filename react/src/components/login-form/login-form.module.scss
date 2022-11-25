@@ -30,6 +30,15 @@
   padding: 8px 10px;
   font-size: 32px;
   line-height: 40px;
+
+  &.error {
+    border: 1px solid #B04040;
+    color: black;
+  }
+}
+
+.error {
+  color: #B04040;
 }
 
 .buttonWrapper {
