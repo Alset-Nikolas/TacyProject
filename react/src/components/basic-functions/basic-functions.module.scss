@@ -68,6 +68,11 @@
   padding: 10px 18.26px;
   background-color: #f4f4f4FF;
   box-sizing: border-box;
+
+  p {
+    overflow-y: auto;
+    max-height: 600px;
+  }
 }
 
 .textBlockEdit {

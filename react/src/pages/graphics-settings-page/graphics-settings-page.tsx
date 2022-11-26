@@ -2,6 +2,7 @@ import { Checkbox, MenuItem, Select, SelectChangeEvent } from '@mui/material';
 import { useEffect, useState } from 'react';
 import CustomizedButton from '../../components/button/button';
 import Graphics from '../../components/graphics/graphics';
+import ModalInfo from '../../components/modal-info/modal-info';
 import SectionHeader from '../../components/section/section-header/section-header';
 import SelectUnits from '../../components/select-units/select-units';
 import CustomizedSelect from '../../components/select/Select';
@@ -14,6 +15,7 @@ import styles from './graphics-settings-page.module.scss';
 export default function GraphicsSettingsPage() {
   const dispatch = useAppDispatch();
   const project = useAppSelector((store) => store.state.project.value);
+  const modal = useAppSelector((store) => store.state.app.modal);
   const graphicsSettings = useAppSelector((store) => store.graphics.settings);
   const [newSettingState, setNewSettingState] = useState([...graphicsSettings]);
   const initialSelectorValue = (settings: typeof graphicsSettings): Array<Array<string>> => {
@@ -157,6 +159,12 @@ export default function GraphicsSettingsPage() {
             onClick={saveButtonClickHandler}
           />
         </div>
+      )}
+      {modal.isOpen && modal.type.error && (
+        <ModalInfo message={modal.message} />
+      )}
+      {modal.isOpen && modal.type.message && (
+        <ModalInfo message={modal.message} />
       )}
     </div>
   );

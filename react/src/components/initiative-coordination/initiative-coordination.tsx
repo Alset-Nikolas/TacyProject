@@ -183,6 +183,7 @@ export default function InitiativeCoordination() {
             // const author = teamList.find((member) => member.id === element.author_text);
             const isServiceMessage = element.action === 'Служебное сообщение';
             const isComment = element.action === 'Новый комментарий'
+            const isApprovement = element.action === 'Инициатива согласована'
             const authorName = element.author_text?.first_name ?
               `${element.author_text.last_name} ${element.author_text.first_name} ${element.author_text.second_name}`
               :
@@ -208,7 +209,10 @@ export default function InitiativeCoordination() {
                     >
                       {authorName}
                       &nbsp;
-                      {coordinator && (
+                      {isApprovement && (
+                        <span>согласовал</span>
+                      )}
+                      {coordinator && !isApprovement && (
                         <span>
                           ответил(а)
                           &nbsp;

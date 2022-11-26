@@ -163,14 +163,22 @@ export default function BasicFunctions({
             <span className={`${styles.textBlockDescription}`}>
               Задачи:
             </span>
-            {!!project.tasks && project.tasks}
+            {!!project.tasks && (
+              <p>
+                {project.tasks}
+              </p>
+            )}
           </div>
         </div>
         <div className={`${styles.textBlock}`}>
           <span className={`${styles.textBlockDescription}`}>
             Описание:
           </span>
-          {!! project.description && project.description}
+          {!! project.description && (
+            <p>
+              {project.description}
+            </p>
+          )}
         </div>
       </div>
     </div>

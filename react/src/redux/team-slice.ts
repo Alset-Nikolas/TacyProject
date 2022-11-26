@@ -3,7 +3,7 @@ import { AppDispatch, RootState } from './store';
 import { createSlice } from '@reduxjs/toolkit';
 import { getTeamList, postTeamList } from '../utils/requests';
 import { TPropertie, TRequestTeamListItem, TTeamMember, TUser, TUserRequest } from '../types';
-import { openErrorModal } from './state-slice';
+import { closeLoader, openErrorModal, showLoader } from './state-slice';
 
 type TState = {
   list: Array<TTeamMember>;
@@ -239,15 +239,18 @@ export const postTeamThunk = (id: number) => (dispatch: AppDispatch, getState: (
     return listItem;
   })
   dispatch(postTeamRequest());
+  dispatch(showLoader());
   postTeamList(
     id,
     body,
     (res: AxiosResponse) => {
       dispatch(postTeamRequestSuccess());
+      dispatch(closeLoader());
       dispatch(openErrorModal('Данные сохранены'));
     },
     () => {
       dispatch(postTeamRequestFailed());
+      dispatch(closeLoader());
       dispatch(openErrorModal('Ошибка при сохранении'));
     }
   );

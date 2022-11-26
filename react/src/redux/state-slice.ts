@@ -55,6 +55,7 @@ type TState = {
       initiative: boolean;
       risks: boolean;
     };
+    loader: boolean;
   };
 }
 
@@ -103,6 +104,7 @@ const initialState: TState = {
       initiative: false,
       risks: false,
     },
+    loader: false,
   },
 };
 
@@ -366,6 +368,12 @@ export const stateSlice = createSlice({
         ...state.app.initiativeEdit,
         ...action.payload,
       };
+    },
+    showLoader: (state) => {
+      state.app.loader = true;
+    },
+    closeLoader: (state) => {
+      state.app.loader = false;
     }
   },
 });
@@ -401,7 +409,9 @@ export const {
   openDeleteProjectModal,
   openDeleteEventModal,
   openErrorModal,
-  setInitiativeEdit
+  setInitiativeEdit,
+  showLoader,
+  closeLoader,
 } = stateSlice.actions;
 
 export default stateSlice.reducer;

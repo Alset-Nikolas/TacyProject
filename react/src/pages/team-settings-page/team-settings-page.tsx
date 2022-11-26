@@ -33,19 +33,28 @@ export default function TeamSettingsPage() {
 
   return (
     <div className={`${styles.wrapper}`}>
-      <TeamTable edit />
-      <div className={`${styles.buttonsWrapper}`}>
-        <CustomizedButton
-          value="Добавить"
-          onClick={onAddClickHandler}
-        />
-        <CustomizedButton
-          className={`${styles.saveButton}`}
-          value="Сохранить"
-          color="blue"
-          onClick={onSaveClickHandler}
-        />
-      </div>
+      {!value?.id && (
+        <div>
+          Проект не выбран
+        </div>
+      )}
+      {value?.id && (
+        <>
+          <TeamTable edit />
+          <div className={`${styles.buttonsWrapper}`}>
+            <CustomizedButton
+              value="Добавить"
+              onClick={onAddClickHandler}
+            />
+            <CustomizedButton
+              className={`${styles.saveButton}`}
+              value="Сохранить"
+              color="blue"
+              onClick={onSaveClickHandler}
+            />
+          </div>
+        </>
+      )}
       {modal.isOpen && modal.type.addMember && (
         <Modal
           closeModal={() => dispatch(closeModal())}

@@ -4,6 +4,7 @@ import {
   useLocation,
   useNavigate
 } from 'react-router-dom';
+import FullScreenLoader from '../../components/full-screen-loader/full-screen-loader';
 import Header from '../../components/header/header';
 import { paths } from '../../consts';
 import { getUserInfoByIdThunk, getUserInfoThunk, setIsAuth } from '../../redux/auth-slice';
@@ -14,7 +15,7 @@ import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import styles from './root-page.module.scss';
 
 export default function RootPage() {
-  const { auth, state: { project, projectsList } } = useAppSelector((store) => store);
+  const { auth, state: { project, projectsList, app: { loader } } } = useAppSelector((store) => store);
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -53,6 +54,9 @@ export default function RootPage() {
     <div className={`${styles.wrapper}`}>
       <Header />
       <Outlet />
+      {loader && (
+        <FullScreenLoader />
+      )}
     </div>
   )
 }

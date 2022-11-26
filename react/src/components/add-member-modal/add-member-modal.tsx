@@ -1,4 +1,5 @@
 import { SelectChangeEvent } from "@mui/material";
+import { setDefaultResultOrder } from "dns/promises";
 import { ChangeEvent, useState } from "react";
 import { closeModal } from "../../redux/state-slice";
 import { addMember } from "../../redux/team-slice";
@@ -15,6 +16,12 @@ export default function AddMemberModal() {
   const dispatch = useAppDispatch();
   const project = useAppSelector((store) => store.state.project.value);
   const [stage, setStage] = useState(1);
+  const [isError, setIsError] = useState(false);
+  const [name, setName] = useState({
+    'first-name': '',
+    'second-name': '',
+    'surname': '',
+  });
   const [newMember, setNewMember] = useState<TTeamMember>({
     id: -1,
     name: '  ',
@@ -49,19 +56,29 @@ export default function AddMemberModal() {
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    setIsError(false);
     if (name === 'surname') {
+      setName((prevState) => {
+        return { ...prevState, [name]: value }
+      });
       setNewMember(((prevState) => {
         const memberName = prevState.name.split(' ');
         memberName[0] = value;
         return { ...prevState, name: memberName.join(' ') }
       }));
     } else if (name === 'first-name') {
+      setName((prevState) => {
+        return { ...prevState, [name]: value }
+      });
       setNewMember(((prevState) => {
         const memberName = prevState.name.split(' ');
         memberName[1] = value;
         return { ...prevState, name: memberName.join(' ') }
       }));
     } else if (name === 'second-name') {
+      setName((prevState) => {
+        return { ...prevState, [name]: value }
+      });
       setNewMember(((prevState) => {
         const memberName = prevState.name.split(' ');
         memberName[2] = value;
@@ -77,15 +94,56 @@ export default function AddMemberModal() {
   const handleSelectorInput = (e: SelectChangeEvent<string | Array<string>>) => {
     const name = e.target.name;
     const value = e.target.value;
-
+    
     setNewMember(((prevState) => {
       return { ...prevState, [name]: value }
     }));
   };
 
+  const validate = (currentStage: number): boolean => {
+    let isValidated = true;
+    switch (currentStage) {
+      case 1:
+        if (!name['first-name']) isValidated = false;
+        if (!name['second-name']) isValidated = false;
+        if (!name.surname) isValidated = false;
+        break;
+      case 2:
+        if (!newMember.email.match(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/g)) isValidated = false;
+        if (!newMember.phone.match(/\d+/g)) isValidated = false;
+        break;
+      case 3:
+        if (!newMember.rights.length) isValidated = false;
+        break;
+    }
+    return isValidated;
+  };
+
   const onAddClickHandler = () => {
     dispatch(closeModal());
     dispatch(addMember(newMember));
+  };
+
+  const modalButtonHandler = () => {
+    const check = () => {
+      if (validate(stage)) {
+        setStage((prevStage) => prevStage + 1)
+      } else {
+        setIsError(true);
+      }
+    };
+
+    const checkStage3 = () => {
+      if(validate(stage)) {
+        onAddClickHandler();
+      } else {
+        setIsError(true);
+      }
+    }
+    stage < 3 ?
+      check()
+    :
+      checkStage3();
   }
 
   return (
@@ -210,11 +268,18 @@ export default function AddMemberModal() {
           </form>
         )
       }
+      {isError && (
+        <div
+          className={`${styles.error}`}
+        >
+          Заполните обязательные поля
+        </div>
+      )}
       <CustomizedButton
         className={`${styles.button}`}
         value={`${stage < 3 ? 'Далее' : 'Добавить'}`}
         color="blue"
-        onClick={stage < 3 ? () => setStage((prevStage) => prevStage + 1) : onAddClickHandler}
+        onClick={modalButtonHandler}
       />
     </div>
   );

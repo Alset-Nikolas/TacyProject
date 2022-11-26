@@ -5,6 +5,7 @@ import { getComponents, getInitiativesList, getRequest, postRequest } from '../u
 import { TBoss, TComponentsSettings, TCoordinationHistoryItem, TEvent, TInitiative, TRisk } from '../types';
 import { getUserInfoByIdThunk, getUserRightsThunk } from './auth-slice';
 import Properties from '../components/properties/properties';
+import { closeLoader, openErrorModal, showLoader } from './state-slice';
 
 type TState = {
   graphics: Array<{
@@ -426,6 +427,7 @@ export const updateGraphicsSettingsThunk = (
 ) => (dispatch: AppDispatch, getState: () => RootState) => {
   const project = getState().state.project.value;
   const body = { grafics: settings };
+  dispatch(showLoader());
   dispatch(updateGraphicsSettingsRequest());
   postRequest(
     `grafics/settings/?id=${projectId}`,
@@ -436,8 +438,10 @@ export const updateGraphicsSettingsThunk = (
         metrics: Array<{ id: number, title: string }>
       }> 
     }>) => {
+      dispatch(closeLoader());
       try {
         dispatch(updateGraphicsSettingsRequestSuccess());
+        dispatch(openErrorModal('Данные сохранены'));
       } catch (error) {
         console.log(error);
         dispatch(updateGraphicsSettingsRequestFailed());
@@ -445,7 +449,10 @@ export const updateGraphicsSettingsThunk = (
       
     },
     () => {
+      dispatch(closeLoader());
       dispatch(getGraphicsSettingsRequestFailed());
+      dispatch(openErrorModal('Ошибка при сохранении'));
+
     }
   );
 };
