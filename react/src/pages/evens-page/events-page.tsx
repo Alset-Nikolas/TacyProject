@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import CustomizedButton from "../../components/button/button";
 import Modal from "../../components/modal/modal";
 import Pictogram from "../../components/pictogram/pictogram";
@@ -50,7 +50,22 @@ export default function EventsPage() {
   };
 
   const checkboxChangeHandler = (event: TEvent) => {
-    const newEventState = { ...event };
+    const newEventState = {
+      event: { ... event.event },
+      metric_fields: event.metric_fields.map((field) => {
+        return {
+          metric: field.metric,
+          value: field.value,
+        }
+      }),
+      addfields: event.addfields.map((field) => {
+        return {
+          id: field.title.id,
+          value: field.value,
+        }
+      }),
+    };
+
     const newEventInfo = { ...event.event };
     newEventInfo.ready = !newEventInfo.ready;
     newEventState.event = newEventInfo;
@@ -111,7 +126,11 @@ export default function EventsPage() {
                   key={event.event.id}
                 >
                   <td>
-                    {event.event.name}
+                    <Link
+                      to={`/${paths.events}/info/${event.event.id}`}
+                    >
+                      {event.event.name}
+                    </Link>
                   </td>
                   <td
                     className={`${statusStyles.get(event.event_status)}`}

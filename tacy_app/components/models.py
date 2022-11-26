@@ -493,6 +493,38 @@ class Events(models.Model):
         event.save()
         return event.id
 
+    def update_addfields(self):
+        settings_initiatives = (
+            self.initiative.project.settings_initiatives.first()
+        )
+        for new_field in SettingsAddFeldsEvent.objects.filter(
+            settings_project=settings_initiatives
+        ).all():
+            print("new_field", new_field)
+            if (
+                not EventsAddFields.objects.filter(event=self)
+                .filter(title=new_field)
+                .exists()
+            ):
+                EventsAddFields.objects.create(
+                    event=self, title=new_field, value=""
+                )
+
+    def update_metrics(self):
+        for m in self.initiative.project.metrics.all():
+            if (
+                not EventMetricsFields.objects.filter(event=self)
+                .filter(metric=m)
+                .first()
+            ):
+                EventMetricsFields.objects.create(
+                    event=self, metric=m, value=0
+                )
+
+    def check_updates(self):
+        self.update_metrics()
+        self.update_addfields()
+
     @classmethod
     def delete_event(cls, event_id):
         event = Events.get_by_id(event_id)
@@ -523,7 +555,7 @@ class EventsAddFields(models.Model):
         blank=True,
         null=True,
     )
-    value = models.CharField(max_length=200)
+    value = models.CharField(max_length=200, blank=True)
 
     class Meta:
         db_table = "event_add_fields"

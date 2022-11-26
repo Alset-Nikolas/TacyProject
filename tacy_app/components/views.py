@@ -247,6 +247,7 @@ class InfoEventView(views.APIView):
         if not id_event:
             return Response("get id event", 404)
         event = get_object_or_404(Events, id=id_event)
+        event.check_updates()
         s = EventSerializer(
             instance={
                 "event": event,
@@ -288,6 +289,8 @@ class ListEventView(views.APIView):
 
         id = request.GET.get("id", None)
         initiative = get_object_or_404(Initiatives, id=id)
+        events = initiative.events.all()
+        [x.check_updates() for x in events]
         inst = {
             "initiative_events": [
                 {
@@ -299,7 +302,6 @@ class ListEventView(views.APIView):
                 for event in initiative.events.all()
             ]
         }
-
         s = ListEventSerializer(instance=inst)
         return Response(s.data, 200)
 

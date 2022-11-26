@@ -709,19 +709,6 @@ class AddFieldEventSerializer(serializers.ModelSerializer):
             "value",
         ]
 
-    def validate(self, attrs):
-        id = attrs.get("id")
-        e = SettingsAddFeldsEvent.get_by_id(id)
-        if not e:
-            raise serializers.ValidationError(
-                {
-                    "id": "not exist",
-                    "msg": "Таких доп полей нет у мероприятий",
-                }
-            )
-
-        return super().validate(attrs)
-
 
 class EventMetricsFieldsSerializer(serializers.ModelSerializer):
     metric = MetricProjectSerializer()
@@ -738,8 +725,8 @@ class EventMetricsFieldsSerializer(serializers.ModelSerializer):
 class EventSerializer(serializers.Serializer):
     event = MainEventSerializer()
     event_status = serializers.CharField(required=False)
-    addfields = AddFieldEventSerializer(many=True)
     metric_fields = EventMetricsFieldsSerializer(many=True)
+    addfields = AddFieldEventSerializer(many=True)
 
     def validate(self, attrs):
         print("EventSerializer", attrs)
@@ -764,6 +751,41 @@ class EventSerializer(serializers.Serializer):
                 }
             )
         return super().validate(metric_fields)
+
+    def validate_addfields(self, addfields):
+        initiative = self.context.get("initiative")
+        print("initiative", initiative)
+        project = initiative.project
+        print(
+            list(
+                x.id
+                for x in SettingsAddFeldsEvent.get_by_settings_project(
+                    project.settings_initiatives.first()
+                )
+            )
+        )
+        print(set(x["id"] for x in addfields))
+        correct_value = set(
+            str(x.id)
+            for x in SettingsAddFeldsEvent.get_by_settings_project(
+                project.settings_initiatives.first()
+            )
+        )
+        data_value = set(str(x["id"]) for x in addfields)
+
+        if correct_value != data_value:
+            raise serializers.ValidationError(
+                {
+                    "addfields": f"error addfields",
+                    "msg_er": "Не совпадает кол-во доп полей или название не те",
+                    "context": {
+                        "ждали": ",".join(list(correct_value)),
+                        "пришло": ",".join(list(data_value)),
+                    },
+                }
+            )
+
+        return super().validate(addfields)
 
     def create_or_update(self, data):
         initiative: Initiatives = self.context.get("initiative")

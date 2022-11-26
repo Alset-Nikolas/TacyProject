@@ -9,6 +9,7 @@ import ComponentsSettingsPage from '../../pages/components-settings-page/compone
 import CreateProjectPage from '../../pages/create-project-page/create-project-page';
 import EditInitiativePage from '../../pages/edit-initiative-page/edit-initiative-page';
 import EventsPage from '../../pages/evens-page/events-page';
+import EventInfoPage from '../../pages/event-info-page/event-info-page';
 import GraphicsSettingsPage from '../../pages/graphics-settings-page/graphics-settings-page';
 import InitiativesRegistryPage from '../../pages/initiatives-registry-page/initiatives-registry-page';
 import LoginPage from '../../pages/login-page/login-page';
@@ -80,6 +81,10 @@ const router = createBrowserRouter([
       {
         path: `${paths.events}/add`,
         element: <AddEventPage />,
+      },
+      {
+        path: `${paths.events}/info/:eventId`,
+        element: <EventInfoPage />,
       },
       {
         path: paths.personalStats,
