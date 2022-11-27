@@ -90,7 +90,6 @@ class InfoInitiativeView(views.APIView):
 class CreateRiskView(views.APIView):
     def post(self, request):
         initiative_id = request.data.get("risk", {}).get("initiative", None)
-
         s: RiskInfoSerializer = RiskInfoSerializer(
             data=request.data,
             context={

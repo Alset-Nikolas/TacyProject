@@ -585,7 +585,6 @@ class MainRiskSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         init = attrs.get("initiative")
-        print("init", init)
         if not init:
             raise serializers.ValidationError(
                 {"initiative": "initiative not exist"}
@@ -606,6 +605,16 @@ class MainRiskSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     {"initiative or risk": "У инициативы нет таких рисков"}
                 )
+            new_name = attrs.get("name")
+            risk_problem = (
+                Risks.objects.filter(initiative=init)
+                .filter(name=new_name)
+                .first()
+            )
+            if risk_problem and risk_problem.id != id:
+                raise serializers.ValidationError(
+                    {"name": "Навание риска - уникально в рамках инициативы"}
+                )
         return super().validate(attrs)
 
 
@@ -620,18 +629,23 @@ class RiskInfoSerializer(serializers.Serializer):
 
     def validate_addfields(self, addfields):
         initiative = self.context.get("initiative")
-        print("initiative", initiative)
         project = initiative.project
-        if set(
-            x.id
+        valid_addfields_ids = set(
+            str(x.id)
             for x in SettingsAddFeldsRisks.get_by_settings_project(
                 project.settings_initiatives.first()
             )
-        ) != set(x["id"] for x in addfields):
+        )
+        now_addfields_ids = set(str(x["id"]) for x in addfields)
+        if valid_addfields_ids != now_addfields_ids:
             raise serializers.ValidationError(
                 {
                     "addfields": f"error addfields",
                     "msg_er": "Не совпадает кол-во доп полей или название не те",
+                    "context": {
+                        "ждали": ",".join(valid_addfields_ids),
+                        "пришло": ",".join(now_addfields_ids),
+                    },
                 }
             )
 

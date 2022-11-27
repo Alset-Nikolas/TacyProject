@@ -657,7 +657,6 @@ class Risks(models.Model):
         max_length=200,
         verbose_name="Название риска",
         help_text="Введите название риска",
-        unique=True,
     )
 
     class Meta:
@@ -735,7 +734,10 @@ class RisksAddFields(models.Model):
         blank=True,
         null=True,
     )
-    value = models.CharField(max_length=500)
+    value = models.CharField(
+        max_length=500,
+        blank=True,
+    )
 
     class Meta:
         db_table = "risk_add_fields"

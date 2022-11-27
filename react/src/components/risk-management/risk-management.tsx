@@ -26,6 +26,10 @@ export default function RiskManagement({ edit, editButton, isSettings }: TRiskMa
   const { initiative } = useAppSelector((store) => store.initiatives);
   const risksList = useAppSelector((store) => store.risks.list);
 
+  const handleRiskEditClick = (riskIndex: number, riskId: number) => {
+    navigate(`/${paths.registry}/risk-info/${riskId}`);
+  };
+
   useEffect(() => {
     if (initiative?.initiative.id) dispatch(getRisksListThunk(initiative.initiative.id));
   }, [initiative?.initiative.id]);
@@ -143,7 +147,7 @@ export default function RiskManagement({ edit, editButton, isSettings }: TRiskMa
         <ul 
           className={`${styles.risksList}`}
         >
-          {risksList.map((risk) => {
+          {risksList.map((risk, riskIndex) => {
             return (
               <li
                 key={risk.risk.id}
@@ -154,11 +158,22 @@ export default function RiskManagement({ edit, editButton, isSettings }: TRiskMa
                   {risk.addfields.map((addfield) => {
                     return (
                       <li key={addfield.id}>
-                        {addfield.title.title}:{addfield.value}
+                        {addfield.title.title}:&nbsp;{addfield.value}
                       </li>
                     )
                   })}
                 </ol>
+                {!editButton && (
+                  <div
+                    className={`${styles.editButtonWrapper}`}
+                  >
+                    <Pictogram
+                      type="edit"
+                      cursor="pointer"
+                      onClick={() => handleRiskEditClick(riskIndex, risk.risk.id)}
+                    />
+                  </div>
+                )}
               </li>
             )
           })}

@@ -71,20 +71,22 @@ export const {
 export default stateSlice.reducer;
 
 export const getPersonalStatsThunk = (projectId: number) => (dispatch: AppDispatch, getState: () => RootState) => {
-  dispatch(getPersonalStatsRequest());
-  getRequest(
-    `components/initiative/user/statistics/?id=${projectId}`,
-    (res: AxiosResponse) => {
-      try {
-        console.log(res.data);
-      } catch (error) {
-        console.log(error);
+  try {
+    dispatch(getPersonalStatsRequest());
+    if (!projectId) {
+      throw new Error('Project doesnt exista')
+    }
+    getRequest(
+      `components/initiative/user/statistics/?id=${projectId}`,
+      (res: AxiosResponse) => {
+        dispatch(getPersonalStatsRequestSuccess(res.data));
+      },
+      () => {
         dispatch(getPersonalStatsRequestFailed());
       }
-      dispatch(getPersonalStatsRequestSuccess(res.data));
-    },
-    () => {
-      dispatch(getPersonalStatsRequestFailed());
-    }
-  );
+    );
+  } catch (error) {
+    dispatch(getPersonalStatsRequestFailed());
+  }
+  
 };

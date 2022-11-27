@@ -70,14 +70,14 @@ export default function InitiativesRegistryPage() {
               style={{ flex: '1 1' }}
             >
               <InitiativeManagement
-                editButton={(userRights?.user_is_author || user?.user.is_superuser) && !isInitiativeApproved ? true : false}
+                editButton={((userRights?.user_is_author && !isInitiativeApproved) || user?.user.is_superuser) ? true : false}
               />
             </div>
             <div
               style={{ flex: '1 1' }}
             >
               <RiskManagement
-                editButton={(userRights?.user_is_author || user?.user.is_superuser) && !isInitiativeApproved ? true : false}
+                editButton={((userRights?.user_is_author && !isInitiativeApproved) || user?.user.is_superuser) ? true : false}
               />
             </div>
           </section>

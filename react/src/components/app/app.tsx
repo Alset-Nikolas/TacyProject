@@ -7,6 +7,7 @@ import BasicSettingsPage from '../../pages/basic-settings-page/basic-settings-pa
 import ComponentsSettingsEditPage from '../../pages/components-settings-edit-page/components-settings-edit-page';
 import ComponentsSettingsPage from '../../pages/components-settings-page/components-settings-page';
 import CreateProjectPage from '../../pages/create-project-page/create-project-page';
+import EditRiskPage from '../../pages/edit-risk-page/edit-risk-page';
 import EditInitiativePage from '../../pages/edit-initiative-page/edit-initiative-page';
 import EventsPage from '../../pages/evens-page/events-page';
 import EventInfoPage from '../../pages/event-info-page/event-info-page';
@@ -73,6 +74,10 @@ const router = createBrowserRouter([
       {
         path: `${paths.registry}/edit`,
         element: <EditInitiativePage />,
+      },
+      {
+        path: `${paths.registry}/risk-info/:riskId`,
+        element: <EditRiskPage />,
       },
       {
         path: `${paths.events}`,
