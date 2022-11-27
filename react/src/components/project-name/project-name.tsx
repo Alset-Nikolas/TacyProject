@@ -147,10 +147,10 @@ export default function ProjectName({
       <div className={`${styles.projectName}`}>
         {project.name}
       </div>
-      <div>
+      <div className={`${styles.date}`}>
         <span className={`${styles.contentBoldText}`}>Дата начала:</span> {project.date_start}
       </div>
-      <div>
+      <div className={`${styles.date}`}>
         <span className={`${styles.contentBoldText}`}>Дата окончания:</span> {project.date_end}
       </div>
     </div>

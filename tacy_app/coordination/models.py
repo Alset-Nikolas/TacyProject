@@ -46,7 +46,7 @@ class CoordinationInitiativeHistory(models.Model):
         blank=True,
         null=True,
     )
-    text = models.CharField(max_length=300)
+    text = models.CharField(max_length=800)
 
     TYPE_VALUE = [
         (TYPE_SEND_APPROVAL, TYPE_SEND_APPROVAL),

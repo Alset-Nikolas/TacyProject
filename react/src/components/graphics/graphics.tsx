@@ -31,7 +31,7 @@ export default function Graphics() {
       >
         {/* <GanttD3 data={ganttData} /> */}
       {!graphics.length && (
-        <div>Ёмкости отвутствуют</div>
+        <div>Данные для аналитики отвутствуют</div>
       )}
       {!!graphics.length && (
       <div>

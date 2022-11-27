@@ -31,7 +31,7 @@ export default function PersonalGraphics() {
       >
         {/* <GanttD3 data={ganttData} /> */}
       {!personalGraphics.length && (
-        <div>Ёмкости отвутствуют</div>
+        <div>Данные для аналитики отвутствуют</div>
       )}
       {!!personalGraphics.length && (
       <div>

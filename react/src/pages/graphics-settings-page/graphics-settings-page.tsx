@@ -96,7 +96,7 @@ export default function GraphicsSettingsPage() {
         className={`${styles.settingsWrapper}`}
       >
         {!newSettingState.length && (
-          <div>Емкости отсутствуют</div>
+          <div>Аналитика отсутствует</div>
         )}
         {newSettingState.map((settingsItem, index) => {
           return (

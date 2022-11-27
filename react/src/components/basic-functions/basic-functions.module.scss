@@ -68,10 +68,16 @@
   padding: 10px 18.26px;
   background-color: #f4f4f4FF;
   box-sizing: border-box;
+  max-height: 120px;
 
   p {
     overflow-y: auto;
     max-height: 600px;
+    margin: 0;
+  }
+
+  &.description {
+    max-height: 312px;
   }
 }
 

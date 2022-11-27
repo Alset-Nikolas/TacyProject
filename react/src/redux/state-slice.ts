@@ -450,11 +450,17 @@ export const createProjectThunk = (body: TProject | TProjectForEdit) => (dispatc
       dispatch(setCurrentProjectId(res.data.id));
       dispatch(getProjectsListThunk());
     },
-    (error: AxiosError) => {
+    (error: AxiosError<any>) => {
       // console.log(error);
       dispatch(projectCreateRequestFailed(error.response?.data));
       // dispatch(openModal('Произошла ошибка во время создания проекта'));
-      dispatch(openErrorModal('Произошла ошибка во время создания проекта'));
+      if (error.response) {
+        const errorEntries = Object.entries(error.response.data);
+        const errorMessages = errorEntries.map((error) => error[1] as string);
+        dispatch(openErrorModal(errorMessages));
+      } else {
+        dispatch(openErrorModal('Произошла ошибка во время создания проекта'));
+      }
     },
   );
 };

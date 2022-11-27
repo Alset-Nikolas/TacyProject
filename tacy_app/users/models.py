@@ -57,34 +57,34 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(
         validators=[validators.validate_email],
         verbose_name="email",
-        max_length=60,
+        max_length=100,
         unique=True,
         blank=True,
         null=True,
         default=None,
     )
     first_name = models.CharField(
-        max_length=30,
+        max_length=100,
         blank=True,
         null=True,
     )
     last_name = models.CharField(
-        max_length=30,
+        max_length=100,
         blank=True,
         null=True,
     )
     second_name = models.CharField(
-        max_length=30,
+        max_length=100,
         blank=True,
         null=True,
     )
     phone = models.CharField(
-        max_length=30,
+        max_length=100,
         blank=True,
         null=True,
     )
     job_title = models.CharField(
-        max_length=30,
+        max_length=100,
         blank=True,
         null=True,
     )

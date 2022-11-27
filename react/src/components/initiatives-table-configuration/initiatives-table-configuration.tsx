@@ -63,7 +63,7 @@ export default function InitiativesTableConfiguration() {
           <div
             className={`${styles.colHeader}`}
           >
-            Ёмкости
+            Аналитика
           </div>
           <div
             className={`${styles.listWrapper}`}

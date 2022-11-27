@@ -32,7 +32,9 @@ export default function InitiativeCoordination() {
   })].filter((boss) => boss.id !== user?.user.id);
 
   const [ coordinatorName, setCoordinatorName ] = useState(bossesNamesList.length ? bossesNamesList[0].name : ''); 
-  const coordinationButtonIsDisabled = !(userRights?.user_rights_flag.is_coordinate && userRights?.user_now_apprwed || userRights?.user_is_author) || userRights.init_failure;
+  const coordinationButtonIsDisabled = !(userRights?.user_rights_flag.is_coordinate && userRights?.user_now_apprwed || userRights?.user_is_author) ||
+    userRights.init_failure ||
+    initiative?.initiative.status?.value === -1;
 
   const inputChangeHandler = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const { name, value } = e.target;

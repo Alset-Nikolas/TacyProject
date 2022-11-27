@@ -110,13 +110,15 @@ export default function EventsPage() {
                 Дата окончания
               </th>
               {userRights?.user_is_author && (
-                <th>
-                  Отметить как выполненное
-                </th>
+                <>
+                  <th>
+                    Отметить как выполненное
+                  </th>
+                  <th
+                    className={`${styles.deleteCell}`}
+                  />
+                </>
               )}
-              <th
-                className={`${styles.deleteCell}`}
-              />
             </tr>
           </thead>
           <tbody>
@@ -133,7 +135,7 @@ export default function EventsPage() {
                     </Link>
                   </td>
                   <td
-                    className={`${statusStyles.get(event.event_status)}`}
+                    className={`${statusStyles.get(event.event_status)} ${styles.statusCell}`}
                   >
                     {event.event_status}
                   </td>
@@ -144,23 +146,25 @@ export default function EventsPage() {
                     {event.event.date_end}
                   </td>
                   {userRights?.user_is_author && (
-                    <td>
-                      <input
-                        type="checkbox"
-                        checked={event.event.ready}
-                        onChange={() => checkboxChangeHandler(event)}
-                      />
-                    </td>
+                    <>
+                      <td>
+                        <input
+                          type="checkbox"
+                          checked={event.event.ready}
+                          onChange={() => checkboxChangeHandler(event)}
+                        />
+                      </td>
+                      <td
+                        className={`${styles.deleteCell}`}
+                      >
+                        <Pictogram
+                          type="delete"
+                          cursor="pointer"
+                          onClick={() => onRemoveClickHandler(index)}
+                        />
+                      </td>
+                    </>
                   )}
-                  <td
-                    className={`${styles.deleteCell}`}
-                  >
-                    <Pictogram
-                      type="delete"
-                      cursor="pointer"
-                      onClick={() => onRemoveClickHandler(index)}
-                    />
-                  </td>
                 </tr>
               );
             })}

@@ -99,7 +99,25 @@ export default function CreateProjectPage() {
         <Modal
           closeModal={() => dispatch(closeModal())}
         >
-            <div>{modal.message}</div>
+          <div
+            style={{ display: 'flex', flexDirection: 'column', margin: 20 }}
+          >
+            {modal.message instanceof Array ? (
+              <ul>
+                {modal.message.map((el) => <li key={el}>{el}</li>)}
+              </ul>
+            ) : (
+              <div>{modal.message}</div>
+            )}
+            <div
+              style={{ display: 'flex', justifyContent: 'center' }}
+            >
+              <CustomizedButton
+                value='Ок'
+                onClick={() => dispatch(closeModal())}
+              />
+            </div>
+          </div>
         </Modal>
       )}
     </div>

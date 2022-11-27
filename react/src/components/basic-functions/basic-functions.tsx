@@ -170,7 +170,7 @@ export default function BasicFunctions({
             )}
           </div>
         </div>
-        <div className={`${styles.textBlock}`}>
+        <div className={`${styles.textBlock} ${styles.description}`}>
           <span className={`${styles.textBlockDescription}`}>
             Описание:
           </span>

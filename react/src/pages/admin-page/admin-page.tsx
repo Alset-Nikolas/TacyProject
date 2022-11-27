@@ -15,6 +15,7 @@ import {
   setCurrentProjectId
 } from '../../redux/state-slice';
 import { SelectChangeEvent } from '@mui/material';
+import ProjectSelector from '../../components/project-selector/project-selector';
 
 export default function AdminPage() {
   const dispatch = useAppDispatch();
@@ -69,54 +70,15 @@ export default function AdminPage() {
     dispatch(getProjectsListThunk());
   }, [projectCreate.isGetRequestSuccess]);
 
-  // useEffect(() => {
-  //   const savedProjectId = localStorage.getItem('project-id');
-  //   if (project.currentId === null) {
-  //     if (savedProjectId && projectsList.find((item) => item.id === parseInt(savedProjectId))) {
-  //       dispatch(setCurrentProjectId(parseInt(savedProjectId)));
-  //     } else if (projectsList.length) {
-  //       dispatch(setCurrentProjectId(projectsList[0].id));
-  //     }
-  //   }
-  // }, [projectsList]); 
-
-  // useEffect(() => {
-  //   if (!project.currentId && projectsList.length) {
-  //     dispatch(setCurrentProjectId(projectsList[0].id));
-  //     console.log(`dispatched first prj here id:${project.currentId}`);
-  //   }
-  //   console.log(projectsList);
-  // }, [projectsList])
-
   const setValue = () => {
-    const value = projectsList.find((el) => el.id === project.currentId)?.name
-    // if (!value) {
-    //   console.log(`here id:${project.currentId}`);
-    //   console.log(projectsList);
-    // } else {
-    //   console.log(`ok id:${project.currentId}`);
-    //   console.log(projectsList);
-    // }
-    // return value ? value : projectsList.value[0].name;
+    const value = projectsList.find((el) => el.id === project.currentId)?.name;
     return value;
   };
   return (
     <div className={`${styles.wrapper}`}>
       <section className={`${styles.headerSection}`}>
         <div>
-          <span className={`${textStyles.sectionHeaderText}`}>Все проекты</span>
-          <div className={`${styles.selectorWrapper}`}>
-            <CustomizedSelect
-              value={setValue()}
-              items={projectsList.map((el) => el.name)}
-              onChange={onSelectorChange}
-            />
-            <CustomizedButton
-              value="Выбрать"
-              color="blue"
-              onClick={onSelectButtonClick}
-            />
-          </div>
+          <ProjectSelector />
         </div>
         <div>
           <CustomizedButton

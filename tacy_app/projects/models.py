@@ -13,7 +13,7 @@ def directory_path(instance, filename):
 class Project(models.Model):
 
     name = models.CharField(
-        max_length=150,
+        max_length=300,
         verbose_name="Название проекта",
         help_text="Введите название проекта",
     )
@@ -156,7 +156,7 @@ class IntermediateDateProject(models.Model):
         help_text="Проект к которому относятся промежуточные даты",
         verbose_name="Проект",
     )
-    title = models.CharField(max_length=30)
+    title = models.CharField(max_length=200)
     date = models.DateField(
         help_text="Введите промежуточную дату проекта",
         verbose_name="Промежуточная дата",
@@ -196,7 +196,7 @@ class MetricsProject(models.Model):
         verbose_name="Проект",
     )
     title = models.CharField(
-        max_length=30,
+        max_length=200,
         help_text="Введите название метрики",
         verbose_name="Метрика проекта",
     )
@@ -212,7 +212,7 @@ class MetricsProject(models.Model):
     units = models.CharField(
         help_text="Введите единицы измерения метрики",
         verbose_name="Единицы измерения метрики",
-        max_length=30,
+        max_length=200,
     )
     active = models.BooleanField()
     initiative_activate = models.BooleanField(default=True)
@@ -278,7 +278,7 @@ class PropertiesItemsProject(models.Model):
         verbose_name="Значение свойства",
     )
     value = models.CharField(
-        max_length=30,
+        max_length=200,
         help_text="Введите возможное значение свойства",
         verbose_name="Значение свойства",
     )
@@ -326,7 +326,7 @@ class PropertiesProject(models.Model):
         verbose_name="Проект",
     )
     title = models.CharField(
-        max_length=30,
+        max_length=200,
         verbose_name="Название свойства",
         help_text="Введите название свойства",
     )
@@ -478,7 +478,7 @@ class RolesUserInProject(models.Model):
         help_text="Проект к которому относятся роли",
         verbose_name="Проект",
     )
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=200)
     coverage = models.IntegerField(default=0)
 
     class Meta:
@@ -549,7 +549,7 @@ class RightsUSerInProject(models.Model):
         help_text="Проект к которому относятся права пользователей",
         verbose_name="Проект",
     )
-    name = models.CharField(max_length=30)
+    name = models.CharField(max_length=200)
     flags = models.ForeignKey(
         "RightsUserBool",
         on_delete=models.CASCADE,
@@ -625,7 +625,7 @@ class ProjectStages(models.Model):
         help_text="Проект",
         verbose_name="Проект",
     )
-    name_stage = models.CharField(max_length=50)
+    name_stage = models.CharField(max_length=200)
     date_start = models.DateField(
         help_text="Введите дату начала этапа",
         verbose_name="Дата начала этапа",

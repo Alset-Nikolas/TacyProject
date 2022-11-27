@@ -66,22 +66,22 @@ class Initiatives(models.Model):
         related_name="initiatives",
     )
     name = models.CharField(
-        max_length=30,
+        max_length=500,
         verbose_name="Название инициативы",
         help_text="Введите название инициативы",
     )
     current_state = models.CharField(
-        max_length=150,
+        max_length=500,
         verbose_name="Текущее состояние инициативы",
         help_text="Введите текущее состояние инициативы",
     )
     reasons = models.CharField(
-        max_length=150,
+        max_length=500,
         verbose_name="Предпосылки инициативы",
         help_text="Введите предпосылкт инициативы",
     )
     description = models.CharField(
-        max_length=150,
+        max_length=500,
         verbose_name="Описание инициативы",
         help_text="Введите описание инициативы",
     )
@@ -429,7 +429,7 @@ class Events(models.Model):
         related_name="creator_events",
     )
     name = models.CharField(
-        max_length=30,
+        max_length=500,
         verbose_name="Название мероприятия",
         help_text="Введите название мероприятия",
     )
@@ -555,7 +555,7 @@ class EventsAddFields(models.Model):
         blank=True,
         null=True,
     )
-    value = models.CharField(max_length=200, blank=True)
+    value = models.CharField(max_length=500, blank=True)
 
     class Meta:
         db_table = "event_add_fields"
@@ -595,7 +595,7 @@ class EventMetricsFields(models.Model):
         blank=True,
         null=True,
     )
-    value = models.FloatField(max_length=200)
+    value = models.FloatField(max_length=500)
 
     class Meta:
         db_table = "event_metrics_fields"
@@ -654,7 +654,7 @@ class Risks(models.Model):
     )
 
     name = models.CharField(
-        max_length=30,
+        max_length=200,
         verbose_name="Название риска",
         help_text="Введите название риска",
         unique=True,
@@ -735,7 +735,7 @@ class RisksAddFields(models.Model):
         blank=True,
         null=True,
     )
-    value = models.CharField(max_length=200)
+    value = models.CharField(max_length=500)
 
     class Meta:
         db_table = "risk_add_fields"
@@ -778,7 +778,7 @@ class SettingsStatusInitiative(models.Model):
     )
 
     name = models.CharField(
-        max_length=30,
+        max_length=200,
         verbose_name="Название статуса",
         help_text="Введите название статуса",
     )
@@ -964,7 +964,7 @@ class SettingsAddFeldsInitiative(models.Model):
     )
 
     title = models.CharField(
-        max_length=30,
+        max_length=200,
         verbose_name="Название дополнительного поля",
         help_text="Введите название инициативы",
     )
@@ -1015,13 +1015,13 @@ class SettingsAddFeldsEvent(models.Model):
     )
 
     title = models.CharField(
-        max_length=30,
+        max_length=200,
         verbose_name="Название дополнительного поля",
         help_text="Введите название инициативы",
     )
 
     type = models.CharField(
-        max_length=30,
+        max_length=200,
         choices=TYPE_VALUE,
         default=STRING,
     )
@@ -1070,13 +1070,13 @@ class SettingsAddFeldsRisks(models.Model):
     )
 
     title = models.CharField(
-        max_length=30,
+        max_length=200,
         verbose_name="Название дополнительного поля",
         help_text="Введите название инициативы",
     )
 
     type = models.CharField(
-        max_length=30,
+        max_length=200,
         choices=TYPE_VALUE,
         default=STRING,
     )

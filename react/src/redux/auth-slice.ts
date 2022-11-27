@@ -1,4 +1,4 @@
-import { AxiosResponse } from 'axios';
+import { AxiosError, AxiosResponse } from 'axios';
 import { AppDispatch } from './store';
 import { createSlice } from '@reduxjs/toolkit';
 import { authUser, confirmPassword, getRequest, resetPassword } from '../utils/requests';
@@ -8,6 +8,9 @@ type TState = {
   isAuth: boolean;
   user: TAuthUser | null;
   userRights: TUserRights | null;
+  error: {
+    message: string;
+  } | null;
 
   authRequest: boolean,
   authRequestSuccess: boolean,
@@ -34,6 +37,7 @@ const initialState: TState = {
   isAuth: false,
   user: null,
   userRights: null,
+  error: null,
 
   authRequest: false,
   authRequestSuccess: false,
@@ -98,6 +102,7 @@ export const stateSlice = createSlice({
     resetRequest: (state) => {
       return {
         ...state,
+        error: null,
         resetRequest: true,
         resetRequestSuccess: false,
         resetRequestFailed: false,
@@ -110,9 +115,12 @@ export const stateSlice = createSlice({
         resetRequestSuccess: true,
       }
     },
-    resetRequestFailed: (state) => {
+    resetRequestFailed: (state, action) => {
       return {
         ...state,
+        error: {
+          message: action.payload,
+        },
         resetRequest: false,
         resetRequestFailed: true,
       }
@@ -211,6 +219,9 @@ export const stateSlice = createSlice({
         getUserRightsRequestFailed: true,
       }
     },
+    clearError: (state) => {
+      state.error = null;
+    },
   },
 });
 
@@ -237,6 +248,7 @@ export const {
   getUserRightsRequestSuccess,
   getUserRightsRequestFailed,
   clearUser,
+  clearError,
 } = stateSlice.actions;
 
 export default stateSlice.reducer;
@@ -282,7 +294,7 @@ export const authThunk = (credentials: { email: string, password: string }) => (
       dispatch(authRequestSuccess());
       dispatch(getUserInfoThunk());
     },
-    () => {
+    (error: AxiosError) => {
       dispatch(authRequestFailed());
     }
   );
@@ -295,8 +307,9 @@ export const resetPasswordThunk = (credentials: { email: string }) => (dispatch:
     () => {
       dispatch(resetRequestSuccess());
     },
-    () => {
-      dispatch(resetRequestFailed());
+    (error: AxiosError<any>) => {
+      const message = error.response ? error.response.data.password : 'Неизвестная ошибка'
+      dispatch(resetRequestFailed(message));
     }
   );
 };

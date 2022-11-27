@@ -37,6 +37,7 @@ export default function CustomizedSelect({
   // console.log(value);
   const SelectStyle = style ? style : {
     minWidth: '223px',
+    maxWidth: 300,
     height: height ? height : '32px',
     border: '1px solid #504F4F',
     borderRadius: 0,

@@ -22,7 +22,7 @@ import styles from './reset-form.module.scss';
 
 export default function ResetPasswordForm() {
   const dispatch = useAppDispatch();
-  const { resetRequestSuccess } = useAppSelector((store) => store.auth);
+  const { resetRequestSuccess,resetRequestFailed, error } = useAppSelector((store) => store.auth);
   const [ formData, setFormData ] = useState({ email: '' });
 
   const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
@@ -70,6 +70,14 @@ export default function ResetPasswordForm() {
           <p className={`${styles.message}`}>
             Введите свой электронный адрес для изменения пароля
           </p>
+
+          {resetRequestFailed && (
+            <div
+              className={`${styles.error}`}
+            >
+              {error?.message}
+            </div>
+          )}
           
           <CustomizedButton
             className={`${styles.buttonWrapper}`}

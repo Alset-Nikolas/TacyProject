@@ -318,7 +318,7 @@ export const getPersonalGraphicsThunk = (projectId: number) => (dispatch: AppDis
       const graphicData = metricssEntries.map((el) => {
         const metricName = project.metrics.find((metric) => metric.id === +el[0])?.title;
         return {
-          metricName: metricName ? metricName : 'Сумма',
+          metricName: metricName ? metricName : 'Количество',
           data: el[1],
         };
       });
@@ -333,7 +333,7 @@ export const getPersonalGraphicsThunk = (projectId: number) => (dispatch: AppDis
     const graphicData = metricssEntries.map((el) => {
       const metricName = project.metrics.find((metric) => metric.id === +el[0])?.title;
       return {
-        metricName: metricName ? metricName : 'Сумма',
+        metricName: metricName ? metricName : 'Количество',
         data: el[1],
       };
     });

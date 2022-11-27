@@ -19,7 +19,7 @@ class NotificationsUser(models.Model):
         default=timezone.now,
     )
     text = models.CharField(
-        max_length=300,
+        max_length=800,
     )
 
     class Meta:

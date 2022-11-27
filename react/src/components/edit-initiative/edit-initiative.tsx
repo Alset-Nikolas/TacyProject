@@ -231,12 +231,12 @@ export default function EditInitiative() {
                 <div
                   className={`${styles.sectionHeader}`}
                 >
-                  Ёмкости
+                  Аналитика
                 </div>
                 <div
                   className={`${styles.section}`}
                 >
-                  {!newInitiativeState.properties_fields.length && 'Список ёмкостей пуст'}
+                  {!newInitiativeState.properties_fields.length && 'Данные для аналитики отсутствуют'}
                   {newInitiativeState.properties_fields.map((field, index) => (
                     <label
                       className={`${styles.label}`}

@@ -55,7 +55,18 @@ export const GanttD3YAxis = ({ data, itemsCount }: TGanttD3YAxisProps) => {
         fillOpacity={0.5}
       />
       <g>
-        {stagesList}
+        {stagesList.length ?
+          stagesList
+          :
+          <text
+            x={10}
+            y={marginTop + xAxisHeight}
+            fill={BLACK}
+            className={text}
+          >
+            Список пуст
+          </text>
+          }
       </g>
     </g>
   );
