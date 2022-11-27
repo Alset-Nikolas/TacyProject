@@ -135,6 +135,7 @@ class GraficsProject(models.Model):
         status_grafic = res["status_grafic"]
         new_format_res = copy.deepcopy(grafics)
         new_format_status_grafic = copy.deepcopy(status_grafic)
+        m_id_not_in_stat = set()
         if grafics:
             # если есть обьемы
 
@@ -147,7 +148,7 @@ class GraficsProject(models.Model):
                         .filter(metric_id=m_id)
                         .exists()
                     ):
-                        new_format_res[v_id].pop(m_id)
+                        m_id_not_in_stat.add(new_format_res[v_id].pop(m_id))
                     else:
                         new_format = []
                         for x_name, y_value in grafic_item.items():
@@ -157,10 +158,11 @@ class GraficsProject(models.Model):
                         new_format_res[v_id][m_id] = new_format
 
         for m_id, grafic_item in status_grafic.items():
-            new_format = []
-            for x_name, y_value in grafic_item.items():
-                new_format.append({"name": x_name, "value": y_value})
-            new_format_status_grafic[m_id] = new_format
+            if m_id not in m_id_not_in_stat:  # только активные графики
+                new_format = []
+                for x_name, y_value in grafic_item.items():
+                    new_format.append({"name": x_name, "value": y_value})
+                new_format_status_grafic[m_id] = new_format
         return {
             "grafics": new_format_res,
             "status_grafic": new_format_status_grafic,

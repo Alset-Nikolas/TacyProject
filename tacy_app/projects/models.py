@@ -13,7 +13,7 @@ def directory_path(instance, filename):
 class Project(models.Model):
 
     name = models.CharField(
-        max_length=30,
+        max_length=150,
         verbose_name="Название проекта",
         help_text="Введите название проекта",
     )

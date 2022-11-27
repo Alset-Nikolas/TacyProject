@@ -82,7 +82,7 @@ class CustomPasswordResetView:
         context = {
             "current_user": reset_password_token.user,
             "email": reset_password_token.user.email,
-            "reset_password_url": f"{settings.SITE_DOMAIN}:3000/reset-password/confirm/?token={reset_password_token.key}",
+            "reset_password_url": f"{settings.SITE_DOMAIN}/reset-password/confirm/?token={reset_password_token.key}",
         }
 
         email_html_message = render_to_string(
@@ -96,8 +96,7 @@ class CustomPasswordResetView:
             subject="Password Reset for {}".format(settings.SITE_FULL_NAME),
             body=email_plaintext_message,
             from_email=settings.EMAIL_HOST_USER,
-            to=["Alset.Nikolas@yandex.ru"],
-            # to=[reset_password_token.user.email],
+            to=[reset_password_token.user.email],
         )
 
         msg.attach_alternative(email_html_message, "text/html")
@@ -109,7 +108,6 @@ class CustomPasswordResetView:
             subject=f"Password Reset for {settings.SITE_FULL_NAME}",
             body="Поздравляем с успешным изменением пароля.",
             from_email=settings.EMAIL_HOST_USER,
-            to=["Alset.Nikolas@yandex.ru"],
-            # to=[reset_password_token.user.email],
+            to=[user.email],
         )
         msg.send()
