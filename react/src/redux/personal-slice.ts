@@ -74,7 +74,7 @@ export const getPersonalStatsThunk = (projectId: number) => (dispatch: AppDispat
   try {
     dispatch(getPersonalStatsRequest());
     if (!projectId) {
-      throw new Error('Project doesnt exista')
+      throw new Error('Project doesnt exist')
     }
     getRequest(
       `components/initiative/user/statistics/?id=${projectId}`,

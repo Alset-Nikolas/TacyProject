@@ -340,11 +340,14 @@ export const getPersonalGraphicsThunk = (projectId: number) => (dispatch: AppDis
     return graphicData;
   }
 
-  dispatch(getPersonalGraphicsRequest());
-  getRequest(
-    `grafics/statistic/metrics/user/?id=${projectId}`,
-    (res: AxiosResponse<{ grafics: Array<any>, status_grafic: Array<any> }>) => {
-      try {
+  try {
+    dispatch(getPersonalGraphicsRequest());
+    if (!projectId) {
+      throw new Error('Project doesn\'t exist')
+    }
+    getRequest(
+      `grafics/statistic/metrics/user/?id=${projectId}`,
+      (res: AxiosResponse<{ grafics: Array<any>, status_grafic: Array<any> }>) => {
         const data = {personalGraphics: [] as Array<any>, personalStatusGraphics: [] as Array<any>};
         const graphics = res.data.grafics;
         const statusGraphics = res.data.status_grafic;
@@ -352,39 +355,16 @@ export const getPersonalGraphicsThunk = (projectId: number) => (dispatch: AppDis
         data.personalGraphics = parseGraphicData(graphics);
         data.personalStatusGraphics = parseStatusGraphics(statusGraphics);
 
-        // const propertiesEntries = Object.entries(graphics);
-        if (project) {
-        //   propertiesEntries.forEach((el) => {
-        //     const propGraphic = {} as any;
-        //     const propertieName = project.properties.find((properie) => properie.id === +el[0])?.title;
-        //     propGraphic.propertieName = propertieName;
-        //     const metricssEntries = Object.entries(el[1]);
-        //     const graphicData = metricssEntries.map((el) => {
-        //       const metricName = project.metrics.find((metric) => metric.id === +el[0])?.title;
-        //       return {
-        //         metricName: metricName ? metricName : 'Сумма',
-        //         data: el[1],
-        //       };
-        //     })
-        //     propGraphic.graphicData = graphicData;
-        //     data.push(propGraphic);
-        //   });
-          dispatch(getPersonalGraphicsRequestSuccess(data));
-        } else {
-          throw new Error('Project doesn\'t exist');
-        }
-        
-
-      } catch (error) {
-        console.log(error);
+        dispatch(getPersonalGraphicsRequestSuccess(data));
+      },
+      () => {
         dispatch(getPersonalGraphicsRequestFailed());
       }
-      
-    },
-    () => {
-      dispatch(getPersonalGraphicsRequestFailed());
-    }
-  );
+    );
+  } catch (error) {
+    dispatch(getPersonalGraphicsRequestFailed());
+  }
+  
 };
 
 export const getGraphicsSettingsThunk = (projectId: number) => (dispatch: AppDispatch, getState: () => RootState) => {
