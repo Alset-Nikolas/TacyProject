@@ -42,7 +42,9 @@ export default function EditRisk() {
     const { name, value } = e.target; 
     setNewRiskState((prevState) => {
       const state = { ...prevState };
-      state.risk[name as 'name'] = value;
+      const tempRisk = { ...state.risk };
+      tempRisk[name as 'name'] = value;
+      state.risk = tempRisk;
       return state;
     })
   };

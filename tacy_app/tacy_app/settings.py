@@ -7,7 +7,7 @@ SECRET_KEY = (
 )
 ALLOWED_HOSTS = ["158.160.19.111", "127.0.0.1", "localhost"]
 
-DEBUG = True
+DEBUG = False
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
@@ -133,7 +133,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_HOST_USER = "Alset.Nikolas@gmail.com"
-EMAIL_HOST_PASSWORD = "ipkcrzmrdsujblfj"
+EMAIL_HOST_PASSWORD = ""
 
 EMAIL_USE_TLS = True
 
