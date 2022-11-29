@@ -22,15 +22,18 @@ export default function RootPage() {
   
   useEffect(() => {
     if (location.pathname.match('/')) {
-      if (auth.isAuth) {
-        navigate(`/${paths.status}`);
-      } else if (localStorage.getItem('token')) {
-        dispatch(setIsAuth());
-        dispatch(getUserInfoThunk());
-        dispatch(getProjectsListThunk());
-        navigate(`/${paths.status}`);
-      } else {
-        navigate(`/${paths.login}`);
+      if (!auth.isAuth) {
+        if (localStorage.getItem('token')) {
+          dispatch(setIsAuth());
+          dispatch(getUserInfoThunk());
+          dispatch(getProjectsListThunk());
+          if (localStorage.getItem('project-id')) {
+            const savedProjectId = localStorage.getItem('project-id');
+            if (savedProjectId) dispatch(getProjectInfoThunk(Number.parseInt(savedProjectId)));
+          }
+        } else {
+          navigate(`/${paths.login}`);
+        }
       }
     }
   }, []);

@@ -142,13 +142,14 @@ class GraficsProject(models.Model):
             for v_id, m_dict in grafics.items():
                 for m_id, grafic_item in m_dict.items():
                     if m_id != "enum" and (
-                        not cls.objects.filter(project=project)
+                        cls.objects.filter(project=project)
                         .filter(activate=False)
                         .filter(propertie_id=v_id)
                         .filter(metric_id=m_id)
                         .exists()
                     ):
-                        m_id_not_in_stat.add(new_format_res[v_id].pop(m_id))
+                        new_format_res[v_id].pop(m_id)
+                        m_id_not_in_stat.add(m_id)
                     else:
                         new_format = []
                         for x_name, y_value in grafic_item.items():
@@ -156,13 +157,14 @@ class GraficsProject(models.Model):
                                 {"name": x_name, "value": y_value}
                             )
                         new_format_res[v_id][m_id] = new_format
-
         for m_id, grafic_item in status_grafic.items():
             if m_id not in m_id_not_in_stat:  # только активные графики
                 new_format = []
                 for x_name, y_value in grafic_item.items():
                     new_format.append({"name": x_name, "value": y_value})
                 new_format_status_grafic[m_id] = new_format
+            else:
+                new_format_status_grafic.pop(m_id)
         return {
             "grafics": new_format_res,
             "status_grafic": new_format_status_grafic,

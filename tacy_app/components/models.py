@@ -160,7 +160,7 @@ class Initiatives(models.Model):
         events = self.events.all()
         if len(events) > 0:
             self.date_start = min(x.date_start for x in events)
-            self.date_end = min(x.date_end for x in events)
+            self.date_end = max(x.date_end for x in events)
             self.save()
 
     def update_metrics(self):

@@ -493,7 +493,7 @@ class UpdateCommunityProjectSerializer(serializers.ModelSerializer):
             user_info = user_obj["user"]
             user: User = User.get_user_by_email(user_info["email"])
             new_account = bool(not user)
-
+            print("user_info", user_info)
             if not new_account and (
                 project not in Project.get_user_projects(user)
             ):

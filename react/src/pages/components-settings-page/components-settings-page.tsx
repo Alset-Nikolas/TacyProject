@@ -48,8 +48,12 @@ export default function ComponentsSettingsPage() {
         </div>
       </div>
       <section className={`${styles.initativeSectionWrapper}`}>
-        <InitiativeManagement />
-        <EventManagement />
+        <div>
+          <InitiativeManagement />
+        </div>
+        <div>
+          <EventManagement />
+        </div>
       </section>
       <section className={`${styles.bottomSectionWrapper}`}>
         <RiskManagement

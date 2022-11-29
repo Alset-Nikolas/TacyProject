@@ -37,6 +37,8 @@ export const GanttD3YAxis = ({ data, itemsCount }: TGanttD3YAxisProps) => {
         y={y}
         fill={BLACK}
         className={text}
+        width={120}
+        style={{ textOverflow: 'ellipsis' }}
       >
         {stageTitle}
       </text>
@@ -44,7 +46,7 @@ export const GanttD3YAxis = ({ data, itemsCount }: TGanttD3YAxisProps) => {
   });
 
   return (
-    <g>
+    <g clipPath="url(#clip1)">
       <rect x={0} y={0} width={yAxisWidth} height={chartHeight-200 + 32 * (itemsCount || 0)} fill={GREY} />
       <rect
         x={0}
@@ -55,6 +57,7 @@ export const GanttD3YAxis = ({ data, itemsCount }: TGanttD3YAxisProps) => {
         fillOpacity={0.5}
       />
       <g>
+      <svg x="0" y="0" width={yAxisWidth} height={chartHeight-200 + 32 * (itemsCount || 0)}>
         {stagesList.length ?
           stagesList
           :
@@ -67,6 +70,7 @@ export const GanttD3YAxis = ({ data, itemsCount }: TGanttD3YAxisProps) => {
             Список пуст
           </text>
           }
+        </svg>
       </g>
     </g>
   );
