@@ -1,0 +1,117 @@
+.wrapper {
+  width: 608px;
+  display: flex;
+  flex-direction: column;
+  background: #FFFFFF;
+  box-shadow: 0px 2px 22px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  flex: 1 1;
+  height: fit-content;
+  
+  &.edit {
+    min-width: 345px;
+    width: fit-content;
+    box-shadow: none;
+    border-radius: 0;
+  }
+}
+
+.header {
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 30px;
+  color: #17598C;
+  margin: 0 0 24px 20px;
+
+  &.edit {
+    color: #504F4F;
+  }
+}
+
+.section {
+  // overflow-x: auto;
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 40px 20px;
+  position: relative;
+  background: #F4F4F4;
+
+  &.edit {
+    background: #FFF;
+    border-radius: 0px;
+  }
+
+  &.effect {
+    flex-direction: row;
+    align-items: center;
+    overflow-y: hidden;
+  }
+}
+
+.effectWrapper {
+  display: flex;
+  flex-direction: column;
+  align-self: flex-start;
+  gap: 8px;
+  input {
+    width: 48px;
+  }
+}
+
+.sum {
+  align-self: center;
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 30px;
+  text-align: center;
+  margin-left: 72px;
+}
+
+.metricsWrapper {
+  display: flex;
+  flex-flow: row wrap;
+  gap: 40px;
+}
+
+.singleMetricWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+}
+
+.title {
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 30px;
+}
+
+.value {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 101px;
+  height: 72px;
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 30px;
+  background: #FFFFFF;
+  border-radius: 10px;
+}
+
+.checkboxInput {
+  display: flex;
+  align-items: center;
+  height: 32px;
+
+  input {
+    height: 28px;
+    margin: 0;
+  }
+}

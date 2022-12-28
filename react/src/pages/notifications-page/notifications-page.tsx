@@ -9,6 +9,7 @@ import NotificationsRow from '../../components/notifications-row/notifications-r
 import { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import { getNotificationsThunk } from '../../redux/notifications-slice';
+import CustomizedButton from '../../components/button/button';
 
 export default function NotificationsPage() {
   const dispatch = useAppDispatch();
@@ -31,13 +32,29 @@ export default function NotificationsPage() {
       <SectionContent
         className={`${styles.content}`}
       >
-        {notifications && notifications.length ? (
-          notifications.map((notification) => <NotificationsRow notification={notification} key={notification.id} />)
+        {notifications && notifications.results.length ? (
+          notifications.results.map((notification) => <NotificationsRow notification={notification} key={notification.date} />)
         ) : (
           <div>
             Cписок уведомлений пуст
           </div>
         )}
+        <div
+          className={`${styles.buttonsWrapper}`}
+        >
+          {notifications?.previous && (
+            <CustomizedButton
+              value="Назад"
+              onClick={() => dispatch(getNotificationsThunk(notifications.previous))}
+            />
+          )}
+          {notifications?.next && (
+            <CustomizedButton
+              value="Далее"
+              onClick={() => dispatch(getNotificationsThunk(notifications.next))}
+            />
+          )}
+        </div>
       </SectionContent>
     </div>
   );

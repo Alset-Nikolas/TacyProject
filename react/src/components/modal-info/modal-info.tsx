@@ -1,4 +1,4 @@
-import { closeModal } from "../../redux/state-slice";
+import { closeModal } from "../../redux/state/state-slice";
 import { useAppDispatch } from "../../utils/hooks";
 import CustomizedButton from "../button/button";
 import Modal from "../modal/modal";
@@ -19,8 +19,20 @@ export default function ModalInfo({ message }: TModalInfoProps) {
       <div
         className={`${styles.modalWrapper}`}
       >
-        <div>
-          {message}
+        <div style={{ display: 'flex', flexDirection: 'column'  }}>
+          {message instanceof Array ? (
+            <>
+              {message.map((el, index) => (
+                <div key={`msg_${index}`}>
+                  {el}
+                </div>
+              ))}
+            </>
+          ) : (
+            <div>
+              {message}
+            </div>
+          )}
         </div>
         <div>
           <CustomizedButton

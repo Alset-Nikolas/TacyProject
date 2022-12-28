@@ -170,6 +170,9 @@ export const stateSlice = createSlice({
         getBossesListRequestFailed: true,
       }
     },
+    clearBossesList: (state) => {
+      state.bosses = [];
+    },
   },
 });
 
@@ -190,6 +193,7 @@ export const {
   getBossesListRequest,
   getBossesListRequestSuccess,
   getBossesListRequestFailed,
+  clearBossesList,
 } = stateSlice.actions;
 
 export default stateSlice.reducer;

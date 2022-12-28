@@ -4,7 +4,7 @@ import styles from './notifications.module.scss';
 
 type TNotificationsRowProps = {
   notification: {
-    id: number;
+    user: number;
     text: string;
     date: string;
   }

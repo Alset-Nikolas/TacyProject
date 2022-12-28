@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getInitiativeByIdThunk } from "../../redux/initiatives-slice";
+import { getInitiativeByIdThunk, setCurrentInitiativeId } from "../../redux/initiatives-slice";
 import { addComponentItem, handleComponentInputChange, removeComponentItem } from "../../utils";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import Pictogram from "../pictogram/pictogram";
@@ -10,8 +10,9 @@ import { paths } from "../../consts";
 
 // Styles
 import styles from './initiative-management.module.scss';
-import { setInitiativeEdit } from "../../redux/state-slice";
+import { setInitiativeEdit } from "../../redux/state/state-slice";
 import CustomizedButton from "../button/button";
+import { useGetInitiativeByIdQuery, useGetInitiativesListQuery } from "../../redux/initiatives/initiatives-api";
 
 type TInitiativeManagementProps = {
   edit?: boolean;
@@ -22,14 +23,33 @@ export default function InitiativeManagement({ edit, editButton }: TInitiativeMa
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const components = useAppSelector((store) => store.components.value);
-  const initiativesList = useAppSelector((store) => store.initiatives.list);
-  const currentInitiative = useAppSelector((store) => store.initiatives.initiative);
+  // const initiativesList = useAppSelector((store) => store.initiatives.list);
+  // const { currentInitiative } = useAppSelector((store) => store.initiatives);
   // const currentInitiativeId = useAppSelector((store) => store.initiatives.currentInitiativeId);
-  const project = useAppSelector((store) => store.state.project);
+  const { currentId } = useAppSelector((store) => store.state.project);
+
+  const {
+    data: initiativesList,
+    isFetching: isFetchingInitiativesList,
+  } = useGetInitiativesListQuery(currentId ? currentId : -1, {
+    skip: !currentId,
+  });
+  const {
+    currentInitiativeId
+  } = useAppSelector((store) => store.initiatives);
+  const {
+    data: currentInitiative,
+    isFetching: isFetchingInitiative,
+  } = useGetInitiativeByIdQuery(currentInitiativeId ? currentInitiativeId : -1, {
+    skip: !currentInitiativeId,
+  });
 
   useEffect(() => {
-    if (!currentInitiative && initiativesList.length) dispatch((getInitiativeByIdThunk(initiativesList[0].initiative.id)));
-  }, [currentInitiative, initiativesList]);
+    if (!currentInitiativeId && initiativesList?.length) {
+      dispatch((getInitiativeByIdThunk(initiativesList[0].initiative.id)));
+      dispatch(setCurrentInitiativeId(initiativesList[0].initiative.id));
+    }
+  }, [currentInitiativeId, initiativesList]);
 
   if (!components) return null;
 

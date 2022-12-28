@@ -6,7 +6,7 @@ import SectionHeader from "../section/section-header/section-header";
 import styles from './initiatives-table.module.scss';
 import sectionStyles from '../../styles/sections.module.scss';
 import { TInitiative } from "../../types";
-import { getInitiativeByIdThunk } from "../../redux/initiatives-slice";
+import { getInitiativeByIdThunk, setCurrentInitiativeId } from "../../redux/initiatives-slice";
 
 type TInitiativesTableProps = {
   initiativesList: Array<TInitiative>;
@@ -16,14 +16,16 @@ export default function InitiativesTable({ initiativesList }: TInitiativesTableP
   const dispatch = useAppDispatch();
   // const initiativesList = useAppSelector((store) => store.initiatives.list);
   const initiative = useAppSelector((store) => store.initiatives.initiative);
+  const { currentInitiativeId } = useAppSelector((store) => store.initiatives);
   const components = useAppSelector((store) => store.components.value);
   const project = useAppSelector((store) => store.state.project.value);
 
   // if (!components) return null;
 
   const onInitiativeClickHandler = (initiative: TInitiative) => {
+    dispatch(setCurrentInitiativeId(initiative.initiative.id));
     
-    dispatch(getInitiativeByIdThunk(initiative.initiative.id));
+    // dispatch(getInitiativeByIdThunk(initiative.initiative.id));
   }
 
   return (
@@ -40,7 +42,9 @@ export default function InitiativesTable({ initiativesList }: TInitiativesTableP
                 >
                   №
                 </th>
-                <th>
+                <th
+                  className={`${styles.initiativeName}`}
+                >
                   Название инициативы
                 </th>
                 <th>
@@ -57,7 +61,10 @@ export default function InitiativesTable({ initiativesList }: TInitiativesTableP
                 ))}
                 {components && components.table_registry.metrics.map((metric, index) => (
                   metric.initiative_activate ? (
-                    <th key={`${index}_${metric.id}`}>
+                    <th
+                      key={`${index}_${metric.id}`}
+                      className={`${styles.tableCol}`}
+                    >
                       {metric.title}
                     </th>
                   ) : (
@@ -73,7 +80,7 @@ export default function InitiativesTable({ initiativesList }: TInitiativesTableP
                 </div>
               )} */}
               {initiativesList.map((item, index) => {
-                const isActive = initiative?.initiative.id === item.initiative.id;
+                const isActive = currentInitiativeId === item.initiative.id;
                 return (
                   <tr
                     key={item.initiative.id}
@@ -85,7 +92,9 @@ export default function InitiativesTable({ initiativesList }: TInitiativesTableP
                     >
                       {item.initiative.id}
                     </td>
-                    <td>
+                    <td
+                      className={`${styles.initiativeName}`}
+                    >
                       {item.initiative.name}
                     </td>
                     <td>
@@ -94,7 +103,10 @@ export default function InitiativesTable({ initiativesList }: TInitiativesTableP
                     </td>
                     {item.properties_fields.map((propertie) => (
                       propertie.title.initiative_activate ? (
-                        <td key={`${index}_${propertie.id}`}>
+                        <td
+                          key={`${index}_${propertie.id}`}
+                          className={`${styles.tableCol}`}
+                        >
                           {propertie.value === null ? '' : propertie.value.value}
                         </td>
                       ) : (

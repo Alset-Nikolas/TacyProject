@@ -43,19 +43,39 @@ export const GanttD3XAxis = ({ data, itemsCount }: TGanttD3XAxisProps) => {
   ];
 
   const axisLines = arrayDateForLine.map(date => {
-    const y1 = date.getDate() === 1 ? 0 : marginTop;
-    const x = dateScale(date);
-    return (
-      <line
-        key={+date}
-        x1={x}
-        y1={y1}
-        x2={x}
-        y2={chartHeight}
-        strokeWidth={1}
-        stroke={BLACK}
-      />
-    );
+    if (date.getDate() === 1) {
+      const y1 = date.getDate() === 1 ? 0 : marginTop;
+      const x = dateScale(date);
+      return (
+        <line
+          key={+date}
+          x1={x}
+          y1={y1}
+          x2={x}
+          y2={(32 * (itemsCount || 0) + 75)}
+          strokeWidth={0.5}
+          stroke={BLACK}
+        />
+      );
+    }
+    return null;
+  });
+
+  const yearLabels = dateArray.map(date => {
+    if (months[date.getMonth()] === 'январь' && date.getDate() === 1) {
+      return (
+        <text
+          className="year"
+          key={+date}
+          x={dateScale(date)}
+          dx={7}
+          y={18}
+          fill={BLACK}
+          fontSize={16}
+        >{`${date.getFullYear()}`}</text>
+      );
+    }
+    return null;
   });
 
   const monthLabels = dateArray.map(date => {
@@ -66,7 +86,7 @@ export const GanttD3XAxis = ({ data, itemsCount }: TGanttD3XAxisProps) => {
           key={+date}
           x={dateScale(date)}
           dx={7}
-          y={32}
+          y={37}
           fill={BLACK}
           fontSize={16}
         >{`${months[date.getMonth()]}`}</text>
@@ -149,7 +169,8 @@ export const GanttD3XAxis = ({ data, itemsCount }: TGanttD3XAxisProps) => {
         fill={BLACK}
         fillOpacity={0.5}
       /> */}
-      {/* <g>{axisLines}</g> */}
+      <g>{axisLines}</g>
+      <g>{yearLabels}</g>
       <g className="months">{monthLabels}</g>
       {/* <g>{dayLabels}</g>s */}
       {!!data && (

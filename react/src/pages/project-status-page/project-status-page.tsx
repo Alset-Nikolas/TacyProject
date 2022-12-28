@@ -6,8 +6,9 @@ import ProjectName from '../../components/project-name/project-name';
 import ProjectSelector from '../../components/project-selector/project-selector';
 import ProjectTimeline from '../../components/project-timeline/project-timeline';
 import ProjectsEffect from '../../components/projects-effect/projects-effect';
+import TargetEffectStatus from '../../components/target-effect-status/target-effect-status';
 import TargetEffect from '../../components/target-effect/target-effect';
-import { getProjectInfoThunk } from '../../redux/state-slice';
+import { getProjectInfoThunk } from '../../redux/state/state-slice';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import styles from './project-status-page.module.scss';
 
@@ -36,8 +37,9 @@ export default function ProjectStatusPage() {
           <div
             className={`${styles.effectsWrapper}`}
           >
-            <TargetEffect />
+            {/* <TargetEffect /> */}
             <ProjectsEffect />
+            <TargetEffectStatus />
           </div>
           <Graphics />
           <ProjectTimeline />

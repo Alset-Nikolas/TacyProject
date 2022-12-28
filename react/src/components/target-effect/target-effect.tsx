@@ -9,6 +9,9 @@ import styles from './target-effect.module.scss';
 import inputStyles from '../../styles/inputs.module.scss';
 import { handlePropertieInutChange } from '../../utils';
 import { ChangeEvent } from 'react';
+import MetricView from '../ui/metric-view/metric-view';
+import { Tooltip } from '@mui/material';
+import { useGetProjectInfoQuery } from '../../redux/state/state-api';
 
 type TTargetEffectProps = {
   edit?: boolean;
@@ -17,7 +20,8 @@ type TTargetEffectProps = {
 export default function TargetEffect({ edit }: TTargetEffectProps) {
   const { textInput } = inputStyles;
   const dispatch = useAppDispatch();
-  const project = useAppSelector((store) => store.state.project.value);
+  const { currentId } = useAppSelector((store) => store.state.project);
+  const { data: project } = useGetProjectInfoQuery(currentId);
   const projectForEdit = useAppSelector((store) => store.state.projectForEdit);
 
   const title = 'Целевой эффект'
@@ -72,14 +76,21 @@ export default function TargetEffect({ edit }: TTargetEffectProps) {
               Метрики отсутствуют
             </div>
           )}
-          {metrics?.map((el, index) => (
+          {metrics?.map((el) => (
+            // <MetricView
+            //   key={el.id}
+            //   title={el.title}
+            //   value={el.target_value}
+            // />
             <div
               className={`${styles.singleMetricWrapper}`}
-              key={index}
+              key={el.id}
             >
-              <span className={`${styles.title}`}>
-                {el.title}
-              </span>
+              <Tooltip title={el.title}>
+                <span className={`${styles.title}`}>
+                  {el.title}
+                </span>
+              </Tooltip>
               <span className={`${styles.value}`}>
                 {el.target_value}
               </span>

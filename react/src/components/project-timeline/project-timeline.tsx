@@ -9,6 +9,7 @@ import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import { GanttD3 } from '../../d3/GanttD3/GanttD3';
 import { addPropertie, isStage } from '../../utils';
 import CustomizedButton from '../button/button';
+import { useGetProjectInfoQuery } from '../../redux/state/state-api';
 
 type TProjectTimelineProps = {
   edit?: boolean;
@@ -20,7 +21,8 @@ export default function ProjectTimeline({
   create,
 }: TProjectTimelineProps) {
   const dispatch = useAppDispatch();
-  const project = useAppSelector((store) => store.state.project.value);
+  const { currentId } = useAppSelector((store) => store.state.project);
+  const { data: project } = useGetProjectInfoQuery(currentId);
   const projectForEdit = useAppSelector((store) => store.state.projectForEdit);
   const timeline = project?.intermediate_dates;
   const stages = project?.stages;

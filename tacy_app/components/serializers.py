@@ -21,6 +21,7 @@ from .models import (
     SettingsStatusInitiative,
 )
 from projects.models import PropertiesProject, MetricsProject, Project
+from django.shortcuts import get_object_or_404
 
 User = get_user_model()
 
@@ -193,6 +194,7 @@ class MainInitiativeSerializer(serializers.ModelSerializer):
             "date_registration",
             "status",
         ]
+        read_only_fields = ["author"]
 
     def validate(self, attrs):
         id = attrs.get("id")
@@ -581,9 +583,11 @@ class MainRiskSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Risks
-        fields = ["id", "name", "initiative"]
+        fields = ["id", "name", "initiative", "author"]
+        read_only_fields = ["author"]
 
     def validate(self, attrs):
+        attrs["author"] = self.context.get("user")
         init = attrs.get("initiative")
         if not init:
             raise serializers.ValidationError(
@@ -833,3 +837,15 @@ class UserPersonStatisticSerializer(serializers.Serializer):
     user_initiatives = InitiativeSerializer(many=True)
     events = MainEventSerializer(many=True)
     metrics_user_stat = MetricItemUserStat(many=True)
+
+
+class DeleteRiskSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+
+    def validate_id(self, id):
+        user = self.context.get("user")
+        risc_obj = get_object_or_404(Risks, id=id)
+        if user.is_staff or risc_obj.author == user:
+            return id
+
+        serializers.ValidationError({"id": "not enough rights"})

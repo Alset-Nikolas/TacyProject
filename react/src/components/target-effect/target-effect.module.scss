@@ -1,5 +1,5 @@
 .wrapper {
-  width: 608px;
+  min-width: 570px;
   display: flex;
   flex-direction: column;
   background: #FFFFFF;
@@ -29,8 +29,8 @@
 }
 
 .section {
-  height: 100%;
-  overflow-x: auto;
+  // height: 100%;
+  // overflow-x: auto;
 }
 
 .content {
@@ -49,8 +49,9 @@
 
 .metricsWrapper {
   display: flex;
-  flex-direction: row;
+  flex-flow: row wrap;
   gap: 40px;
+  row-gap: 20px;
 }
 
 .singleMetricWrapper {
@@ -64,6 +65,11 @@
   font-weight: 600;
   font-size: 20px;
   line-height: 30px;
+  max-width: 120px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: default;
 }
 
 .value {

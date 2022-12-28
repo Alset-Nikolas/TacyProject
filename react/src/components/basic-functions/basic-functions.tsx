@@ -5,26 +5,29 @@ import styles from './basic-functions.module.scss';
 import textStyles from '../../styles/text.module.scss';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import { handleInputChange } from '../../utils';
+import { useGetProjectInfoQuery } from '../../redux/state/state-api';
 
 type TBasicFunctionsProps = {
   edit?: boolean;
   create?: boolean;
+  error?: any;
 }
 
 export default function BasicFunctions({
   edit,
   create,
+  error,
 }: TBasicFunctionsProps) {
   const dispatch = useAppDispatch();
   const { sectionHeaderText } = textStyles;
-  const project = useAppSelector((store) => store.state.project.value);
+  // const project = useAppSelector((store) => store.state.project.value);
+  const { currentId } = useAppSelector((store) => store.state.project);
+  const { data: project } = useGetProjectInfoQuery(currentId);
   const projectForEdit = useAppSelector((store) => store.state.projectForEdit);
 
   const onChangeHandler = (e: ChangeEvent<HTMLTextAreaElement>) => {
     if (projectForEdit) handleInputChange(e, projectForEdit, dispatch);
   };
-
-  if (!project) return null;
 
   if (create) {
     if (!projectForEdit) return null;
@@ -43,7 +46,7 @@ export default function BasicFunctions({
                 Цели:
               </label>
               <textarea
-                className={`${styles.purpose}`}
+                className={`${styles.purpose} ${error?.purpose ? styles.error : ''}`}
                 name="purpose"
                 value={projectForEdit.purpose}
                 onChange={onChangeHandler}
@@ -57,7 +60,7 @@ export default function BasicFunctions({
                 Задачи:
               </label>
               <textarea
-                className={`${styles.tasks}`}
+                className={`${styles.tasks} ${error?.tasks ? styles.error : ''}`}
                 name="tasks"
                 value={projectForEdit.tasks}
                 onChange={onChangeHandler}
@@ -72,7 +75,7 @@ export default function BasicFunctions({
               Описание:
             </label>
             <textarea
-              className={`${styles.descrition}`}
+              className={`${styles.descrition} ${error?.descrition ? styles.error : ''}`}
               name="description"
               value={projectForEdit.description}
               onChange={onChangeHandler}
@@ -141,6 +144,8 @@ export default function BasicFunctions({
       </div>
     );
   }
+
+  if (!project) return null;
 
   return (
     <div className={`${styles.wrapper}`}>

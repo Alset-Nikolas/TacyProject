@@ -6,8 +6,9 @@ import SectionHeader from '../section/section-header/section-header';
 // Styles
 import styles from './projects-effect.module.scss';
 import inputStyles from '../../styles/inputs.module.scss'
-import { updateProjectForEdit } from '../../redux/state-slice';
+import { updateProjectForEdit } from '../../redux/state/state-slice';
 import ProjectsEffectComponent from '../projects-effect-component/projects-effect-component';
+import { useGetProjectInfoQuery } from '../../redux/state/state-api';
 
 type TProjectsEffectProps = {
   edit?: boolean;
@@ -16,7 +17,8 @@ type TProjectsEffectProps = {
 export default function ProjectsEffect({ edit }: TProjectsEffectProps) {
   const dispatch = useAppDispatch()
   const { textInput } = inputStyles;
-  const project = useAppSelector((store) => store.state.project.value);
+  const { currentId } = useAppSelector((store) => store.state.project);
+  const { data: project } = useGetProjectInfoQuery(currentId);
   const projectForEdit = useAppSelector((store) => store.state.projectForEdit);
   const title = 'Эффект проекта';
 

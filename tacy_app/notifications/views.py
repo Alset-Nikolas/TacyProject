@@ -1,19 +1,21 @@
 from rest_framework import views
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
+from rest_framework import viewsets
+from .serializers import (
+    NotificationUserItemSerializer,
+)
+from rest_framework.pagination import PageNumberPagination
 
-from .serializers import NotificationsUserSerializer, NotificationUserItemSerializer
+from .models import NotificationsUser
 
 
-class UserNotificationsView(views.APIView):
-    def get(self, request, form=None):
-        user = request.user
-        serializer = NotificationsUserSerializer(user)
-        return Response(serializer.data, 200)
+class UserNotificationsView(viewsets.ReadOnlyModelViewSet):
+    serializer_class = NotificationUserItemSerializer
+    pagination_class = PageNumberPagination
 
-    def post(self, request, format=None):
-        data = request.data
-        data["user"] = request.user.pk
-        serializer = NotificationUserItemSerializer(data=data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response({"status": 200}, 200)
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_anonymous:
+            return []
+        return NotificationsUser.objects.filter(user=user).all()

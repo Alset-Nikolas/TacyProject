@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { paths } from "../../consts";
 import { getRisksListThunk } from "../../redux/risks-slice";
-import { setInitiativeEdit } from "../../redux/state-slice";
+import { setInitiativeEdit } from "../../redux/state/state-slice";
 import { addComponentItem, handleComponentInputChange, removeComponentItem } from "../../utils";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import CustomizedButton from "../button/button";
@@ -147,6 +147,11 @@ export default function RiskManagement({ edit, editButton, isSettings }: TRiskMa
         <ul 
           className={`${styles.risksList}`}
         >
+          {!risksList.length && (
+            <div>
+               Список рисков пуст
+            </div>
+          )}
           {risksList.map((risk, riskIndex) => {
             return (
               <li

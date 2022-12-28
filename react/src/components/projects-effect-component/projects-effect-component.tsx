@@ -5,9 +5,8 @@ import SectionHeader from '../section/section-header/section-header';
 
 // Styles
 import styles from './projects-effect.module.scss';
-import inputStyles from '../../styles/inputs.module.scss'
-import { updateProjectForEdit } from '../../redux/state-slice';
 import { TMetrica } from '../../types';
+import MetricView from '../ui/metric-view/metric-view';
 
 type TProjectsEffectComponentProps = {
   title?: string;
@@ -30,19 +29,12 @@ export default function ProjectsEffectComponent({ title, metrics }: TProjectsEff
               Метрики отсутствуют
             </div>
           )}
-          {metrics?.map((el, index) => (
-            <div
-              className={`${styles.singleMetricWrapper}`}
-              key={index}
-            >
-              <div className={`${styles.value}`}>
-                {el.value}
-              </div>
-              <span className={`${styles.title}`}>
-                {el.title}
-              </span>
-              
-            </div>
+          {metrics.map((el) => (
+            <MetricView
+              title={el.title}
+              value={el.value}
+              key={`${el.title}_${el.id}`}
+            />
           ))}
         </div>
       </SectionContent>

@@ -9,7 +9,6 @@ from .serializers import (
     ListInitiativeSerializer,
     SettingsInitiativeSerializer,
     InfoSettingsInitiativeSerializer,
-    # CreateInitiativeSerializer,
     InitiativeSerializer,
     InitiativesAddFields,
     RiskInfoSerializer,
@@ -17,6 +16,7 @@ from .serializers import (
     EventSerializer,
     ListEventSerializer,
     UserPersonStatisticSerializer,
+    DeleteRiskSerializer,
 )
 from projects.serializers import UserProjectIdSerializer
 from .models import (
@@ -28,6 +28,8 @@ from .models import (
     EventMetricsFields,
 )
 from rest_framework.response import Response
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 
 def get_project_by_id_or_active(request) -> tp.Optional[Project]:
@@ -50,72 +52,162 @@ def get_project_by_id_or_active(request) -> tp.Optional[Project]:
     return project
 
 
-# ++++++++++++++++++++++ИНИЦИАТИВА+++++++++++++++++++++++++++
-class CreateInitiativeView(views.APIView):
-    def post(self, request):
-        project_id = request.data.get("initiative", {}).get("project", None)
-        project = Project.get_project_by_id(project_id)
-        data = request.data
-        data["initiative"] = request.data.get("initiative", {})
-        data["initiative"]["author"] = request.user.id
-        s = InitiativeSerializer(
-            data=request.data,
-            context={"user": request.user, "project": project},
-        )
-        s.is_valid(raise_exception=True)
-        s.create_or_update(request.data)
-        return Response(request.data, 200)
-
-
-class InfoInitiativeView(views.APIView):
-    def get(self, request):
-        if not request.GET.get("id", None):
-            return Response("get id initiative", 404)
-        init: Initiatives = get_object_or_404(
-            Initiatives, id=request.GET.get("id")
-        )
-        init.check_updates()
-        s = InitiativeSerializer(
-            instance={
-                "initiative": init,
-                "addfields": init.addfields.all(),
-                "properties_fields": init.properties_fields.all(),
-                "metric_fields": init.metric_fields.all(),
-            }
-        )
-        return Response(s.data, 200)
-
-
-# ++++++++++++++++++++++РИСКИ+++++++++++++++++++++++++++
-class CreateRiskView(views.APIView):
-    def post(self, request):
-        initiative_id = request.data.get("risk", {}).get("initiative", None)
-        s: RiskInfoSerializer = RiskInfoSerializer(
-            data=request.data,
-            context={
-                "initiative": get_object_or_404(Initiatives, id=initiative_id)
-            },
-        )
-        s.is_valid(raise_exception=True)
-        s.create_or_update(s.data)
-        return Response(s.data, 200)
-
-
-class InfoRiskView(views.APIView):
-    def get(self, request):
-        id_initiative = request.GET.get("id", None)
-        risc_obj = get_object_or_404(Risks, id=id_initiative)
-        risc_obj.check_updates()
-        s = RiskInfoSerializer(
-            instance={
-                "risk": risc_obj,
-                "addfields": risc_obj.addfields.all(),
-            }
-        )
-        return Response(s.data, 200)
+# ++++++++++++++++++++++НАСТРОЙКИ+++++++++++++++++++++++++++
 
 
 class UpdateSettingsInitiativeView(views.APIView):
+    response_schema_dict = {
+        "200": openapi.Response(
+            description="Настройки компонентов.",
+            examples={
+                "application/json": {
+                    "settings": {
+                        "id": 2,
+                        "initiative_status": [
+                            {
+                                "id": 3,
+                                "value": -1,
+                                "name": "Согласовано",
+                                "settings_project": 2,
+                            },
+                            {
+                                "id": 4,
+                                "value": -2,
+                                "name": "Отозвано",
+                                "settings_project": 2,
+                            },
+                            {
+                                "id": 5,
+                                "value": 0,
+                                "name": "L0",
+                                "settings_project": 2,
+                            },
+                            {
+                                "id": 6,
+                                "value": 1,
+                                "name": "L1",
+                                "settings_project": 2,
+                            },
+                            {
+                                "id": 7,
+                                "value": 2,
+                                "name": "L2",
+                                "settings_project": 2,
+                            },
+                            {
+                                "id": 8,
+                                "value": 3,
+                                "name": "L3",
+                                "settings_project": 2,
+                            },
+                            {
+                                "id": 9,
+                                "value": 4,
+                                "name": "L4",
+                                "settings_project": 2,
+                            },
+                            {
+                                "id": 10,
+                                "value": 5,
+                                "name": "L5",
+                                "settings_project": 2,
+                            },
+                        ],
+                        "initiative_addfields": [
+                            {
+                                "id": 1,
+                                "title": "Качественный эффект",
+                                "type": "str",
+                                "settings_project": 2,
+                            }
+                        ],
+                        "event_addfields": [],
+                        "risks_addfields": [
+                            {
+                                "id": 1,
+                                "title": "Описание риска",
+                                "type": "str",
+                                "settings_project": 2,
+                            },
+                            {
+                                "id": 2,
+                                "title": "Митигация риска",
+                                "type": "str",
+                                "settings_project": 2,
+                            },
+                        ],
+                    },
+                    "table_registry": {
+                        "properties": [
+                            {
+                                "id": 1,
+                                "title": "Подразделения",
+                                "initiative_activate": True,
+                                "items": [
+                                    {"id": 1, "value": "КХП", "propertie": 1},
+                                    {"id": 2, "value": "ОГЦ", "propertie": 1},
+                                ],
+                            },
+                            {
+                                "id": 2,
+                                "title": "Программы",
+                                "initiative_activate": True,
+                                "items": [
+                                    {"id": 3, "value": "ДАТП", "propertie": 2},
+                                    {"id": 4, "value": "ДРК", "propertie": 2},
+                                    {
+                                        "id": 5,
+                                        "value": "Развитие",
+                                        "propertie": 2,
+                                    },
+                                    {
+                                        "id": 6,
+                                        "value": "Умное производство",
+                                        "propertie": 2,
+                                    },
+                                    {"id": 7, "value": "УПП", "propertie": 2},
+                                ],
+                            },
+                        ],
+                        "metrics": [
+                            {
+                                "id": 2,
+                                "title": "млн.руб.",
+                                "initiative_activate": True,
+                                "units": "бм",
+                            },
+                            {
+                                "id": 3,
+                                "title": "ШЕ",
+                                "initiative_activate": True,
+                                "units": "бм",
+                            },
+                        ],
+                    },
+                }
+            },
+        ),
+        "400": openapi.Response(
+            description="Передан id несуществующего проекта",
+            examples={
+                "application/json": {"id": ["project pk = 100 not exist"]}
+            },
+        ),
+        "401": openapi.Response(
+            description="Токен идентификации не был передан",
+            examples={
+                "application/json": {
+                    "detail": "Учетные данные не были предоставлены."
+                }
+            },
+        ),
+    }
+
+    @swagger_auto_schema(
+        operation_description="Команда проекта",
+        responses=response_schema_dict,
+        request_body=SettingsInitiativeSerializer,
+    )
     def post(self, request):
         serializer = SettingsInitiativeSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -124,6 +216,18 @@ class UpdateSettingsInitiativeView(views.APIView):
             {"msg": "settings initiative update", "code": 200}, 200
         )
 
+    @swagger_auto_schema(
+        operation_description="Команда проекта",
+        responses=response_schema_dict,
+        manual_parameters=[
+            openapi.Parameter(
+                name="id",
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description="ID проекта",
+            )
+        ],
+    )
     def get(self, request):
         project: Project = get_project_by_id_or_active(request)
         settings_initiatives = project.settings_initiatives.first()
@@ -141,11 +245,336 @@ class UpdateSettingsInitiativeView(views.APIView):
         )
 
 
+# ++++++++++++++++++++++ИНИЦИАТИВЫ+++++++++++++++++++++++++++
+class CreateInitiativeView(views.APIView):
+    response_schema_dict = {
+        "400": openapi.Response(
+            description="Передан id несуществующей проекта",
+            examples={
+                "application/json": {"initiative": {"project": "not exist"}}
+            },
+        ),
+        "401": openapi.Response(
+            description="Токен идентификации не был передан",
+            examples={
+                "application/json": {
+                    "detail": "Учетные данные не были предоставлены."
+                }
+            },
+        ),
+    }
+
+    @swagger_auto_schema(
+        operation_description="Создать инициативу",
+        responses=response_schema_dict,
+        request_body=InitiativeSerializer,
+    )
+    def post(self, request):
+        project_id = request.data.get("initiative", {}).get("project", None)
+        project = Project.get_project_by_id(project_id)
+        if not project:
+            return Response({"initiative": {"project": "not exist"}}, 400)
+        data = request.data
+        data["initiative"] = request.data.get("initiative", {})
+        data["initiative"]["author"] = request.user.id
+        s = InitiativeSerializer(
+            data=request.data,
+            context={"user": request.user, "project": project},
+        )
+        s.is_valid(raise_exception=True)
+        s.create_or_update(request.data)
+        return Response(request.data, 200)
+
+
+class InfoInitiativeView(views.APIView):
+    response_schema_dict = {
+        "200": openapi.Response(
+            description="Список инициатив проекта",
+            examples={
+                "application/json": {
+                    "initiative": {
+                        "id": 1,
+                        "project": 2,
+                        "author": 1,
+                        "name": "Восстановление дробильно-фрезерной машины и вагоноопракидывателя №2",
+                        "current_state": "Низкая производительность машины и вагоноопракидывателя из-за износа",
+                        "reasons": "Доведение аппаратов до проектного состояния позволит достичь проектных мощностей",
+                        "description": "Восстановление существующих систем видеоконтроля за качеством очищенных вагонов в зданиях вагоноопрокидывателей № 1, 2, 3",
+                        "date_start": "2023-01-15",
+                        "date_end": "2023-08-01",
+                        "date_registration": "2022-11-29",
+                        "status": {
+                            "id": 5,
+                            "value": 0,
+                            "name": "L0",
+                            "settings_project": 2,
+                        },
+                    },
+                    "properties_fields": [
+                        {
+                            "id": 1,
+                            "title": {
+                                "id": 1,
+                                "title": "Подразделения",
+                                "initiative_activate": True,
+                            },
+                            "value": {"id": 1, "value": "КХП", "propertie": 1},
+                        },
+                        {
+                            "id": 2,
+                            "title": {
+                                "id": 2,
+                                "title": "Программы",
+                                "initiative_activate": True,
+                            },
+                            "value": {"id": 4, "value": "ДРК", "propertie": 2},
+                        },
+                    ],
+                    "metric_fields": [
+                        {
+                            "metric": {
+                                "id": 2,
+                                "title": "млн.руб.",
+                                "units": "бм",
+                                "initiative_activate": True,
+                            },
+                            "value": 440,
+                        },
+                        {
+                            "metric": {
+                                "id": 3,
+                                "title": "ШЕ",
+                                "units": "бм",
+                                "initiative_activate": True,
+                            },
+                            "value": 0,
+                        },
+                    ],
+                    "addfields": [
+                        {
+                            "id": 1,
+                            "value": "Снижение ручного труда",
+                            "title": {
+                                "id": 1,
+                                "title": "Качественный эффект",
+                                "type": "str",
+                            },
+                        }
+                    ],
+                }
+            },
+        ),
+        "400": openapi.Response(
+            description="Передан id несуществующей проекта",
+            examples={"application/json": {"msg": "id init not valid"}},
+        ),
+        "401": openapi.Response(
+            description="Токен идентификации не был передан",
+            examples={
+                "application/json": {
+                    "detail": "Учетные данные не были предоставлены."
+                }
+            },
+        ),
+    }
+
+    @swagger_auto_schema(
+        operation_description="Информация инициативы",
+        responses=response_schema_dict,
+        manual_parameters=[
+            openapi.Parameter(
+                name="id",
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description="ID инициативы",
+            )
+        ],
+    )
+    def get(self, request):
+        id_init = request.GET.get("id", None)
+        print(id_init, isinstance(id_init, int))
+        if not id_init or not id_init.isdigit():
+            return Response({"msg": "id init not valid"}, 400)
+        init: Initiatives = get_object_or_404(
+            Initiatives, id=request.GET.get("id")
+        )
+        init.check_updates()
+        s = InitiativeSerializer(
+            instance={
+                "initiative": init,
+                "addfields": init.addfields.all(),
+                "properties_fields": init.properties_fields.all(),
+                "metric_fields": init.metric_fields.all(),
+            }
+        )
+        return Response(s.data, 200)
+
+
+class DeleteInitiativeView(views.APIView):
+    response_schema_dict = {
+        "200    ": openapi.Response(
+            description="Передан id несуществующей проекта",
+            examples={"application/json": {"msg": "Инициатива удалена"}},
+        ),
+        "400": openapi.Response(
+            description="Передан id несуществующей проекта",
+            examples={"application/json": {"msg": "id init not valid"}},
+        ),
+        "401": openapi.Response(
+            description="Токен идентификации не был передан",
+            examples={
+                "application/json": {
+                    "detail": "Учетные данные не были предоставлены."
+                }
+            },
+        ),
+    }
+
+    @swagger_auto_schema(
+        operation_description="Удаление инициативы",
+        responses=response_schema_dict,
+        manual_parameters=[
+            openapi.Parameter(
+                name="id",
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description="ID инициативы",
+            )
+        ],
+    )
+    def delete(self, request):
+        id_init = request.GET.get("id", None)
+        if not id_init or not id_init.isdigit():
+            return Response({"msg": "id init not valid"}, 400)
+        init: Initiatives = get_object_or_404(
+            Initiatives, id=request.GET.get("id")
+        )
+        init.delete_node()
+        return Response({"msg": "Инициатива удалена"}, 200)
+
+
 class ListInitiativesView(views.APIView):
     """
     Выдать список инициатив проекта
     """
 
+    response_schema_dict = {
+        "200": openapi.Response(
+            description="Список инициатив проекта",
+            examples={
+                "application/json": {
+                    "project_initiatives": [
+                        {
+                            "initiative": {
+                                "id": 1,
+                                "project": 2,
+                                "author": 1,
+                                "name": "Восстановление дробильно-фрезерной машины и вагоноопракидывателя №2",
+                                "current_state": "Низкая производительность машины и вагоноопракидывателя из-за износа",
+                                "reasons": "Доведение аппаратов до проектного состояния позволит достичь проектных мощностей",
+                                "description": "Восстановление существующих систем видеоконтроля за качеством очищенных вагонов в зданиях вагоноопрокидывателей № 1, 2, 3",
+                                "date_start": "2023-01-15",
+                                "date_end": "2023-08-01",
+                                "date_registration": "2022-11-29",
+                                "status": {
+                                    "id": 5,
+                                    "value": 0,
+                                    "name": "L0",
+                                    "settings_project": 2,
+                                },
+                            },
+                            "properties_fields": [
+                                {
+                                    "id": 1,
+                                    "title": {
+                                        "id": 1,
+                                        "title": "Подразделения",
+                                        "initiative_activate": True,
+                                    },
+                                    "value": {
+                                        "id": 1,
+                                        "value": "КХП",
+                                        "propertie": 1,
+                                    },
+                                },
+                                {
+                                    "id": 2,
+                                    "title": {
+                                        "id": 2,
+                                        "title": "Программы",
+                                        "initiative_activate": True,
+                                    },
+                                    "value": {
+                                        "id": 4,
+                                        "value": "ДРК",
+                                        "propertie": 2,
+                                    },
+                                },
+                            ],
+                            "metric_fields": [
+                                {
+                                    "metric": {
+                                        "id": 2,
+                                        "title": "млн.руб.",
+                                        "units": "бм",
+                                        "initiative_activate": True,
+                                    },
+                                    "value": 440,
+                                },
+                                {
+                                    "metric": {
+                                        "id": 3,
+                                        "title": "ШЕ",
+                                        "units": "бм",
+                                        "initiative_activate": True,
+                                    },
+                                    "value": 0,
+                                },
+                            ],
+                            "addfields": [
+                                {
+                                    "id": 1,
+                                    "value": "Снижение ручного труда",
+                                    "title": {
+                                        "id": 1,
+                                        "title": "Качественный эффект",
+                                        "type": "str",
+                                    },
+                                }
+                            ],
+                        }
+                    ]
+                }
+            },
+        ),
+        "400": openapi.Response(
+            description="Передан id несуществующей проекта",
+            examples={
+                "application/json": {"id": ["project pk = 1 not exist"]}
+            },
+        ),
+        "401": openapi.Response(
+            description="Токен идентификации не был передан",
+            examples={
+                "application/json": {
+                    "detail": "Учетные данные не были предоставлены."
+                }
+            },
+        ),
+    }
+
+    @swagger_auto_schema(
+        operation_description="Список инициатив в проекте",
+        responses=response_schema_dict,
+        manual_parameters=[
+            openapi.Parameter(
+                name="id",
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description="ID проекта",
+            )
+        ],
+    )
     def get(self, request):
         project = get_project_by_id_or_active(request)
         list_inits = project.initiatives.all()
@@ -200,6 +629,153 @@ class UserStatisticsInitiativesView(views.APIView):
             "events": events,
         }
 
+    response_schema_dict = {
+        "200": openapi.Response(
+            description="Статистика пользователя в проекте",
+            examples={
+                "application/json": {
+                    "user_initiatives": [
+                        {
+                            "initiative": {
+                                "id": 1,
+                                "project": 2,
+                                "author": 1,
+                                "name": "Восстановление дробильно-фрезерной машины и вагоноопракидывателя №2",
+                                "current_state": "Низкая производительность машины и вагоноопракидывателя из-за износа",
+                                "reasons": "Доведение аппаратов до проектного состояния позволит достичь проектных мощностей",
+                                "description": "Восстановление существующих систем видеоконтроля за качеством очищенных вагонов в зданиях вагоноопрокидывателей № 1, 2, 3",
+                                "date_start": "2023-01-15",
+                                "date_end": "2023-08-01",
+                                "date_registration": "2022-11-29",
+                                "status": {
+                                    "id": 5,
+                                    "value": 0,
+                                    "name": "L0",
+                                    "settings_project": 2,
+                                },
+                            },
+                            "properties_fields": [
+                                {
+                                    "id": 1,
+                                    "title": {
+                                        "id": 1,
+                                        "title": "Подразделения",
+                                        "initiative_activate": True,
+                                    },
+                                    "value": {
+                                        "id": 1,
+                                        "value": "КХП",
+                                        "propertie": 1,
+                                    },
+                                },
+                                {
+                                    "id": 2,
+                                    "title": {
+                                        "id": 2,
+                                        "title": "Программы",
+                                        "initiative_activate": True,
+                                    },
+                                    "value": {
+                                        "id": 4,
+                                        "value": "ДРК",
+                                        "propertie": 2,
+                                    },
+                                },
+                            ],
+                            "metric_fields": [
+                                {
+                                    "metric": {
+                                        "id": 2,
+                                        "title": "млн.руб.",
+                                        "units": "бм",
+                                        "initiative_activate": True,
+                                    },
+                                    "value": 440,
+                                },
+                                {
+                                    "metric": {
+                                        "id": 3,
+                                        "title": "ШЕ",
+                                        "units": "бм",
+                                        "initiative_activate": True,
+                                    },
+                                    "value": 0,
+                                },
+                            ],
+                            "addfields": [
+                                {
+                                    "id": 1,
+                                    "value": "Снижение ручного труда",
+                                    "title": {
+                                        "id": 1,
+                                        "title": "Качественный эффект",
+                                        "type": "str",
+                                    },
+                                }
+                            ],
+                        }
+                    ],
+                    "events": [
+                        {
+                            "id": 1,
+                            "initiative": 1,
+                            "name": "Подготовка проектной документации",
+                            "date_start": "2023-01-15",
+                            "date_end": "2023-02-15",
+                            "ready": False,
+                        },
+                        {
+                            "id": 2,
+                            "initiative": 1,
+                            "name": "Проведение ремонтных работ",
+                            "date_start": "2023-03-01",
+                            "date_end": "2023-06-01",
+                            "ready": False,
+                        },
+                        {
+                            "id": 3,
+                            "initiative": 1,
+                            "name": "Выход на проектную мощность",
+                            "date_start": "2023-06-10",
+                            "date_end": "2023-08-01",
+                            "ready": False,
+                        },
+                    ],
+                    "metrics_user_stat": [
+                        {"title": "млн.руб.", "value": 440},
+                        {"title": "ШЕ", "value": 0},
+                    ],
+                }
+            },
+        ),
+        "400": openapi.Response(
+            description="Передан id несуществующего проекта",
+            examples={
+                "application/json": {"id": ["project pk = 1 not exist"]}
+            },
+        ),
+        "401": openapi.Response(
+            description="Токен идентификации не был передан",
+            examples={
+                "application/json": {
+                    "detail": "Учетные данные не были предоставлены."
+                }
+            },
+        ),
+    }
+
+    @swagger_auto_schema(
+        operation_description="Статистика пользователя в проекте",
+        responses=response_schema_dict,
+        manual_parameters=[
+            openapi.Parameter(
+                name="id",
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description="ID проекта",
+            )
+        ],
+    )
     def get(self, request):
         project = get_project_by_id_or_active(request)
         user = request.user
@@ -211,7 +787,141 @@ class UserStatisticsInitiativesView(views.APIView):
         s = UserPersonStatisticSerializer(
             instance=self._get_user_statistic(project, list_inits)
         )
-        self._get_user_statistic(project, list_inits)
+        return Response(s.data, 200)
+
+
+# ++++++++++++++++++++++РИСКИ+++++++++++++++++++++++++++
+class CreateRiskView(views.APIView):
+    response_schema_dict = {
+        "200": openapi.Response(
+            description="Название риска в рамках инициативы уникально.",
+            examples={
+                "application/json": {
+                    "risk": {
+                        "name": "Название нового риска",
+                        "initiative_id": 1,
+                        "author_id": 1,
+                    },
+                    "addfields": [
+                        {"id": 1, "value": "12"},
+                        {"id": 2, "value": ""},
+                    ],
+                }
+            },
+        ),
+        "400": openapi.Response(
+            description="Название риска в рамках инициативы уникально.",
+            examples={
+                "application/json": {
+                    "risk": {"name": ["Имя уже используется"]}
+                }
+            },
+        ),
+        "401": openapi.Response(
+            description="Токен идентификации не был передан",
+            examples={
+                "application/json": {
+                    "detail": "Учетные данные не были предоставлены."
+                }
+            },
+        ),
+        "404": openapi.Response(
+            description="Если передать несуществующий id инициативы",
+            examples={"application/json": {"detail": "Страница не найдена."}},
+        ),
+    }
+
+    @swagger_auto_schema(
+        operation_description="Создать риск",
+        responses=response_schema_dict,
+        request_body=RiskInfoSerializer,
+    )
+    def post(self, request):
+        initiative_id = request.data.get("risk", {}).get("initiative", None)
+        s: RiskInfoSerializer = RiskInfoSerializer(
+            data=request.data,
+            context={
+                "initiative": get_object_or_404(Initiatives, id=initiative_id),
+                "user": request.user,
+            },
+        )
+        s.is_valid(raise_exception=True)
+        s.create_or_update(s.data)
+        return Response(s.data, 200)
+
+
+class InfoRiskView(views.APIView):
+    response_schema_dict = {
+        "200": openapi.Response(
+            description="Если передать существующий id риска",
+            examples={
+                "application/json": {
+                    "risk": {
+                        "id": 1,
+                        "name": "Название риска 1",
+                        "initiative": 1,
+                    },
+                    "addfields": [
+                        {
+                            "id": 1,
+                            "value": "Описание риска 1",
+                            "title": {
+                                "id": 1,
+                                "title": "Описание риска",
+                                "type": "str",
+                                "settings_project": 2,
+                            },
+                        },
+                        {
+                            "id": 2,
+                            "value": "Митигация риска 1",
+                            "title": {
+                                "id": 2,
+                                "title": "Митигация риска",
+                                "type": "str",
+                                "settings_project": 2,
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        "400": openapi.Response(
+            description="Передан id несуществующей риска",
+            examples={"application/json": {"detail": "Страница не найдена."}},
+        ),
+        "401": openapi.Response(
+            description="Токен идентификации не был передан",
+            examples={
+                "application/json": {
+                    "detail": "Учетные данные не были предоставлены."
+                }
+            },
+        ),
+    }
+
+    @swagger_auto_schema(
+        operation_description="Информация о риске",
+        responses=response_schema_dict,
+        manual_parameters=[
+            openapi.Parameter(
+                name="id",
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description="ID риска",
+            )
+        ],
+    )
+    def get(self, request):
+        id_risk = request.GET.get("id", None)
+        risc_obj = get_object_or_404(Risks, id=id_risk)
+        risc_obj.check_updates()
+        s = RiskInfoSerializer(
+            instance={
+                "risk": risc_obj,
+                "addfields": risc_obj.addfields.all(),
+            }
+        )
         return Response(s.data, 200)
 
 
@@ -220,12 +930,75 @@ class ListRiskView(views.APIView):
     Выдать список инициатив проекта
     """
 
-    def get(self, request):
+    response_schema_dict = {
+        "200": openapi.Response(
+            description="Если передать существующий id инициативы",
+            examples={
+                "application/json": {
+                    "initiative_risks": [
+                        {
+                            "risk": {
+                                "id": 1,
+                                "name": "Название риска 1",
+                                "initiative": 1,
+                            },
+                            "addfields": [
+                                {
+                                    "id": 1,
+                                    "value": "Описание риска 1",
+                                    "title": {
+                                        "id": 1,
+                                        "title": "Описание риска",
+                                        "type": "str",
+                                        "settings_project": 2,
+                                    },
+                                },
+                                {
+                                    "id": 2,
+                                    "value": "Митигация риска 1",
+                                    "title": {
+                                        "id": 2,
+                                        "title": "Митигация риска",
+                                        "type": "str",
+                                        "settings_project": 2,
+                                    },
+                                },
+                            ],
+                        }
+                    ]
+                }
+            },
+        ),
+        "400": openapi.Response(
+            description="Передан id несуществующей инициативы",
+            examples={"application/json": {"detail": "Страница не найдена."}},
+        ),
+        "401": openapi.Response(
+            description="Токен идентификации не был передан",
+            examples={
+                "application/json": {
+                    "detail": "Учетные данные не были предоставлены."
+                }
+            },
+        ),
+    }
 
+    @swagger_auto_schema(
+        operation_description="Список рисков инициативы",
+        responses=response_schema_dict,
+        manual_parameters=[
+            openapi.Parameter(
+                name="id",
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description="ID инициативы",
+            )
+        ],
+    )
+    def get(self, request):
         id = request.GET.get("id", None)
         initiative = get_object_or_404(Initiatives, id=id)
         risks = initiative.risks.all()
-        print(risks)
         [x.check_updates() for x in risks]
         inst = {
             "initiative_risks": [
@@ -240,7 +1013,109 @@ class ListRiskView(views.APIView):
         return Response(s.data, 200)
 
 
+class DeleteRiskView(views.APIView):
+    response_schema_dict = {
+        "200": openapi.Response(
+            description="Удаление риска",
+            examples={"application/json": {"msg": "risk delete"}},
+        ),
+        "400": openapi.Response(
+            description="Передан id несуществующего риска",
+            examples={"application/json": {"detail": "Страница не найдена."}},
+        ),
+        "401": openapi.Response(
+            description="Токен идентификации не был передан",
+            examples={
+                "application/json": {
+                    "detail": "Учетные данные не были предоставлены."
+                }
+            },
+        ),
+    }
+
+    @swagger_auto_schema(
+        operation_description="Удалить риск",
+        responses=response_schema_dict,
+        request_body=DeleteRiskSerializer,
+    )
+    def delete(self, request):
+        s = DeleteRiskSerializer(
+            data=request.data,
+            context={"user": request.user},
+        )
+        s.is_valid(raise_exception=True)
+        id_risk = request.data.get("id")
+        risc_obj = get_object_or_404(Risks, id=id_risk)
+        risc_obj.delete()
+        return Response({"msg": "risk delete"}, 200)
+
+
+# ++++++++++++++++++++++МЕРОПРИЯТИЯ+++++++++++++++++++++++++++
 class InfoEventView(views.APIView):
+    response_schema_dict = {
+        "200": openapi.Response(
+            description="Информация о мероприятии",
+            examples={
+                "application/json": {
+                    "event": {
+                        "id": 1,
+                        "initiative": 1,
+                        "name": "Подготовка проектной документации",
+                        "date_start": "2023-01-15",
+                        "date_end": "2023-02-15",
+                        "ready": False,
+                    },
+                    "event_status": "Запланировано",
+                    "metric_fields": [
+                        {
+                            "metric": {
+                                "id": 2,
+                                "title": "млн.руб.",
+                                "units": "бм",
+                                "initiative_activate": True,
+                            },
+                            "value": 70,
+                        },
+                        {
+                            "metric": {
+                                "id": 3,
+                                "title": "ШЕ",
+                                "units": "бм",
+                                "initiative_activate": True,
+                            },
+                            "value": 0,
+                        },
+                    ],
+                    "addfields": [],
+                }
+            },
+        ),
+        "400": openapi.Response(
+            description="Передан id несуществующего мероприятия",
+            examples={"application/json": {"detail": "Страница не найдена."}},
+        ),
+        "401": openapi.Response(
+            description="Токен идентификации не был передан",
+            examples={
+                "application/json": {
+                    "detail": "Учетные данные не были предоставлены."
+                }
+            },
+        ),
+    }
+
+    @swagger_auto_schema(
+        operation_description="Информация о мероприятии",
+        responses=response_schema_dict,
+        manual_parameters=[
+            openapi.Parameter(
+                name="id",
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description="ID мероприятия",
+            )
+        ],
+    )
     def get(self, request):
         id_event = request.GET.get("id", None)
         if not id_event:
@@ -259,6 +1134,10 @@ class InfoEventView(views.APIView):
 
 
 class CreateEventView(views.APIView):
+    @swagger_auto_schema(
+        operation_description="Создать мероприятие",
+        request_body=EventSerializer,
+    )
     def post(self, request):
         initiative_id = request.data.get("event", {}).get("initiative", None)
         initiative = get_object_or_404(Initiatives, id=initiative_id)
@@ -270,20 +1149,163 @@ class CreateEventView(views.APIView):
         s.is_valid(raise_exception=True)
         data["event"]["author"] = request.user
         s.create_or_update(data)
-        return Response(s.data, 200)
+        return Response(s.data, 201)
 
 
 class DeleteEventView(views.APIView):
-    def post(self, request):
+    @swagger_auto_schema(
+        operation_description="Удаление мероприятия",
+        manual_parameters=[
+            openapi.Parameter(
+                name="id",
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description="ID мероприятия",
+            )
+        ],
+    )
+    def delete(self, request):
         id_event = request.GET.get("id", None)
-        if not id_event:
+        if not id_event or not id_event.isdigit():
             return Response("get id event", 404)
-        event: Events = get_object_or_404(Events, id=id_event)
-        Events.delete_event(id_event)
-        return Response("ok", 200)
+        Events = get_object_or_404(Events, id=id_event)
+        Events.delete_node(id_event)
+        return Response({"msg": "Мероприятие удалено"}, 204)
 
 
 class ListEventView(views.APIView):
+    response_schema_dict = {
+        "200": openapi.Response(
+            description="Передан id несуществующей инициативы",
+            examples={
+                "application/json": {
+                    "initiative_events": [
+                        {
+                            "event": {
+                                "id": 1,
+                                "initiative": 1,
+                                "name": "Подготовка проектной документации",
+                                "date_start": "2023-01-15",
+                                "date_end": "2023-02-15",
+                                "ready": False,
+                            },
+                            "event_status": "Запланировано",
+                            "metric_fields": [
+                                {
+                                    "metric": {
+                                        "id": 2,
+                                        "title": "млн.руб.",
+                                        "units": "бм",
+                                        "initiative_activate": True,
+                                    },
+                                    "value": 440,
+                                },
+                                {
+                                    "metric": {
+                                        "id": 3,
+                                        "title": "ШЕ",
+                                        "units": "бм",
+                                        "initiative_activate": True,
+                                    },
+                                    "value": 0,
+                                },
+                            ],
+                            "addfields": [],
+                        },
+                        {
+                            "event": {
+                                "id": 2,
+                                "initiative": 1,
+                                "name": "Проведение ремонтных работ",
+                                "date_start": "2023-03-01",
+                                "date_end": "2023-06-01",
+                                "ready": False,
+                            },
+                            "event_status": "Запланировано",
+                            "metric_fields": [
+                                {
+                                    "metric": {
+                                        "id": 2,
+                                        "title": "млн.руб.",
+                                        "units": "бм",
+                                        "initiative_activate": True,
+                                    },
+                                    "value": 440,
+                                },
+                                {
+                                    "metric": {
+                                        "id": 3,
+                                        "title": "ШЕ",
+                                        "units": "бм",
+                                        "initiative_activate": True,
+                                    },
+                                    "value": 0,
+                                },
+                            ],
+                            "addfields": [],
+                        },
+                        {
+                            "event": {
+                                "id": 3,
+                                "initiative": 1,
+                                "name": "Выход на проектную мощность",
+                                "date_start": "2023-06-10",
+                                "date_end": "2023-08-01",
+                                "ready": False,
+                            },
+                            "event_status": "Запланировано",
+                            "metric_fields": [
+                                {
+                                    "metric": {
+                                        "id": 2,
+                                        "title": "млн.руб.",
+                                        "units": "бм",
+                                        "initiative_activate": True,
+                                    },
+                                    "value": 440,
+                                },
+                                {
+                                    "metric": {
+                                        "id": 3,
+                                        "title": "ШЕ",
+                                        "units": "бм",
+                                        "initiative_activate": True,
+                                    },
+                                    "value": 0,
+                                },
+                            ],
+                            "addfields": [],
+                        },
+                    ]
+                }
+            },
+        ),
+        "400": openapi.Response(
+            description="Передан id несуществующей инициативы",
+            examples={"application/json": {"detail": "Страница не найдена."}},
+        ),
+        "401": openapi.Response(
+            description="Токен идентификации не был передан",
+            examples={
+                "application/json": {
+                    "detail": "Учетные данные не были предоставлены."
+                }
+            },
+        ),
+    }
+
+    @swagger_auto_schema(
+        operation_description="Список мероприятий инициативы",
+        responses=response_schema_dict,
+        manual_parameters=[
+            openapi.Parameter(
+                name="id",
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description="ID инициативы",
+            )
+        ],
+    )
     def get(self, request):
 
         id = request.GET.get("id", None)
@@ -305,8 +1327,4 @@ class ListEventView(views.APIView):
         return Response(s.data, 200)
 
 
-class DeleteRiskView(views.APIView):
-    def post(self, request):
-        project = get_project_by_id_or_active(request)
-        project.risks.delete()
-        return Response("risks delete ok", 200)
+#  Token d610730d92183eace7ca2c4f949982a34781cef8

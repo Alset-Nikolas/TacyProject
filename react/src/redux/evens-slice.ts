@@ -214,7 +214,7 @@ export const getEventsListThunk = (initiativeId: number) => (dispatch: AppDispat
     `components/event/info/list/?id=${initiativeId}`,
     (res: AxiosResponse<{ initiative_events: Array<TEvent> }>) => {
       try {
-        console.log(res.data);
+        // console.log(res.data);
       } catch (error) {
         console.log(error);
         dispatch(eventsListRequestFailed());

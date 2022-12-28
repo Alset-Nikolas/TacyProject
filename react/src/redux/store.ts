@@ -1,5 +1,5 @@
 import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
-import stateReducer from '../redux/state-slice';
+import stateReducer from './state/state-slice';
 import authReducer from '../redux/auth-slice';
 import teamReducer from '../redux/team-slice';
 import componentsReducer from '../redux/components-slice';
@@ -10,14 +10,22 @@ import coordinationReducer from '../redux/coordination-slice';
 import notificationsReducer from '../redux/notifications-slice';
 import graphicsReducer from '../redux/graphics-slice';
 import personalReducer from '../redux/personal-slice';
+import { stateApi } from './state/state-api';
+import { initiativesApi } from './initiatives/initiatives-api';
+import { teamApi } from './team/team-api';
+import { authApi } from './auth/auth-api';
 
 export const store = configureStore({
   reducer: {
     state: stateReducer,
+    [stateApi.reducerPath]: stateApi.reducer,
     auth: authReducer,
+    [authApi.reducerPath]: authApi.reducer,
     team: teamReducer,
+    [teamApi.reducerPath]: teamApi.reducer,
     components: componentsReducer,
     initiatives: initiativesReducer,
+    [initiativesApi.reducerPath]: initiativesApi.reducer,
     risks: risksReducer,
     events: eventsReducer,
     coordination: coordinationReducer,
@@ -25,6 +33,13 @@ export const store = configureStore({
     graphics: graphicsReducer,
     personal: personalReducer,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware().concat([
+      stateApi.middleware,
+      initiativesApi.middleware,
+      teamApi.middleware,
+      authApi.middleware,
+    ]),
 });
 
 export type AppDispatch = typeof store.dispatch;

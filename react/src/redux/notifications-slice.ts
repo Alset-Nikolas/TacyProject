@@ -5,7 +5,16 @@ import { getRequest } from '../utils/requests';
 import { TCoordinationHistoryItem, TNotification } from '../types';
 
 type TState = {
-  notifications: Array<any> | null;
+  notifications: {
+    count: number;
+    next: string;
+    previous: string;
+    results: Array<{
+      user: number;
+      date: string;
+      text: string;
+    }>
+  } | null;
 
   getNotificationsListRequest: boolean,
   getNotificationsListRequestSuccess: boolean,
@@ -65,10 +74,10 @@ export const {
 
 export default stateSlice.reducer;
 
-export const getNotificationsThunk = () => (dispatch: AppDispatch, getState: () => RootState) => {
+export const getNotificationsThunk = (url?: string) => (dispatch: AppDispatch, getState: () => RootState) => {
   dispatch(getNotificationsListRequest());
   getRequest(
-    `notifications`,
+    url ? url : `notifications/info`,
     (res: AxiosResponse<{ notifications: Array<TNotification>}>) => {
       try {
         console.log(res.data);
@@ -76,7 +85,7 @@ export const getNotificationsThunk = () => (dispatch: AppDispatch, getState: () 
         console.log(error);
         dispatch(getNotificationsListRequestFailed());
       }
-      dispatch(getNotificationsListRequestSuccess(res.data.notifications));
+      dispatch(getNotificationsListRequestSuccess(res.data));
     },
     () => {
       dispatch(getNotificationsListRequestFailed());

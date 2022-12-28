@@ -6,20 +6,26 @@ import sectionStyles from '../../styles/sections.module.scss';
 import styles from './initiative-coordination.module.scss';
 import { ChangeEvent, useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
-import { closeInitiativeThunk, coordinateThunk, getBossesListThunk, getChatThunk, postCommentThunk, sendForApprovalThunk } from "../../redux/coordination-slice";
+import { clearBossesList, closeInitiativeThunk, coordinateThunk, getBossesListThunk, getChatThunk, postCommentThunk, sendForApprovalThunk } from "../../redux/coordination-slice";
 import { getUserInfoByIdThunk, getUserRightsThunk } from "../../redux/auth-slice";
 import CustomizedSelect from "../select/Select";
-import { getTeamThunk } from "../../redux/team-slice";
 import moment from "moment";
 import { SelectChangeEvent } from "@mui/material";
+import { useGetAuthInfoByIdQuery } from "../../redux/auth/auth-api";
+import { useGetProjectInfoQuery } from "../../redux/state/state-api";
 
 export default function InitiativeCoordination() {
   const dispatch = useAppDispatch();
   const initiative = useAppSelector((store) => store.initiatives.initiative);
-  const project = useAppSelector((store) => store.state.project.value);
-  const teamList = useAppSelector((store) => store.team.list);
+  const { currentId } = useAppSelector((store) => store.state.project);
+  const { data: project } = useGetProjectInfoQuery(currentId);
+  // const project = useAppSelector((store) => store.state.project.value);
+  // const teamList = useAppSelector((store) => store.team.list);
   const { coordinationHistory, bosses } = useAppSelector((store) => store.coordination);
-  const { userRights, user } = useAppSelector((store) => store.auth);
+  const { userRights } = useAppSelector((store) => store.auth);
+  const { data: user } = useGetAuthInfoByIdQuery(currentId ? currentId : -1, {
+    skip: !currentId,
+  });
   const [ commentState, setCommentState ] = useState({
     text: '',
     initiative: initiative ? initiative.initiative.id : -1,
@@ -87,11 +93,15 @@ export default function InitiativeCoordination() {
       });
     }
     if (project) {
-      dispatch(getUserInfoByIdThunk(project.id));
-      dispatch(getTeamThunk(project.id));
       dispatch(getBossesListThunk(project.id));
     }
   }, [initiative, project]);
+
+  useEffect(() => {
+    return () => {
+      dispatch(clearBossesList());
+    };
+  }, []);
 
   return (
     <div

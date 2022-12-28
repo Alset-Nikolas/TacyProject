@@ -1,6 +1,6 @@
 import { ChangeEvent } from 'react';
 import { updateSettings } from '../redux/components-slice';
-import { updateProjectForEdit } from "../redux/state-slice";
+import { updateProjectForEdit } from "../redux/state/state-slice";
 import { AppDispatch } from "../redux/store";
 import {
   TCommonProject,
@@ -12,7 +12,6 @@ import {
   TPropertieEdit,
   TStage,
   TStageEdit,
-  TComponentsSettings,
   TSettings,
   TAdditionalField,
   TStatusField
@@ -63,7 +62,9 @@ export const handlePropertieInutChange = (
       propsArrayElement[key] = value;
     } else if (key === 'values' && typeof propertieIndex === 'number') {
       const propVluesArray = [...propsArrayElement[key]];
-      propVluesArray[propertieIndex] = value;
+      const currentPropertie = { ...propVluesArray[propertieIndex] };
+      currentPropertie.value = value;
+      propVluesArray[propertieIndex] = currentPropertie;
       propsArrayElement[key] = propVluesArray;
     }
 
@@ -110,8 +111,14 @@ export const addPropertie = (
       break;
     case 'properties':
       newPropertyElement = {
+        id: -1,
         title: '',
-        values: [ '' ],
+        values: [
+          {
+            id: -1,
+            value: '',
+          },
+        ],
       };
       break;
   }
@@ -160,7 +167,7 @@ export const addPropertieValue = (
 
   if (!propertie || typeof indexOfPropertie === 'undefined') return;
 
-  propertie.values = [ ...propertie.values, '' ];
+  propertie.values = [ ...propertie.values, { id: -1, value: ''} ];
 
   propsArray[indexOfPropertie] = propertie;
 
@@ -232,7 +239,8 @@ export function makeProjectFordit(project: TProject): TProjectForEdit {
           if (isPropertie(el)) {
             projectForEdit[key].push({
               title: el.title,
-              values: el.items.map((el) => el.value),
+              // values: el.items.map((el) => el.value),
+              values: el.items,
             });
           }
         });
@@ -401,4 +409,24 @@ export function handleComponentInputChange(
   dispatch(updateSettings({
     [key]: newItemsArray,
   }));
+}
+
+export function parseRequestError(response: any): any {
+  const errorEntries = Object.entries(response);
+  const errorMessages = errorEntries.map((error: [string, any]) => {
+    if (typeof error[1] === 'string') return `${error[0]}: ${error[1]}`;
+    if (error[1] instanceof Array && typeof error[1][0] === 'string') {
+      return `${error[0]}: ${error[1].join(', ')}`;
+    }
+    if (typeof error[1] === 'object') {
+      // const currentErrorEntries = Object.entries(error[1][0]);
+      // const title = currentErrorEntries[0][0];
+      // const description = currentErrorEntries[0][1];
+      // return `${error[0]} ${title}: ${description}`;
+      return parseRequestError(error[1]);
+    }
+    return 'unknown error';
+  });
+
+  return errorMessages;
 }

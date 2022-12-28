@@ -10,6 +10,5 @@ urlpatterns = [
     path("community/", views.UpdateCommunityProjectView.as_view()),
     path("community/bosses/", views.BossesProjectView.as_view()),
     path("info/", views.InfoProjectView.as_view()),
-    path("change/", views.ChangeProjectView.as_view()),
     path("list/", views.GetProjectListView.as_view()),
 ]

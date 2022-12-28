@@ -3,13 +3,10 @@ import { useNavigate } from "react-router-dom";
 import AddRisk from "../../components/add-risk/add-risk";
 import CustomizedButton from "../../components/button/button";
 import EditInitiative from "../../components/edit-initiative/edit-initiative";
-import EditRisks from "../../components/edit-risks/edit-risks";
 import InitiativeManagement from "../../components/initiative-management/initiative-management";
 import RiskManagement from "../../components/risk-management/risk-management";
-import CustomizedSelect from "../../components/select/Select";
 import { paths } from "../../consts";
-import { addInitiativeThunk, setInitiativesState } from "../../redux/initiatives-slice";
-import { useAppDispatch, useAppSelector } from "../../utils/hooks";
+import { useAppSelector } from "../../utils/hooks";
 
 // Styles
 import styles from './edit-initiative-page.module.scss';

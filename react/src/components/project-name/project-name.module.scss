@@ -106,6 +106,10 @@
   border-radius: 0;
   padding-bottom: 0;
   // margin-left: 20px;
+
+  &.error {
+    border: 1px solid #B04040;
+  }
 }
 
 .bothDatesWrapper {

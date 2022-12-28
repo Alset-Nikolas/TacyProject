@@ -7,6 +7,7 @@ app_name = "components"
 urlpatterns = [
     path("settings/", views.UpdateSettingsInitiativeView.as_view()),
     path("initiative/create/", views.CreateInitiativeView.as_view()),
+    path("initiative/delete/", views.DeleteInitiativeView.as_view()),
     path("initiative/info/", views.InfoInitiativeView.as_view()),
     path("initiative/info/list/", views.ListInitiativesView.as_view()),
     path(

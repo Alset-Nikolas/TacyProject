@@ -75,7 +75,6 @@ class GraficsProject(models.Model):
                     )
                 item["metrics"].append(graf_obj)
             res.append(item)
-
         return res
 
     @classmethod

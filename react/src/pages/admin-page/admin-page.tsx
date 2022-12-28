@@ -12,8 +12,7 @@ import {
   emptyProjectForEdit,
   getProjectInfoThunk,
   getProjectsListThunk,
-  setCurrentProjectId
-} from '../../redux/state-slice';
+} from '../../redux/state/state-slice';
 import { SelectChangeEvent } from '@mui/material';
 import ProjectSelector from '../../components/project-selector/project-selector';
 
@@ -54,26 +53,14 @@ export default function AdminPage() {
   }
 
   const onCreateButtonClick = () => {
-    dispatch(emptyProjectForEdit());
+    // dispatch(emptyProjectForEdit());
     navigate(paths.create.project.absolute);
   };
 
-  const onSelectorChange = (e: SelectChangeEvent<string>) => {
-    dispatch(setCurrentProjectId(projectsList.find((el) => el.name === e.target.value)?.id));
-  };
-
-  const onSelectButtonClick = () => {
-    if (project.currentId) dispatch(getProjectInfoThunk(project.currentId));
-  };
-
   useEffect(() => {
-    dispatch(getProjectsListThunk());
+    // dispatch(getProjectsListThunk());
   }, [projectCreate.isGetRequestSuccess]);
 
-  const setValue = () => {
-    const value = projectsList.find((el) => el.id === project.currentId)?.name;
-    return value;
-  };
   return (
     <div className={`${styles.wrapper}`}>
       <section className={`${styles.headerSection}`}>

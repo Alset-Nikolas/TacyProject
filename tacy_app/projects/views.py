@@ -24,6 +24,8 @@ from .serializers import (
 from components.models import SettingsComponents
 from users.serializers import UserSerializer
 from components.models import SettingsStatusInitiative
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 User = get_user_model()
 
@@ -53,12 +55,91 @@ class CreateProjectView(views.APIView):
     Создание/Обновление проекта
     """
 
+    response_schema_dict = {
+        "200": openapi.Response(
+            description="Проект создан (обновлен)",
+            examples={
+                "application/json": {"msg": "Проект обновился", "id": 4}
+            },
+        ),
+        "400 (v1)": openapi.Response(
+            description="Дата конца проекта > дата начала",
+            examples={
+                "application/json": {
+                    "date_start <= date_end": [
+                        "date_start_project <= date_end"
+                    ],
+                    "msg_er": [
+                        "Дата конца проекта не может быть раньше начала."
+                    ],
+                }
+            },
+        ),
+        "400 (v2)": openapi.Response(
+            description="Промежуточные даты не могут вылезать за промежуток активности проекта",
+            examples={
+                "application/json": {
+                    "intermediate_dates": [
+                        "date_start <= intermediate_dates <= date_end"
+                    ],
+                    "msg_er": [
+                        "Промежуточные даты должны начинаться не раньше 'Даты создания проекта' и не позже 'Даты конца проекта'"
+                    ],
+                }
+            },
+        ),
+        "400 (v3)": openapi.Response(
+            description="Этапы проекта не могут вылезать за промежуток активности проекта",
+            examples={
+                "application/json": {
+                    "stages": [
+                        "date_start_project <= stages_dates <= date_end_project"
+                    ],
+                    "msg_er": [
+                        "Этапы проекта не могут начинаться раньше 'Даты создания проекта' и закончится позже 'Даты конца проекта'"
+                    ],
+                }
+            },
+        ),
+        "400 (v4)": openapi.Response(
+            description="Название проектов - уникальны.",
+            examples={
+                "application/json": {
+                    "name": ["name project already exist"],
+                    "msg_er": ["Такое имя проекта уже кем-то используется."],
+                }
+            },
+        ),
+        "400 (v5)": openapi.Response(
+            description="Если передать id>0 - проект должен существовать",
+            examples={
+                "application/json": {
+                    "id": "id project not exist",
+                    "msg_er": "Проект с таким id не найден",
+                }
+            },
+        ),
+        "401": openapi.Response(
+            description="Токен идентификации не был передан",
+            examples={
+                "application/json": {
+                    "detail": "Учетные данные не были предоставлены."
+                }
+            },
+        ),
+    }
+
+    @swagger_auto_schema(
+        operation_description="Создание (обновление) проекта. Если id>0 - то обновление, иначе создание нового проекта.",
+        responses=response_schema_dict,
+        manual_parameters=[],
+        request_body=serializers.CreateProjectSerializer,
+    )
     def post(self, request, format=None):
         serializer_project = serializers.CreateProjectSerializer(
             data=request.data,
             context={"request": request},
         )
-        serializer_project.is_valid(raise_exception=True)
         serializer_project.is_valid(raise_exception=True)
         validated_data: tp.OrderedDict = serializer_project.validated_data
         project: Project = serializer_project.create_or_update(validated_data)
@@ -87,8 +168,10 @@ class CreateProjectView(views.APIView):
         )
         settings_project = SettingsComponents.create(project.id)
         SettingsStatusInitiative.generate_defauld_status(settings_project)
+        data = serializer_project.data
+        data["id"] = project.id
         return Response(
-            {"code": 200, "msg": "Проект обновился", "id": project.id},
+            data,
             status=status.HTTP_200_OK,
         )
 
@@ -98,6 +181,40 @@ class GetProjectListView(views.APIView):
     Выдать список проектов пользователя
     """
 
+    response_schema_dict = {
+        "200": openapi.Response(
+            description="Полная информация об проекте по id.",
+            examples={
+                "application/json": {
+                    "items": [
+                        {"id": 2, "name": "Ландшафт долностей НЛМК"},
+                        {"id": 3, "name": "g"},
+                    ]
+                }
+            },
+        ),
+        "401": openapi.Response(
+            description="Токен идентификации не был передан",
+            examples={
+                "application/json": {
+                    "detail": "Учетные данные не были предоставлены."
+                }
+            },
+        ),
+    }
+
+    @swagger_auto_schema(
+        operation_description="Список проектов пользовтеля.",
+        responses=response_schema_dict,
+        manual_parameters=[
+            openapi.Parameter(
+                name="id",
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description="ID проекта",
+            )
+        ],
+    )
     def get(self, request, form=None):
         user: User = request.user
         projects = Project.get_user_projects(user)
@@ -113,6 +230,62 @@ class UpdateCommunityProjectView(views.APIView):
         Обновить информацию о сообществе -> страничка: 'Команда проекта'
     """
 
+    response_schema_dict = {
+        "200": openapi.Response(
+            description="Список людей, с правами согласования инициативы.",
+            examples={
+                "application/json": {
+                    "community_info": [
+                        {
+                            "user": {
+                                "id": 1,
+                                "first_name": "z",
+                                "last_name": "z",
+                                "second_name": "z",
+                                "email": "z@mail.ru",
+                                "phone": "1",
+                            },
+                            "role_user": {"id": 5, "name": "Наблюдать"},
+                            "rights_user": [
+                                {"id": 4, "name": "Создать инициативу"}
+                            ],
+                            "properties": [
+                                {"title": {"id": 1}, "values": []},
+                                {"title": {"id": 2}, "values": []},
+                            ],
+                        },
+                    ]
+                }
+            },
+        ),
+        "400": openapi.Response(
+            description="Передан id несуществующего проекта",
+            examples={
+                "application/json": {"id": ["project pk = 100 not exist"]}
+            },
+        ),
+        "401": openapi.Response(
+            description="Токен идентификации не был передан",
+            examples={
+                "application/json": {
+                    "detail": "Учетные данные не были предоставлены."
+                }
+            },
+        ),
+    }
+
+    @swagger_auto_schema(
+        operation_description="Команда проекта",
+        responses=response_schema_dict,
+        manual_parameters=[
+            openapi.Parameter(
+                name="id",
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description="ID проекта",
+            )
+        ],
+    )
     def get(self, request, format=None):
         project: Project = get_project_by_id_or_active(request)
         s: UpdateCommunityProjectSerializer = UpdateCommunityProjectSerializer(
@@ -123,6 +296,19 @@ class UpdateCommunityProjectView(views.APIView):
             status=status.HTTP_200_OK,
         )
 
+    @swagger_auto_schema(
+        operation_description="Обновить команду проекта.",
+        request_body=UpdateCommunityProjectSerializer,
+        responses=response_schema_dict,
+        manual_parameters=[
+            openapi.Parameter(
+                name="id",
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description="ID проекта",
+            )
+        ],
+    )
     def post(self, request, format=None):
         project: Project = get_project_by_id_or_active(request)
         s: UpdateCommunityProjectSerializer = UpdateCommunityProjectSerializer(
@@ -146,6 +332,66 @@ class InfoProjectView(views.APIView):
         Выдать информацию об проекте ->  страничка: 'Информация о проекте'
     """
 
+    response_schema_dict = {
+        "200": openapi.Response(
+            description="Полная информация об проекте по id.",
+            examples={
+                "application/json": {
+                    "id": 3,
+                    "name": "g",
+                    "date_start": "2022-12-13",
+                    "date_end": "2022-12-13",
+                    "purpose": "Мои цели на этот проект",
+                    "tasks": "Мои задачи на этот проект",
+                    "description": "Мои цели на этот проект",
+                    "intermediate_dates": [],
+                    "properties": [],
+                    "roles": [],
+                    "rights": [],
+                    "metrics": [],
+                    "stages": [],
+                }
+            },
+        ),
+        "400": openapi.Response(
+            description="Передан id несуществующего проекта",
+            examples={
+                "application/json": {"id": ["project pk = 100 not exist"]}
+            },
+        ),
+        "401": openapi.Response(
+            description="Токен идентификации не был передан",
+            examples={
+                "application/json": {
+                    "detail": "Учетные данные не были предоставлены."
+                }
+            },
+        ),
+        "400 (v2)": openapi.Response(
+            description="Проекы разделены на сообщества, нельзя запросить сторонний проект",
+            examples={
+                "application/json": {
+                    "id": {
+                        "id": "user 7 not working in project pk=3",
+                        "msg_er": "В этот проект Вас не приглашали",
+                    }
+                }
+            },
+        ),
+    }
+
+    @swagger_auto_schema(
+        operation_description="Информация о проекте",
+        responses=response_schema_dict,
+        manual_parameters=[
+            openapi.Parameter(
+                name="id",
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description="ID проекта",
+            )
+        ],
+    )
     def get(self, request, format=None):
         project = get_project_by_id_or_active(request)
         project_serializer = InfoProjectSerializer(instance=project)
@@ -155,27 +401,45 @@ class InfoProjectView(views.APIView):
         )
 
 
-class ChangeProjectView(views.APIView):
-    """
-    Ручка по смене проекта у пользователя
-    """
-
-    def post(self, request, format=None):
-        user = request.user
-        serializer = UserProjectIdSerializer(
-            data=self.request.data, context={"user": user}
-        )
-        serializer.is_valid(raise_exception=True)
-        project = Project.get_project_by_id(serializer.validated_data["id"])
-        user.project_active = project
-        user.save()
-        return Response(
-            {"code": 200, "msg": "Активный проект поменялся"},
-            status=status.HTTP_200_OK,
-        )
-
-
 class DeleteProjectView(views.APIView):
+    response_schema_dict = {
+        "200": openapi.Response(
+            description="Проект удален",
+            examples={"application/json": {"msg": "Проект удален"}},
+        ),
+        "400": openapi.Response(
+            description="Токен идентификации не был передан",
+            examples={
+                "application/json": {"id": ["project pk = 0 not exist"]}
+            },
+        ),
+        "400 (v2)": openapi.Response(
+            description="Проекы разделены на сообщества, нельзя запросить сторонний проект",
+            examples={
+                "application/json": {
+                    "id": {
+                        "id": "user 7 not working in project pk=3",
+                        "msg_er": "В этот проект Вас не приглашали",
+                    }
+                }
+            },
+        ),
+        "401": openapi.Response(
+            description="Токен идентификации не был передан",
+            examples={
+                "application/json": {
+                    "detail": "Учетные данные не были предоставлены."
+                }
+            },
+        ),
+    }
+
+    @swagger_auto_schema(
+        operation_description="Удаление проекта.",
+        responses=response_schema_dict,
+        manual_parameters=[],
+        request_body=UserProjectIdSerializer,
+    )
     def delete(self, request):
         id_serializer = UserProjectIdSerializer(
             data=self.request.data, context={"user": request.user}
@@ -185,12 +449,55 @@ class DeleteProjectView(views.APIView):
             Project, id=id_serializer.validated_data["id"]
         )
         project.delete()
-        return Response(
-            {"code": 200, "msg": "Проект удален"}, status=status.HTTP_200_OK
-        )
+        return Response({"msg": "Проект удален"}, status=status.HTTP_200_OK)
 
 
 class BossesProjectView(views.APIView):
+    response_schema_dict = {
+        "200": openapi.Response(
+            description="Список людей, с правами согласования инициативы.",
+            examples={
+                "application/json": [
+                    {
+                        "id": 1,
+                        "email": "z@mail.ru",
+                        "first_name": "z",
+                        "last_name": "z",
+                        "second_name": "z",
+                        "phone": "1",
+                        "is_superuser": True,
+                    },
+                ]
+            },
+        ),
+        "400": openapi.Response(
+            description="Передан id несуществующего проекта",
+            examples={
+                "application/json": {"id": ["project pk = 100 not exist"]}
+            },
+        ),
+        "401": openapi.Response(
+            description="Токен идентификации не был передан",
+            examples={
+                "application/json": {
+                    "detail": "Учетные данные не были предоставлены."
+                }
+            },
+        ),
+    }
+
+    @swagger_auto_schema(
+        operation_description="Список лиц у которых есть права согласовывать инициативы в проекте.",
+        responses=response_schema_dict,
+        manual_parameters=[
+            openapi.Parameter(
+                name="id",
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description="ID проекта",
+            )
+        ],
+    )
     def get(self, request):
         project: Project = get_object_or_404(Project, id=request.GET.get("id"))
         s = UserSerializer(

@@ -1,9 +1,9 @@
 import { AxiosResponse } from 'axios';
-import { AppDispatch, RootState } from './store';
+import { AppDispatch } from './store';
 import { createSlice } from '@reduxjs/toolkit';
-import { getComponents, getInitiativesList, getRequest, postRequest } from '../utils/requests';
-import { TBoss, TComponentsSettings, TCoordinationHistoryItem, TEvent, TInitiative, TPersonalStats, TRisk } from '../types';
-import { getUserInfoByIdThunk, getUserRightsThunk } from './auth-slice';
+import { getRequest } from '../utils/requests';
+import { TPersonalStats } from '../types';
+import { closeLoader, showLoader } from './state/state-slice';
 
 type TState = {
   personalStats: TPersonalStats;
@@ -70,9 +70,10 @@ export const {
 
 export default stateSlice.reducer;
 
-export const getPersonalStatsThunk = (projectId: number) => (dispatch: AppDispatch, getState: () => RootState) => {
+export const getPersonalStatsThunk = (projectId: number) => (dispatch: AppDispatch) => {
   try {
     dispatch(getPersonalStatsRequest());
+    dispatch(showLoader());
     if (!projectId) {
       throw new Error('Project doesnt exist')
     }
@@ -80,13 +81,16 @@ export const getPersonalStatsThunk = (projectId: number) => (dispatch: AppDispat
       `components/initiative/user/statistics/?id=${projectId}`,
       (res: AxiosResponse) => {
         dispatch(getPersonalStatsRequestSuccess(res.data));
+        dispatch(closeLoader());
       },
       () => {
         dispatch(getPersonalStatsRequestFailed());
+        dispatch(closeLoader());
       }
     );
   } catch (error) {
     dispatch(getPersonalStatsRequestFailed());
+    dispatch(closeLoader());
   }
   
 };

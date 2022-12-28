@@ -4,12 +4,13 @@ import SectionContent from '../section/section-content/section-content';
 import SectionHeader from '../section/section-header/section-header';
 import inputStyles from '../../styles/inputs.module.scss';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
-import { updateProjectState } from '../../redux/state-slice';
+import { updateProjectState } from '../../redux/state/state-slice';
 import { addPropertie, addPropertieValue, handlePropertieInutChange, isPropertie, isPropertieEdit, removePropertie, removePropertieValue } from '../../utils';
 
 // Styles
 import styles from './properties.module.scss';
 import CustomizedButton from '../button/button';
+import { useGetProjectInfoQuery } from '../../redux/state/state-api';
 
 type TPropertiesProps = {
   edit?: boolean;
@@ -19,7 +20,8 @@ type TPropertiesProps = {
 export default function Properties({
   edit,
 }: TPropertiesProps) {
-  const project = useAppSelector((store) => store.state.project.value);
+  const { currentId } = useAppSelector((store) => store.state.project);
+  const { data: project } = useGetProjectInfoQuery(currentId);
   const projectForEdit = useAppSelector((store) => store.state.projectForEdit);
   const dispatch = useAppDispatch();
 
@@ -81,14 +83,14 @@ export default function Properties({
                   dispatch
                 )}
               />
-              {el.values.map((itemProp: string, itemIndex: number) => (
+              {el.values.map((itemProp: { id: number, value: string }, itemIndex: number) => (
                 <div
-                  key={`prop_${index}_${itemIndex}`}
+                  key={`prop_${itemProp.id}_${itemIndex}`}
                   style={{ display: 'flex', alignItems: 'center' }}
                 >
                   <input
                     className={`${inputStyles.textInput} ${styles.input}`}
-                    value={itemProp}
+                    value={itemProp.value}
                     onChange={(e: ChangeEvent<HTMLInputElement>) => handlePropertieInutChange(
                       index,
                       projectForEdit,
@@ -139,7 +141,9 @@ export default function Properties({
             className={`${styles.propertieWrapper}`}
             key={propertie.id}
           >
-            <div>
+            <div
+              className={`${styles.propertieTitle}`}
+            >
               {propertie.title}
             </div>
             {propertie.items.map((item) => <div key={item.id}>{item.value}</div>)}

@@ -1,17 +1,20 @@
 import { useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import CustomizedButton from "../../components/button/button";
-import EventManagement from "../../components/event-management/event-management";
+import EventsTable from "../../components/events-table/events-table";
 import InitiativeCoordination from "../../components/initiative-coordination/initiative-coordination";
 import EventsDiagram from "../../components/initiative-events/initiative-events";
 import InitiativeManagement from "../../components/initiative-management/initiative-management";
 import InitiativesTable from "../../components/initiatives-table/initiatives-table";
-import ProjectTimeline from "../../components/project-timeline/project-timeline";
 import RiskManagement from "../../components/risk-management/risk-management";
+import RolesAlloction from "../../components/roles-allocation/roles-allocation";
 import { paths } from "../../consts";
-import { getUserInfoByIdThunk, getUserRightsThunk } from "../../redux/auth-slice";
+import { useGetAuthInfoByIdQuery } from "../../redux/auth/auth-api";
 import { getComponentsThunk } from "../../redux/components-slice";
-import { getInitiativesListThunk } from "../../redux/initiatives-slice";
+import { setCurrentInitiativeId } from "../../redux/initiatives-slice";
+import { useGetInitiativeByIdQuery, useGetInitiativesListQuery } from "../../redux/initiatives/initiatives-api";
+import { useGetProjectInfoQuery } from "../../redux/state/state-api";
+import { closeLoader, showLoader } from "../../redux/state/state-slice";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 
 //Styles
@@ -20,11 +23,31 @@ import styles from './initiatives-registry-page.module.scss';
 export default function InitiativesRegistryPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const currentId = useAppSelector((store) => store.state.project.currentId);
-  const project = useAppSelector((store) => store.state.project.value);
-  const { user, userRights } = useAppSelector((store) => store.auth);
-  const initiative = useAppSelector((store) => store.initiatives.initiative);
-  const initiativesList = useAppSelector((store) => store.initiatives.list);
+  const {
+    currentId,
+  } = useAppSelector((store) => store.state.project);
+  const { data: project } = useGetProjectInfoQuery(currentId);
+  const {
+    userRights
+  } = useAppSelector((store) => store.auth);
+  const { data: user } = useGetAuthInfoByIdQuery(currentId ? currentId : -1, {
+    skip: !currentId,
+  });
+  const {
+    data: initiativesList,
+    isFetching: isFetchingInitiativesList,
+  } = useGetInitiativesListQuery(currentId ? currentId : -1, {
+    skip: !currentId,
+  });
+  const {
+    currentInitiativeId
+  } = useAppSelector((store) => store.initiatives);
+  const {
+    data: initiative,
+    isFetching: isFetchingInitiative,
+  } = useGetInitiativeByIdQuery(currentInitiativeId ? currentInitiativeId : -1, {
+    skip: !currentInitiativeId,
+  });
   const isInitiativeApproved = initiative?.initiative.status?.value === -1;
 
   const onAddClickHandler = () => {
@@ -34,11 +57,33 @@ export default function InitiativesRegistryPage() {
 
   useEffect(() => {
     if (currentId) {
-      dispatch(getInitiativesListThunk(currentId));
+      // dispatch(getInitiativesListThunk(currentId));
       dispatch(getComponentsThunk(currentId));
       // dispatch(getUserInfoByIdThunk(currentId));
     }
   }, [currentId]);
+
+  useEffect(() => {
+    if (isFetchingInitiative || isFetchingInitiativesList) {
+      dispatch(showLoader());
+    } else {
+      dispatch(closeLoader());
+    }
+  }, [
+    isFetchingInitiative,
+    isFetchingInitiativesList,
+  ]);
+
+  useEffect(() => {
+    if (!currentInitiativeId && initiativesList?.length) {
+      dispatch(setCurrentInitiativeId(initiativesList[0].initiative.id));
+    }
+    return () => {
+      // dispatch(clearInitiativesList());
+      // dispatch(clearInitiative());
+      dispatch(setCurrentInitiativeId(null));
+    }
+  }, []);
 
   return (
     <div
@@ -48,7 +93,7 @@ export default function InitiativesRegistryPage() {
         className={`${styles.tableWrapper}`}
       >
         <InitiativesTable
-          initiativesList={initiativesList}
+          initiativesList={initiativesList || []}
         />
         {(user && user.user_flags_in_project?.is_create || user?.user.is_superuser) && (
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '40px'}}>
@@ -83,6 +128,10 @@ export default function InitiativesRegistryPage() {
           </section>
           <section>
             <EventsDiagram />
+            <EventsTable />
+          </section>
+          <section>
+            <RolesAlloction />
           </section>
           <section>
             <InitiativeCoordination />

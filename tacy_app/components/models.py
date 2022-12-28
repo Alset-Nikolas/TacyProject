@@ -230,6 +230,15 @@ class Initiatives(models.Model):
                     list_inits.append(init)
         return list_inits
 
+    def delete_node(self):
+        for item in InitiativesMetricsFields.objects.filter(
+            initiative=self
+        ).all():
+            InitiativesMetricsFields.add_delta_value(
+                self, metric_id=item.metric.id, delta=-item.value
+            )
+        return self.delete()
+
     @classmethod
     def get_status_failure(cls, init):
         init.status = (
@@ -526,7 +535,7 @@ class Events(models.Model):
         self.update_addfields()
 
     @classmethod
-    def delete_event(cls, event_id):
+    def delete_node(cls, event_id):
         event = Events.get_by_id(event_id)
         initiative: Initiatives = event.initiative
         for ev in event.metric_fields.all():
@@ -658,6 +667,13 @@ class Risks(models.Model):
         verbose_name="Название риска",
         help_text="Введите название риска",
     )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="author_risks",
+    )
 
     class Meta:
         constraints = [
@@ -686,6 +702,8 @@ class Risks(models.Model):
         id = info.pop("id")
         if "initiative" in info:
             info["initiative_id"] = info.pop("initiative")
+        if "author" in info:
+            info["author_id"] = info.pop("author")
 
         if id < 0:
             return Risks.objects.create(**info).id

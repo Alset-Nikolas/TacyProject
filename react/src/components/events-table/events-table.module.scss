@@ -1,0 +1,92 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 40px;
+  overflow-x: auto;
+}
+
+.toEventsLinkWrapper {
+  margin: 0 0 20px 20px;
+
+  a {
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 28px;
+    color: #504F4F;
+    text-decoration: none;
+  }
+}
+
+.buttonWraper {
+  display: flex;
+  justify-content: flex-end;
+  margin: 40px 20px 20px 0;
+}
+
+.inProgress {
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 28px;
+  color: #17598C;
+}
+
+.outdated {
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 28px;
+  color: #B04040;
+}
+
+.ready {
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 28px;
+  color: #8DB040;
+}
+
+.planned {
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 28px;
+  color: #504F4F;
+}
+
+.table {
+  background-color: #f4f4f4;
+  border-collapse: collapse;
+
+  td,
+  th {
+    padding-right: 20px;
+  }
+  
+}
+
+.tableHeader {
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 30px;
+  color: #504F4F;
+  text-align: left;
+}
+
+.titleCol {
+  min-width: 365px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-right: 0.5px solid #504F4F;
+  padding-left: 20px;
+}
+
+.dateCol {
+  min-width: 177px;
+}
+
+.additionalCol {
+  min-width: 120px;
+}
+
+.statusCol {
+  min-width: 160px;
+  padding-left: 20px;
+}

@@ -42,7 +42,9 @@ export default function ProjectCapacity({ edit }: TProjectCapacityProps) {
       <div className={`${styles.contentWrapper}`}>
         {project.properties.map((propertie) => (
           <SectionContent key={propertie.id}>
-            <div>
+            <div
+              className={`${styles.propertieTitle}`}
+            >
               {propertie.title}
             </div>
             {propertie.items.map((item) => <div key={item.id}>{item.value}</div>)}

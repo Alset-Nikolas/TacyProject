@@ -5,7 +5,7 @@ import Modal from "../../components/modal/modal";
 import Pictogram from "../../components/pictogram/pictogram";
 import { paths } from "../../consts";
 import { addEventThunk, deleteEventByIdThunk, getEventsListThunk, postEventByIdThunk, setEventsList } from "../../redux/evens-slice";
-import { closeModal, openDeleteEventModal } from "../../redux/state-slice";
+import { closeModal, openDeleteEventModal } from "../../redux/state/state-slice";
 import { TEvent } from "../../types";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 

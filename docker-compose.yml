@@ -2,21 +2,43 @@ version: "3"
 
 services:
   backend:
-    restart: unless-stopped
+    container_name: tacy_backend_container
     build:
       context: ./tacy_app
-    command: gunicorn tacy_app.wsgi --bind 0.0.0.0:8000
+    restart: always
+    volumes:
+      - .:/tacy_app
     ports:
       - "8000:8000"
     depends_on:
       - db
+    env_file:
+      - ./tacy_app/.env
   db:
-    container_name: dev_db
-    image: nouchka/sqlite3:latest
-    volumes:
-      - ./data/db:/root/db
+    container_name: "tacy_backend_postgres_container"
+    restart: always
+    image: "postgres:latest"
     environment:
-      - SQLITE3_DB=db.sqlite3
+      POSTGRES_DB: "tacy_project_db"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "qwerty"
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    volumes:
+      - ./tacy_app/docker_postgres_init.sql:/docker-entrypoint-initdb.d/docker_postgres_init.sql
+      - "./postgres:/var/lib/postgresql/data"
+    ports:
+      - "5433:5432"
+  pgadmin:
+    image: dpage/pgadmin4
+    depends_on:
+      - db
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=z@mail.ru
+      - PGADMIN_DEFAULT_PASSWORD=z
+      - PGADMIN_LISTEN_ADDRESS=0.0.0.0
+      - PGADMIN_LISTEN_PORT=5555
+    ports:
+      - "5555:5555"
   frontend:
     restart: unless-stopped
     build:

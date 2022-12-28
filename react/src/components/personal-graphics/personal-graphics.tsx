@@ -6,6 +6,7 @@ import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import CustomBarChart from "../custom-bar-chart/custom-bar-chart";
 import SectionContent from "../section/section-content/section-content";
 import SectionHeader from "../section/section-header/section-header";
+import GraphicSelectorButton from "../ui/graphic-selector-button/graphic-selector-button";
 
 // Styles
 import styles from './personal-graphics.module.scss';
@@ -85,26 +86,24 @@ export default function PersonalGraphics() {
             })}
           </div>
         )}
-        <div style={{display: 'flex',  gap: '20px'}}>
+        <div
+          className={`${styles.graphicSelectorButtonWrapper}`}
+        >
           {chartsProperties.map((el: string, index: number) => {
             return (
-              <div
-                key={el}
-                className={`${styles.propertieGraphic} ${currentPropertieIndex === index ? styles.active : ''}`}
-                style={{cursor: 'pointer'}}
+              <GraphicSelectorButton
+                key={`${el}_${index}`}
+                title={el}
+                active={currentPropertieIndex === index}
                 onClick={() => setCurrentPropertieIndex(index)}
-              >
-                {el}
-              </div>
+              />
             )
           })}
-          <div
-            className={`${styles.propertieGraphic} ${currentPropertieIndex === chartsProperties.length ? styles.active : ''}`}
-            style={{cursor: 'pointer'}}
+          <GraphicSelectorButton
+            title="Статус"
+            active={currentPropertieIndex === chartsProperties.length}
             onClick={() => setCurrentPropertieIndex(chartsProperties.length)}
-          >
-            Статус
-          </div>
+          />
         </div>
       </div>)}
       </SectionContent>

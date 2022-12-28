@@ -1,25 +1,21 @@
-import { useEffect } from "react";
 import TeamTable from "../../components/team-table/team-table";
-import { clearList, getTeamThunk } from "../../redux/team-slice";
-import { useAppDispatch, useAppSelector } from "../../utils/hooks";
+import { useGetProjectInfoQuery } from "../../redux/state/state-api";
+import { useGetTeamListQuery } from "../../redux/team/team-api";
+import { useAppSelector } from "../../utils/hooks";
 
 // Styles
 import styles from './team-page.module.scss';
 
 export default function TeamPage() {
-  const dispatch = useAppDispatch();
   const currentId = useAppSelector((store) => store.state.project.currentId);
-
-  useEffect(() => {
-    if (currentId) dispatch(getTeamThunk(currentId));
-    return () => {
-      dispatch(clearList());
-    }
-  }, [currentId]);
+  const { data: project } = useGetProjectInfoQuery(currentId);
+  const { data: teamList } = useGetTeamListQuery({ id: currentId ? currentId : -1, project: project ? project : null });
 
   return (
     <div className={`${styles.wrapper}`}>
-      <TeamTable />
+      <TeamTable
+        teamList={teamList ? teamList : []}
+      />
     </div>
   );
 }

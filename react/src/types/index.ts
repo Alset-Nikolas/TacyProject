@@ -55,8 +55,12 @@ export type TPropertie = {
 };
 
 export type TPropertieEdit = {
+  id: number;
   title: string;
-  values: Array<string>;
+  values: Array<{
+    id: number;
+    value: string;
+  }>;
 };
 
 export type TProject = {

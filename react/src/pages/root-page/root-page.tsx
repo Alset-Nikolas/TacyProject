@@ -8,7 +8,8 @@ import FullScreenLoader from '../../components/full-screen-loader/full-screen-lo
 import Header from '../../components/header/header';
 import { paths } from '../../consts';
 import { getUserInfoByIdThunk, getUserInfoThunk, setIsAuth } from '../../redux/auth-slice';
-import { getProjectInfoThunk, getProjectsListThunk, setCurrentProjectId } from '../../redux/state-slice';
+import { useGetProjectInfoQuery, useGetProjectsListQuery } from '../../redux/state/state-api';
+import { getProjectInfoThunk } from '../../redux/state/state-slice';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 
 // styles
@@ -19,39 +20,38 @@ export default function RootPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const savedProjectId = localStorage.getItem('project-id') ? Number.parseInt(localStorage.getItem('project-id')!) : null;
+  useGetProjectsListQuery();
+
+  useGetProjectInfoQuery(savedProjectId, {
+    skip: savedProjectId === null,
+  });
   
   useEffect(() => {
-    if (location.pathname.match('/')) {
+    const pathSplit = location.pathname.split('/');
+    // if (pathMatch) {
       if (!auth.isAuth) {
         if (localStorage.getItem('token')) {
           dispatch(setIsAuth());
           dispatch(getUserInfoThunk());
-          dispatch(getProjectsListThunk());
+          // dispatch(getProjectsListThunk());
           if (localStorage.getItem('project-id')) {
             const savedProjectId = localStorage.getItem('project-id');
             if (savedProjectId) dispatch(getProjectInfoThunk(Number.parseInt(savedProjectId)));
+          }
+          if (!pathSplit[1]) {
+            navigate(`/${paths.status}`);
           }
         } else {
           navigate(`/${paths.login}`);
         }
       }
-    }
+    // }
   }, []);
 
-  useEffect(() => {
-    if (project.currentId) dispatch(getUserInfoByIdThunk(project.currentId));
-  }, [project.currentId])
-
-  useEffect(() => {
-    const savedProjectId = localStorage.getItem('project-id');
-    if (project.currentId === null) {
-      if (savedProjectId && projectsList.value.find((item) => item.id === parseInt(savedProjectId))) {
-        dispatch(setCurrentProjectId(parseInt(savedProjectId)));
-      } else if (projectsList.value.length) {
-        dispatch(setCurrentProjectId(projectsList.value[0].id));
-      }
-    }
-  }, [projectsList]); 
+  // useEffect(() => {
+  //   if (project.currentId) dispatch(getUserInfoByIdThunk(project.currentId));
+  // }, [project.currentId])
 
   return (
     <div className={`${styles.wrapper}`}>

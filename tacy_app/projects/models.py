@@ -87,22 +87,14 @@ class Project(models.Model):
         return instanse
 
     @classmethod
-    def get_project_by_id(cls, id):
-        return cls.objects.filter(id=id).first()
+    def get_project_by_id(cls, id: int):
+        if isinstance(id, int) or id.isdigit():
+            return cls.objects.filter(id=int(id)).first()
 
     @classmethod
     def get_user_projects(cls, user: User):
         if user.is_superuser:
             return Project.objects.all()
-        # res = []
-        # ids = set()
-
-        # for p in list(user.projects.all()) + list(user.creator_projects.all()):
-        #     if p.id not in ids:
-        #         res.append(p)
-        #         ids.add(p.id)
-
-        # return res
         return user.projects.all()
 
     @staticmethod
@@ -224,8 +216,8 @@ class MetricsProject(models.Model):
         return f"<MetricsProject title={self.title}>"
 
     @classmethod
-    def get_metric_by_title(cls, title):
-        return cls.objects.filter(title=title).first()
+    def get_metric_by_title(cls, project, title):
+        return cls.objects.filter(title=title).filter(project=project).first()
 
     @classmethod
     def get_metric_by_id(cls, id):
@@ -237,12 +229,16 @@ class MetricsProject(models.Model):
     ):
         ids_not_delete = []
         for metric_info in metrics:
-            metric_old = (
-                cls.objects.filter(project=project)
-                .filter(title=metric_info["title"])
-                .first()
-            )
-            if not metric_old:
+            m_id = metric_info.get("id")
+            print("m_id", m_id)
+            if m_id and m_id > 0:
+                metric_old = cls.objects.filter(id=m_id).first()
+                metric_old.title = metric_info.get("title")
+                metric_old.active = metric_info["active"]
+                metric_old.target_value = metric_info["target_value"]
+                metric_old.units = metric_info["units"]
+                metric_old.save()
+            else:
                 metric_old = cls.objects.create(
                     project=project,
                     title=metric_info["title"],
@@ -250,11 +246,7 @@ class MetricsProject(models.Model):
                     target_value=metric_info["target_value"],
                     units=metric_info["units"],
                 )
-            else:
-                metric_old.active = metric_info["active"]
-                metric_old.target_value = metric_info["target_value"]
-                metric_old.units = metric_info["units"]
-                metric_old.save()
+            metric_info["id"] = metric_old.id
             ids_not_delete.append(metric_old.id)
         cls.objects.filter(project=project).exclude(
             id__in=ids_not_delete
@@ -294,22 +286,31 @@ class PropertiesItemsProject(models.Model):
         return cls.objects.filter(id=id).first()
 
     @classmethod
+    def get_property_item_by_title(cls, propertie, value):
+        return (
+            cls.objects.filter(propertie=propertie).filter(value=value).first()
+        )
+
+    @classmethod
     def update_properties_values_for_project(
-        cls, propertie, values: typing.List[str]
+        cls,
+        propertie,
+        values: typing.List[str],
     ):
         ids_not_delete = []
         for val in values:
-            val_obj = (
-                cls.objects.filter(propertie=propertie)
-                .filter(value=val)
-                .first()
-            )
-            if not val_obj:
+            id = val.get("id")
+            if id and id > 0:
+                val_obj = cls.get_property_item_by_id(id)
+                val_obj.value = val.get("value")
+                val_obj.save()
+            else:
                 val_obj = cls.objects.create(
                     propertie=propertie,
-                    value=val,
+                    value=val.get("value"),
                 )
             ids_not_delete.append(val_obj.id)
+            val["id"] = val_obj.id
         cls.objects.filter(propertie=propertie).exclude(
             id__in=ids_not_delete
         ).delete()
@@ -339,8 +340,8 @@ class PropertiesProject(models.Model):
         return f"<PropertiesProject title={self.title}>"
 
     @classmethod
-    def get_property_by_title(cls, title):
-        return cls.objects.filter(title=title).first()
+    def get_property_by_title(cls, project, title):
+        return cls.objects.filter(project=project).filter(title=title).first()
 
     @classmethod
     def get_property_by_id(cls, id):
@@ -352,12 +353,12 @@ class PropertiesProject(models.Model):
     ):
         ids_not_delete = []
         for p in properties:
-            propertie = (
-                cls.objects.filter(project=project)
-                .filter(title=p["title"])
-                .first()
-            )
-            if not propertie:
+            id = p.get("id")
+            if id and id > 0:
+                propertie = cls.get_property_by_id(id)
+                propertie.title = p.get("title")
+                propertie.save()
+            else:
                 propertie = cls.objects.create(
                     project=project,
                     title=p["title"],
@@ -367,6 +368,7 @@ class PropertiesProject(models.Model):
             PropertiesItemsProject.update_properties_values_for_project(
                 propertie=propertie, values=p["values"]
             )
+            p["id"] = p.get("id")
         cls.objects.filter(project=project).exclude(
             id__in=ids_not_delete
         ).delete()

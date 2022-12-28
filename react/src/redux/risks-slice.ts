@@ -153,7 +153,7 @@ export const getRisksListThunk = (initiativeId: number) => (dispatch: AppDispatc
     `components/risk/info/list/?id=${initiativeId}`,
     (res: AxiosResponse<{ initiative_risks: Array<TRisk> }>) => {
       try {
-        console.log(res.data);
+        // console.log(res.data);
       } catch (error) {
         console.log(error);
         dispatch(risksListRequestFailed());

@@ -4,6 +4,7 @@ import { TStage } from '../../types';
 import { chartConfig } from "../../utils/chartConfig";
 import { getCoordinate, setWidth } from "../../utils/utilities";
 import { fills } from "../../utils/fills";
+import { Tooltip } from "@mui/material";
 
 type TGanttD3BarsProps = {
   data: Array<{
@@ -23,15 +24,20 @@ export const GanttD3Bars = ({ data }: TGanttD3BarsProps) => {
 
     // console.log(getCoordinate(stage.date_start));
     return (
-      <rect
+      <Tooltip
         key={stage.id}
-        id={stage.id.toString()}
-        x={getCoordinate(stage.start) < 0 ? 0 : getCoordinate(stage.start)}
-        y={y}
-        width={setWidth(getCoordinate(stage.start), getCoordinate(stage.end))}
-        height={rectHeight}
-        fill={RED}
-      />
+        title={`Начало: ${stage.start} Окончание: ${stage.end}`}
+        placement="bottom-start"
+      >
+        <rect
+          id={stage.id.toString()}
+          x={getCoordinate(stage.start) < 0 ? 0 : getCoordinate(stage.start)}
+          y={y}
+          width={setWidth(getCoordinate(stage.start), getCoordinate(stage.end))}
+          height={rectHeight}
+          fill={RED}
+        />
+      </Tooltip>
     );
 
 

@@ -33,6 +33,7 @@
   font-size: 20px;
   line-height: 30px;
   color: #504F4F;
+  margin-right: 50px;
 }
 
 .initiativeNumber {
@@ -43,6 +44,9 @@
 }
 
 .paramsList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   padding: 0 0 0 20px;
 }
 

@@ -3,7 +3,7 @@ import { AppDispatch, RootState } from './store';
 import { createSlice } from '@reduxjs/toolkit';
 import { getComponents, postRequest } from '../utils/requests';
 import { TComponentsSettings, IRegistryPropertie, TUpdateComponents } from '../types';
-import { openErrorModal } from './state-slice';
+import { openErrorModal } from './state/state-slice';
 
 type TState = {
   value: TComponentsSettings | null;
@@ -126,7 +126,7 @@ export const getComponentsThunk = (id: number) => (dispatch: AppDispatch, getSta
     id,
     (res: AxiosResponse<TComponentsSettings>) => {
       try {
-        console.log(res.data);
+        // console.log(res.data);
       } catch (error) {
         console.log(error);
         dispatch(componentsRequestFailed());

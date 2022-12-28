@@ -24,12 +24,28 @@ from django.conf import settings
 from projects.models import Project
 from django.contrib.auth import get_user_model
 from notifications.models import NotificationsUser
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 
 User = get_user_model()
 
 
 class CoordinationHistory(views.APIView):
+    @swagger_auto_schema(
+        operation_description="История чата",
+        manual_parameters=[
+            openapi.Parameter(
+                name="id",
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description="ID инициативы",
+            )
+        ],
+    )
     def get(self, request, form=None):
+        id_init = request.GET.get("id")
+        if not id_init or not id_init.isdigit():
+            return Response({"msg": "not init id valid"}, 400)
         initiative: Initiatives = get_object_or_404(
             Initiatives, id=request.GET.get("id")
         )
@@ -53,6 +69,10 @@ class SentForApproval(views.APIView):
         init = Initiatives.get_by_id(id)
         return init.status
 
+    @swagger_auto_schema(
+        operation_description="Отправить на согласование инициативу",
+        request_body=SentForApprovalSerializer,
+    )
     def post(self, request):
         serializer = SentForApprovalSerializer(
             data=request.data, context={"user": request.user}
@@ -89,6 +109,17 @@ class SentForApproval(views.APIView):
 
 
 class InfoInitiativeRole(views.APIView):
+    @swagger_auto_schema(
+        operation_description="Роль пользователя в инициативе",
+        manual_parameters=[
+            openapi.Parameter(
+                name="id",
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description="ID инициативы",
+            )
+        ],
+    )
     def get(self, request):
         user = request.user
         initiative_id = request.GET.get("id")
@@ -132,6 +163,10 @@ class AddComment(views.APIView):
         )
         msg.send()
 
+    @swagger_auto_schema(
+        operation_description="Добавить сообщение в чат.",
+        request_body=AddCommentSerializer,
+    )
     def post(self, request):
         user: User = request.user
         serializer = AddCommentSerializer(
@@ -233,6 +268,10 @@ class Approval(views.APIView):
                 self._add_history_initiative_activate(request)
                 initiative.save()
 
+    @swagger_auto_schema(
+        operation_description="Согласовать на очередном этапе.",
+        request_body=ApprovalSerializer,
+    )
     def post(self, request):
         user: User = request.user
         serializer = ApprovalSerializer(
@@ -249,6 +288,10 @@ class Approval(views.APIView):
 
 
 class Switch(views.APIView):
+    @swagger_auto_schema(
+        operation_description="Переключатель инициативы (отозовать)",
+        request_body=SwitchSerializer,
+    )
     def post(self, request):
         user: User = request.user
         serializer = SwitchSerializer(

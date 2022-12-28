@@ -14,10 +14,9 @@ import {
   deleteProjectThunk,
   getProjectInfoThunk,
   closeModal,
-  setCurrentProjectId,
   getProjectsListThunk,
   openDeleteProjectModal
-} from '../../redux/state-slice';
+} from '../../redux/state/state-slice';
 import ProjectCapacity from '../project-capacity/projects-capacity';
 // Mock data
 // import { mockProjectData as project } from '../../consts';
@@ -26,6 +25,7 @@ import ProjectCapacity from '../project-capacity/projects-capacity';
 import styles from './basic-settings-view.module.scss';
 import Properties from '../properties/properties';
 import Modal from '../modal/modal';
+import { useGetProjectInfoQuery } from '../../redux/state/state-api';
 
 type TBasicSettingsViewProps = {
   onEditClick: MouseEventHandler<HTMLDivElement>;
@@ -33,36 +33,22 @@ type TBasicSettingsViewProps = {
 
 export default function BasicSettingsView({ onEditClick }: TBasicSettingsViewProps) {
   const dispatch = useAppDispatch();
-  const { projectsList, project, app: { modal } } = useAppSelector((store) => store.state);
-  // const project = useAppSelector((store) => store.state.project.value);
-  // const isDeleteSuccess = useAppSelector((store) => store.state.projectDelete.isGetRequestSuccess);
-  // const isCreateSuccess = useAppSelector((store) => store.state.projectCreate.isGetRequestSuccess);
+  const { currentId } = useAppSelector((store) => store.state.project);
+  const { modal } = useAppSelector((store) => store.state.app);
+  const { data: project } = useGetProjectInfoQuery(currentId);
 
   const deleteClickHandler = () => {
     dispatch(openDeleteProjectModal());
-    // if (project.value) {
-    //   dispatch(deleteProjectListElement(project.value.id));
-    //   dispatch(deleteProjectThunk(project.value.id));
-    // }
   };
 
   const confirmClickHandler = () => {
-    if (project.value) {
+    if (project) {
       dispatch(closeModal());
-      // dispatch(deleteProjectListElement(project.value.id));
-      dispatch(deleteProjectThunk(project.value.id));
+      dispatch(deleteProjectThunk(project.id));
     }
-  }
+  };
 
-  useEffect(() => {
-    dispatch(getProjectInfoThunk(project.currentId));
-  }, []);
-
-  // useEffect(() => {
-  //   if (!projectsList.value.find((el) => el.id === project.currentId)) dispatch(setCurrentProjectId(projectsList.value[0].id));
-  // }, [projectsList]);
-
-  if (!project.value?.id || !project.currentId) return null;
+  if (!project?.id || !currentId) return null;
 
   return (
     <div className={`${styles.wrapper}`}>
@@ -93,8 +79,8 @@ export default function BasicSettingsView({ onEditClick }: TBasicSettingsViewPro
       </section>
       <Properties />
       <ProjectsElements
-        roles={project.value.roles}
-        rights={project.value.rights}
+        roles={project.roles}
+        rights={project.rights}
       />
       <div className={`${styles.deleteButtonWrapper}`}>
         <CustomizedButton

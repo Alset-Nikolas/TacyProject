@@ -3,7 +3,7 @@ import { AppDispatch, RootState } from './store';
 import { createSlice } from '@reduxjs/toolkit';
 import { getTeamList, postTeamList } from '../utils/requests';
 import { TPropertie, TRequestTeamListItem, TTeamMember, TUser, TUserRequest } from '../types';
-import { closeLoader, openErrorModal, showLoader } from './state-slice';
+import { closeLoader, openErrorModal, showLoader } from './state/state-slice';
 
 type TState = {
   list: Array<TTeamMember>;
@@ -157,6 +157,7 @@ export const getTeamThunk = (id: number) => (dispatch: AppDispatch, getState: ()
   if (id !== project?.id) return;
 
   dispatch(teamRequest());
+  dispatch(showLoader());
   getTeamList(
     id,
     (res: AxiosResponse<{ community_info: Array<TRequestTeamListItem<TUserRequest>> }>) => {
@@ -188,9 +189,11 @@ export const getTeamThunk = (id: number) => (dispatch: AppDispatch, getState: ()
         }
       });
       dispatch(teamRequestSuccess(teamList));
+    dispatch(closeLoader());
     },
     () => {
       dispatch(teamRequestFailed());
+      dispatch(closeLoader());
     }
   );
 };

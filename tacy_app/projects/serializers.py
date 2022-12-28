@@ -43,20 +43,28 @@ class IntermediateDatesSerializer(serializers.Serializer):
     intermediate_dates = IntermediateDateSerializer(many=True)
 
 
+class PropertiesItemsProjectSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(default=-1)
+
+    class Meta:
+        model = PropertiesItemsProject
+        fields = (
+            "id",
+            "value",
+        )
+
+
 class PropertieSerializer(serializers.Serializer):
     """
     Свойство проекта
     """
 
+    id = serializers.IntegerField(default=-1)
     title = serializers.CharField(
         label="title",
         write_only=True,
     )
-    values = serializers.ListField(
-        child=serializers.CharField(
-            label="values",
-        )
-    )
+    values = PropertiesItemsProjectSerializer(many=True)
 
 
 class ProjectStagesSerializer(serializers.ModelSerializer):
@@ -87,6 +95,8 @@ class MetrcsProjectSerializer(serializers.ModelSerializer):
     """
     Метрика проекта
     """
+
+    id = serializers.IntegerField(default=-1)
 
     class Meta:
         model = MetricsProject
@@ -174,6 +184,84 @@ class CreateProjectSerializer(serializers.ModelSerializer):
                 }
             )
 
+    def _validate_update_metrics_project(self, attrs):
+        if attrs["id"] > 0:
+            project = Project.get_project_by_id(attrs["id"])
+            for m in attrs.get("metrics", []):
+                m_obj = MetricsProject.get_metric_by_id(m.get("id", -1))
+                if m_obj:
+                    if m_obj.project != project:
+                        raise serializers.ValidationError(
+                            {
+                                "metrics": "id metrics error",
+                                "msg_er": "Не соответвует id метрики и id проекты",
+                                "details": f"id error {m.get('id')}",
+                            }
+                        )
+                    m_problem = MetricsProject.get_metric_by_title(
+                        project, m_obj.title
+                    )
+                    if m_problem != m_obj:
+                        raise serializers.ValidationError(
+                            {
+                                "metric name": "name metrics error",
+                                "msg_er": "Название метрик уникально в рамках проекта",
+                                "details": f"name problem {m_obj.title}",
+                            }
+                        )
+
+    def __validate_update_propertie_value_project(self, values):
+        unique = set()
+        for p_item in values:
+            id_item = p_item.get("id")
+            value = p_item.get("value")
+            unique.add(value)
+            if id_item > 0:
+                p_item_obj = PropertiesItemsProject.get_property_item_by_id(
+                    id_item
+                )
+                if not p_item_obj:
+                    raise serializers.ValidationError(
+                        {
+                            "properties value id": "id value properie error",
+                            "msg_er": "Нету с таким id обьекта",
+                            "details": f"title problem {value}",
+                        }
+                    )
+
+        if len(unique) != len(values):
+            raise serializers.ValidationError(
+                {
+                    "properties value title": "title value properie error",
+                    "msg_er": "Название значений в емкости уникальны",
+                }
+            )
+
+    def _validate_update_propertie_project(self, attrs):
+        project = Project.get_project_by_id(attrs.get("id", -1))
+        unique = set()
+        properties = attrs.get("properties", [])
+        for p in properties:
+            if project:
+                p_obj = PropertiesProject.get_property_by_id(p.get("id", -1))
+                if p_obj and p_obj.project != project:
+                    raise serializers.ValidationError(
+                        {
+                            "properties": "id properties error",
+                            "msg_er": "Не соответвует id свойства и id проекты",
+                            "details": f"id error {p.get('id')}",
+                        }
+                    )
+                self.__validate_update_propertie_value_project(p.get("values"))
+            unique.add(p.get("title"))
+        if len(unique) != len(properties):
+            raise serializers.ValidationError(
+                {
+                    "properties title": "title value properie error",
+                    "msg_er": "Название емкостей уникальны в рамках проекта",
+                }
+            )
+
     def validate(self, attrs):
         super().validate(attrs)
         self._validate_intermediate_dates(attrs)
@@ -182,6 +270,8 @@ class CreateProjectSerializer(serializers.ModelSerializer):
         self._validate_main_dates(attrs)
         self._validate_uniq_name(attrs)
         self._validate_update_exist_project(attrs)
+        self._validate_update_metrics_project(attrs)
+        self._validate_update_propertie_project(attrs)
         attrs["author"] = request.user
         return attrs
 
@@ -370,7 +460,6 @@ class PropertiesProjectSerializer(serializers.Serializer):
     id = serializers.IntegerField()
 
     def validate_id(self, id):
-        print("PropertiesProjecttSerializer", id)
         project = self.context.get("project")
         p_name_obj = PropertiesProject.get_property_by_id(id=id)
         if not p_name_obj:
@@ -390,16 +479,15 @@ class PropertiesProjectSerializer(serializers.Serializer):
         return id
 
 
-class PropertiesItemsProjectSerializer(serializers.Serializer):
+class PropertiesItemsIdProjectSerializer(serializers.Serializer):
     id = serializers.IntegerField()
 
 
 class ProperitsUserSerializer(serializers.Serializer):
     title = PropertiesProjectSerializer()
-    values = PropertiesItemsProjectSerializer(many=True)
+    values = PropertiesItemsIdProjectSerializer(many=True)
 
     def validate(self, data):
-        print("data ProperitsUserSerializer", data)
         propert_obj = data["title"]
         p_name_obj = PropertiesProject.get_property_by_id(
             id=propert_obj.get("id")

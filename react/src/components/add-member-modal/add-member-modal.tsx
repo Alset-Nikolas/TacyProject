@@ -1,7 +1,8 @@
 import { SelectChangeEvent } from "@mui/material";
 import { setDefaultResultOrder } from "dns/promises";
 import { ChangeEvent, useState } from "react";
-import { closeModal } from "../../redux/state-slice";
+import { useGetProjectInfoQuery } from "../../redux/state/state-api";
+import { closeModal } from "../../redux/state/state-slice";
 import { addMember } from "../../redux/team-slice";
 import { TTeamMember } from "../../types";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
@@ -12,9 +13,14 @@ import CustomizedSelect from "../select/Select";
 // Styles
 import styles from './add-member-modal.module.scss';
 
-export default function AddMemberModal() {
+type TAddMemberProps = {
+  addMember: any;
+};
+
+export default function AddMemberModal({ addMember }: TAddMemberProps) {
   const dispatch = useAppDispatch();
-  const project = useAppSelector((store) => store.state.project.value);
+  const { currentId } = useAppSelector((store) => store.state.project);
+  const { data: project } = useGetProjectInfoQuery(currentId ? currentId : -1);
   const [stage, setStage] = useState(1);
   const [isError, setIsError] = useState(false);
   const [name, setName] = useState({
@@ -121,7 +127,8 @@ export default function AddMemberModal() {
 
   const onAddClickHandler = () => {
     dispatch(closeModal());
-    dispatch(addMember(newMember));
+    // dispatch(addMember(newMember));
+    addMember(newMember);
   };
 
   const modalButtonHandler = () => {

@@ -1,5 +1,5 @@
 .wrapper {
-  width: 608px;
+  min-width: 570px;
   display: flex;
   flex-direction: column;
   background: #FFFFFF;
@@ -29,7 +29,7 @@
 }
 
 .section {
-  overflow-x: auto;
+  // overflow-x: auto;
 }
 
 .content {
@@ -75,7 +75,7 @@
 
 .metricsWrapper {
   display: flex;
-  flex-direction: row;
+  flex-flow: row wrap;
   gap: 40px;
 }
 

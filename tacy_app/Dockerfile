@@ -1,10 +1,15 @@
 FROM python:3.8.10
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
-WORKDIR /app
-COPY requirements.txt /app/
+WORKDIR /tacy_app
+COPY requirements.txt /tacy_app/
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
-COPY . /app/
+COPY . /tacy_app/
 EXPOSE 8000
-ENV PYTHONPATH "${PYTHONPATH}:/app"
+ENV PYTHONPATH "${PYTHONPATH}:/tacy_app"
+
+ADD docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod a+x /docker-entrypoint.sh
+ENTRYPOINT ["/docker-entrypoint.sh"]
+

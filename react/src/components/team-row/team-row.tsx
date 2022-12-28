@@ -1,6 +1,6 @@
 import { SelectChangeEvent } from "@mui/material";
 import { ChangeEvent } from "react";
-import { closeModal, openDeleteMemberModal } from "../../redux/state-slice";
+import { closeModal, openDeleteMemberModal } from "../../redux/state/state-slice";
 import { addNotExistingPropertie, setList } from "../../redux/team-slice";
 import { TTeamMember } from "../../types";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
@@ -17,9 +17,10 @@ type TTeamRowProps = {
   edit?: boolean;
   header?: boolean;
   index?: number;
+  removeMember?: (index: number) => void;
 };
 
-export default function TeamRow({ index, member, edit, header }: TTeamRowProps) {
+export default function TeamRow({ index, member, edit, header, removeMember }: TTeamRowProps) {
   const project = useAppSelector((store) => store.state.project.value);
   const membersList = useAppSelector((store) => store.team.list); 
   const modal = useAppSelector((store) => store.state.app.modal);
@@ -74,9 +75,10 @@ export default function TeamRow({ index, member, edit, header }: TTeamRowProps) 
   };
 
   const onConfirmClickHandler = () => {
-    const newList = [...membersList];
-    newList.splice(index, 1);
-    dispatch(setList(newList));
+    // const newList = [...membersList];
+    // newList.splice(index, 1);
+    // dispatch(setList(newList));
+    if (typeof removeMember === 'function') removeMember(index);
     dispatch(closeModal());
   };
 

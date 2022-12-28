@@ -1,11 +1,8 @@
 import { AxiosResponse } from 'axios';
 import { AppDispatch, RootState } from './store';
 import { createSlice } from '@reduxjs/toolkit';
-import { getComponents, getInitiativesList, getRequest, postRequest } from '../utils/requests';
-import { TBoss, TComponentsSettings, TCoordinationHistoryItem, TEvent, TInitiative, TRisk } from '../types';
-import { getUserInfoByIdThunk, getUserRightsThunk } from './auth-slice';
-import Properties from '../components/properties/properties';
-import { closeLoader, openErrorModal, showLoader } from './state-slice';
+import { getRequest, postRequest } from '../utils/requests';
+import { closeLoader, openErrorModal, showLoader } from './state/state-slice';
 
 type TState = {
   graphics: Array<{

@@ -1,5 +1,6 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import { REACT_APP_BACKEND_URL } from '../consts';
+import { TProject, TProjectForEdit, TRequestTeamListItem, TUser } from '../types';
 
 export async function getProjectInfo(
   successCallback: (response: AxiosResponse) => void,
@@ -92,7 +93,7 @@ export async function getProjectsList(
 }
 
 export function createProjectRequest(
-  body: any,
+  body: TProject | TProjectForEdit,
   successCallback: (response: AxiosResponse) => void,
   errorCallback: (error: AxiosError) => void,
 ) {
@@ -125,7 +126,7 @@ export function authUser(
   successCallback: (response: AxiosResponse) => void,
   errorCallback: (error: AxiosError) => void,
 ) {
-  console.log(REACT_APP_BACKEND_URL);
+  // console.log(REACT_APP_BACKEND_URL);
 
   const client = axios.create({ baseURL: REACT_APP_BACKEND_URL });
   
@@ -262,7 +263,7 @@ export function getTeamList(
 
 export function postTeamList(
   id: number,
-  body: { community_info: Array<any> },
+  body: { community_info: Array<TRequestTeamListItem<TUser>> },
   successCallback: (response: AxiosResponse) => void,
   errorCallback: (error: AxiosError) => void,
 ) {

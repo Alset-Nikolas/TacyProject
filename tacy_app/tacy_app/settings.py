@@ -7,8 +7,9 @@ SECRET_KEY = (
 )
 ALLOWED_HOSTS = ["158.160.19.111", "127.0.0.1", "localhost"]
 
-DEBUG = False
-CORS_ORIGIN_ALLOW_ALL = True
+DEBUG = True
+
+# CORS_URLS_REGEX = r"^/api/.*$"
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
     "accept",
@@ -22,6 +23,11 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
 ]
 CORS_ALLOW_METHODS = ["DELETE", "GET", "OPTIONS", "PATCH", "POST", "PUT"]
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]
+CORS_ORIGIN_ALLOW_ALL = True
+
 AUTH_USER_MODEL = "users.User"
 
 INSTALLED_APPS = [
@@ -34,6 +40,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "django_rest_passwordreset",
+    "drf_yasg",
     "corsheaders",
     "users",
     "projects",
@@ -79,12 +86,31 @@ WSGI_APPLICATION = "tacy_app.wsgi.application"
 
 
 DATABASES = {
+    # "default": {
+    #     "ENGINE": "django.db.backends.sqlite3",
+    #     "NAME": BASE_DIR / "db.sqlite3",
+    # }
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "tacy_project_db",
+        "USER": "postgres",
+        "PASSWORD": "qwerty",
+        "HOST": "tacy_backend_postgres_container",
+        "PORT": "5432",
     }
 }
 
+SWAGGER_SETTINGS = {
+    "SECURITY_DEFINITIONS": {
+        "Bearer": {
+            "type": "apiKey",
+            "name": "Authorization",
+            "in": "header",
+            "description": "Формат: Token *****",
+        }
+    },
+    "DEFAULT_MODEL_RENDERING": "example",
+}
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -111,8 +137,8 @@ USE_L10N = True
 
 USE_TZ = True
 
-STATIC_URL = "static/"
-
+STATIC_URL = "/static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
@@ -122,6 +148,8 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": [
         "rest_framework.permissions.IsAuthenticated",
     ],
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 5,
 }
 
 
@@ -134,6 +162,8 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 
 ######ТУТ
+EMAIL_HOST_USER = ""
+EMAIL_HOST_PASSWORD = ""
 
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
@@ -143,5 +173,5 @@ SITE_FULL_NAME = "Site name"
 
 if DEBUG:
     SITE_DOMAIN = "http://127.0.0.1:3000"
-    # EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
-    # EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
+    EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+    EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")

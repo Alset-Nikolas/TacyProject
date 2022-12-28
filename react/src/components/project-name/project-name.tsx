@@ -1,33 +1,34 @@
-import { ChangeEvent, ChangeEventHandler, useState } from 'react';
-import Pictogram from '../pictogram/pictogram';
-import SectionHeader from '../section/section-header/section-header';
-
-// Styles
-import styles from './project-name.module.scss';
+import { ChangeEvent } from 'react';
 import textStyles from '../../styles/text.module.scss';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import { handleInputChange } from '../../utils';
 import DateInput from '../date-input/date-input';
+import { useGetProjectInfoQuery } from '../../redux/state/state-api';
+
+// Styles
+import styles from './project-name.module.scss';
 
 type TProjectNameProps = {
   edit?: boolean;
   create?: boolean;
+  error?: any;
 }
 
 export default function ProjectName({
   edit,
   create,
+  error,
 }: TProjectNameProps) {
   const { sectionHeaderText, inputLabelText } = textStyles;
   const dispatch = useAppDispatch();
-  const project = useAppSelector((store) => store.state.project.value);
   const projectForEdit = useAppSelector((store) => store.state.projectForEdit);
+  const { currentId } = useAppSelector((store) => store.state.project);
+  const { data: project } = useGetProjectInfoQuery(currentId);
 
   const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
     if (projectForEdit) handleInputChange(e, projectForEdit, dispatch);
   };
 
-  if (!project) return null;
   if (edit) {
     if (!projectForEdit) return null;
     return (
@@ -40,7 +41,7 @@ export default function ProjectName({
             Название проекта
           </label>
           <input
-            className={`${styles.input}`}
+            className={`${styles.input} ${error?.name ? styles.error : ''}`}
             id="name"
             name="name"
             value={projectForEdit.name}
@@ -95,7 +96,7 @@ export default function ProjectName({
             Название проекта
           </label>
           <input
-            className={`${styles.input}`}
+            className={`${styles.input} ${error?.name ? styles.error : ''}`}
             id="name"
             name="name"
             value={projectForEdit.name}
@@ -111,7 +112,7 @@ export default function ProjectName({
               Дата начала
             </label>
             <DateInput
-              className={`${styles.input}`}
+              className={`${styles.input} ${error?.date_start ? styles.error : ''}`}
               id="date_start"
               name="date_start"
               value={projectForEdit.date_start}
@@ -126,7 +127,7 @@ export default function ProjectName({
               Дата окончания
             </label>
             <DateInput
-              className={`${styles.input}`}
+              className={`${styles.input} ${error?.date_end ? styles.error : ''}`}
               id="date_end"
               name="date_end"
               value={projectForEdit.date_end}
@@ -138,6 +139,7 @@ export default function ProjectName({
     );
   }
 
+  if (!project) return null;
   return (
     <div className={`${styles.wrapper}`}>
       {/* <div className={`${textStyles.sectionHeaderText} ${sectionsStyles.header}`}>

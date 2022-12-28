@@ -9,6 +9,7 @@ type TState = {
   personalList: Array<TInitiative>;
 
   initiative: TInitiative | null;
+  currentInitiativeId: number | null;
 
   initiativesListRequest: boolean,
   initiativesListRequestSuccess: boolean,
@@ -32,6 +33,7 @@ const initialState: TState = {
   personalList: [],
 
   initiative: null,
+  currentInitiativeId: null,
 
   initiativesListRequest: false,
   initiativesListRequestSuccess: false,
@@ -59,6 +61,9 @@ export const stateSlice = createSlice({
         ...state,
         ...action.payload,
       };
+    },
+    setCurrentInitiativeId: (state, action) => {
+      state.currentInitiativeId = action.payload;
     },
     initiativesListRequest: (state) => {
       return {
@@ -132,6 +137,9 @@ export const stateSlice = createSlice({
     clearInitiative: (state) => {
       state.initiative = null;
     },
+    clearInitiativesList: (state) => {
+      state.list = [];
+    },
     addInitiativeRequest: (state) => {
       return {
         ...state,
@@ -159,6 +167,7 @@ export const stateSlice = createSlice({
 
 export const {
   setInitiativesState,
+  setCurrentInitiativeId,
   initiativesListRequest,
   initiativesListRequestSuccess,
   initiativesListRequestFailed,
@@ -169,6 +178,7 @@ export const {
   initiativesByIdRequestSuccess,
   initiativesByIdRequestFailed,
   clearInitiative,
+  clearInitiativesList,
   addInitiativeRequest,
   addInitiativeRequestSuccess,
   addInitiativeRequestFailed,
@@ -189,14 +199,14 @@ export const getInitiativesListThunk = (id: number) => (dispatch: AppDispatch, g
     id,
     (res: AxiosResponse<{ project_initiatives: Array<TInitiative> }>) => {
       try {
-        console.log(res.data);
+        // console.log(res.data);
         if (!project) {
           throw new Error('Project is Missing');
         }
         if (id !== project.id) {
           throw new Error('Wrong project id');
         }
-        if (!initiative) dispatch(getInitiativeByIdThunk(res.data.project_initiatives[0].initiative.id));
+        if (!initiative && res.data.project_initiatives.length) dispatch(getInitiativeByIdThunk(res.data.project_initiatives[0].initiative.id));
       } catch (error) {
         console.log(error);
         dispatch(initiativesListRequestFailed());
@@ -248,7 +258,7 @@ export const getInitiativeByIdThunk = (id: number) => (dispatch: AppDispatch, ge
     `/components/initiative/info/?id=${id}`,
     (res: AxiosResponse<TInitiative>) => {
       try {
-        console.log(res.data);
+        // console.log(res.data);
         const newInitiative = {} as any;
         // newInitiative                  
       } catch (error) {

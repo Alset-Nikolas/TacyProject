@@ -16,9 +16,8 @@ import textStyles from '../../styles/text.module.scss';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import { addPropertie, isPropertie, isStage, makeProjectFordit } from '../../utils';
 import Properties from '../properties/properties';
-import { stringify } from 'querystring';
-import { TIntermediateDate, TMetrica, TPropertie, TPropertieEdit, TRight, TRole, TStage, TStageEdit } from '../../types';
-import { clearProjectForEdit, setProjectForEdit } from '../../redux/state-slice';
+import { clearProjectForEdit, closeModal, setProjectForEdit } from '../../redux/state/state-slice';
+import ModalInfo from '../modal-info/modal-info';
 
 type TBasicSettingsEditProps = {
   onSaveClick: MouseEventHandler<HTMLButtonElement>;
@@ -28,11 +27,13 @@ type TBasicSettingsEditProps = {
 export default function BasicSettingsEdit({ onSaveClick, onCancelClick }: TBasicSettingsEditProps) {
   const dispatch = useAppDispatch();
   const project = useAppSelector((store) => store.state.project.value);
+  const modal = useAppSelector((store) => store.state.app.modal);
 
   useEffect(() => {
     if (project) dispatch(setProjectForEdit(makeProjectFordit(project)));
     return () => {
       dispatch(clearProjectForEdit());
+      dispatch(closeModal());
     };
   }, []);
   
@@ -94,6 +95,9 @@ export default function BasicSettingsEdit({ onSaveClick, onCancelClick }: TBasic
           onClick={onSaveClick}
         />
       </div>
+      {modal.isOpen && modal.type.error && (
+        <ModalInfo message={modal.message} />
+      )}
     </div>
   );
 }

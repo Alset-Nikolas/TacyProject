@@ -49,6 +49,8 @@ class PropertieSerializer(serializers.ModelSerializer):
     class Meta:
         model = PropertiesProject
         fields = ("id", "title")
+        read_only_fields = ["id"]
+        ref_name = "test"
 
     def validate_id(self, id):
 

@@ -1,11 +1,10 @@
+import { IconButton, Tooltip } from "@mui/material";
 import { useEffect, useState } from "react";
-import { GanttD3 } from "../../d3/GanttD3/GanttD3";
 import { getGraphicsThunk } from "../../redux/graphics-slice";
-import { ganttDataCreator } from "../../utils/ganttData";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import CustomBarChart from "../custom-bar-chart/custom-bar-chart";
 import SectionContent from "../section/section-content/section-content";
-import SectionHeader from "../section/section-header/section-header";
+import GraphicSelectorButton from "../ui/graphic-selector-button/graphic-selector-button";
 
 // Styles
 import styles from './graphics.module.scss';
@@ -45,13 +44,18 @@ export default function Graphics() {
             {statusGraphics.map((el, index) => {
               return (
                 <div
-                  key={index}
+                  key={`${el.metricName}_${index}`}
                 >
-                  <div
-                    className={`${styles.metricNameGraphic}`}
+                  <Tooltip
+                    title={el.metricName}
+                    placement="bottom-start"
                   >
-                    {el.metricName}
-                  </div>
+                    <div
+                      className={`${styles.metricNameGraphic}`}
+                    >
+                      {el.metricName}
+                    </div>
+                  </Tooltip>
                   <div
                     className={`${styles.chartWrapper}`}
                   >
@@ -70,11 +74,16 @@ export default function Graphics() {
                 <div
                   key={index}
                 >
-                  <div
-                    className={`${styles.metricNameGraphic}`}
+                  <Tooltip
+                    title={el.metricName}
+                    placement="bottom-start"
                   >
-                    {el.metricName}
+                    <div
+                      className={`${styles.metricNameGraphic}`}
+                    >
+                      {el.metricName}
                   </div>
+                 </Tooltip>
                   <div
                     className={`${styles.chartWrapper}`}
                   >
@@ -85,26 +94,31 @@ export default function Graphics() {
             })}
           </div>
         )}
-        <div style={{display: 'flex',  gap: '20px'}}>
+        <div
+          className={`${styles.graphicSelectorButtonWrapper}`}
+        >
           {chartsProperties.map((el: string, index: number) => {
             return (
-              <div
-                key={el}
-                className={`${styles.propertieGraphic} ${currentPropertieIndex === index ? styles.active : ''}`}
-                style={{cursor: 'pointer'}}
+              <GraphicSelectorButton
+                key={`${el}_${index}`}
+                title={el}
+                active={currentPropertieIndex === index}
                 onClick={() => setCurrentPropertieIndex(index)}
-              >
-                {el}
-              </div>
+              />
             )
           })}
-          <div
+          <GraphicSelectorButton
+            title="Статус"
+            active={currentPropertieIndex === chartsProperties.length}
+            onClick={() => setCurrentPropertieIndex(chartsProperties.length)}
+          />
+          {/* <div
             className={`${styles.propertieGraphic} ${currentPropertieIndex === chartsProperties.length ? styles.active : ''}`}
             style={{cursor: 'pointer'}}
             onClick={() => setCurrentPropertieIndex(chartsProperties.length)}
           >
             Статус
-          </div>
+          </div> */}
         </div>
       </div>)}
       </SectionContent>

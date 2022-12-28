@@ -1,0 +1,38 @@
+.wrapper {
+	margin-bottom: 40px;
+}
+
+.contentWrapper {
+	display: flex;
+	flex-direction: row;
+}
+
+.titlesColumn {
+	flex: 0 0 200px;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.valuesColumn {
+	flex: 1 1;
+	overflow-x: auto;
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	height: max-content;
+	padding-bottom: 20px;
+}
+
+.cell {
+	display: flex;
+	gap: 20px;
+	align-items: center;
+	height: 32px;
+}
+
+.selectorWrapper {
+	display: flex;
+	gap: 10px;
+	align-items: center;
+}

@@ -4,6 +4,8 @@ import CustomizedButton from "../../components/button/button";
 import CustomizedSelect from "../../components/select/Select";
 import { paths } from "../../consts";
 import { addInitiativeThunk, setInitiativesState } from "../../redux/initiatives-slice";
+import { useAddInitiativeMutation, useGetInitiativesListQuery } from "../../redux/initiatives/initiatives-api";
+import { useGetProjectInfoQuery } from "../../redux/state/state-api";
 import {
   TInitiativeMetricsFields, 
   IRegistryPropertie
@@ -17,9 +19,10 @@ export default function AddInitiativePage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const currentProjectId = useAppSelector((store) => store.state.project.currentId);
-  const project = useAppSelector((store) => store.state.project.value);
+  // const project = useAppSelector((store) => store.state.project.value);
+  const { data: project } = useGetProjectInfoQuery(currentProjectId)
   const components = useAppSelector((store) => store.components.value);
-  const { addInitiativeRequestSuccess } = useAppSelector((store) => store.initiatives)
+  // const { addInitiativeRequestSuccess } = useAppSelector((store) => store.initiatives)
   const [newInitiativeState, setNewInitiativeState] = useState({
     initiative: {
       id: -1,
@@ -66,6 +69,10 @@ export default function AddInitiativePage() {
       return returnField
     }) : [],
   });
+  const { refetch: refetchInitiativesList } = useGetInitiativesListQuery(currentProjectId ? currentProjectId : -1, {
+    skip: !currentProjectId,    
+  });
+  const [addInitiative, { isSuccess: addInitiativeRequestSuccess }] = useAddInitiativeMutation();
 
   const onCancelClickHandler = () => {
     navigate(`/${paths.registry}`);
@@ -77,7 +84,8 @@ export default function AddInitiativePage() {
 
   const onSubmitHandler = (e: FormEvent) => {
     e.preventDefault();
-    dispatch(addInitiativeThunk(newInitiativeState));
+    // dispatch(addInitiativeThunk(newInitiativeState));
+    addInitiative(newInitiativeState);
   }
 
   const onInitiativeInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -137,14 +145,17 @@ export default function AddInitiativePage() {
   };
 
   useEffect(() => {
-    if (addInitiativeRequestSuccess) navigate(`/${paths.registry}`);
-    return () => {
-      dispatch(setInitiativesState({
-        addInitiativeRequest: false,
-        addInitiativeRequestSuccess: false,
-        addInitiativeRequestFailed: false,
-      }));
+    if (addInitiativeRequestSuccess) {
+      refetchInitiativesList();
+      navigate(`/${paths.registry}`);
     }
+    // return () => {
+    //   dispatch(setInitiativesState({
+    //     addInitiativeRequest: false,
+    //     addInitiativeRequestSuccess: false,
+    //     addInitiativeRequestFailed: false,
+    //   }));
+    // }
   }, [addInitiativeRequestSuccess]);
 
   return (

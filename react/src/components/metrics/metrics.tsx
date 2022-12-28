@@ -5,8 +5,9 @@ import SectionHeader from '../section/section-header/section-header';
 import styles from './metrics.module.scss';
 import inputStyles from '../../styles/inputs.module.scss';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
-import { updateProjectForEdit, updateProjectState } from '../../redux/state-slice';
+import { updateProjectForEdit, updateProjectState } from '../../redux/state/state-slice';
 import { addPropertie, handlePropertieInutChange, removePropertie } from '../../utils';
+import { useGetProjectInfoQuery } from '../../redux/state/state-api';
 
 type TMetricsProps = {
   edit?: boolean;
@@ -18,7 +19,8 @@ export default function Metrics({
   edit,
   create,
 }: TMetricsProps) {
-  const project = useAppSelector((store) => store.state.project.value);
+  const { currentId } = useAppSelector((store) => store.state.project);
+  const { data: project } = useGetProjectInfoQuery(currentId);
   const projectForEdit = useAppSelector((store) => store.state.projectForEdit);
   const dispatch = useAppDispatch();
   const title = 'Метрики проекта';
