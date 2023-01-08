@@ -37,13 +37,20 @@
 
 .buttonWrapper {
   display: flex;
+  flex-direction: column;
   justify-content: flex-end;
   gap: 22px;
   margin-top: 20px;
 }
 
+.commentButtonsWrapper {
+  display: flex;
+  justify-content: space-between;
+  gap:20px;
+}
+
 .button {
-  width: 225px;
+  flex: 1 1 225px;
 }
 
 .chat {

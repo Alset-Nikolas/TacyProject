@@ -31,7 +31,7 @@ export default function ProjectsElements({ roles, rights, edit }: TProjectsEleme
   const dispatch = useAppDispatch();
   const projectForEdit = useAppSelector((store) => store.state.projectForEdit);
   const SelectStyle = {
-    width: '233px',
+    width: '100%',
     height: '32px',
     border: '1px solid #504F4F',
     borderRadius: 0,
@@ -120,7 +120,9 @@ export default function ProjectsElements({ roles, rights, edit }: TProjectsEleme
                 key={el.id}
                 className={`${styles.roleWrapper}`}
               >
-                <div>
+                <div
+                  className={`${styles.roleInputWrapper}`}
+                >
                   <input
                     className={`${inputStyles.textInput}`}
                     value={el.name}
@@ -128,7 +130,9 @@ export default function ProjectsElements({ roles, rights, edit }: TProjectsEleme
                   />
                   
                 </div>
-                <div>
+                <div
+                  className={`${styles.rightsInputWrapper}`}
+                >
                   {/* {el.name} */}
                   <SelectUnits
                     style={SelectStyle}
@@ -137,6 +141,9 @@ export default function ProjectsElements({ roles, rights, edit }: TProjectsEleme
                     onChange={(e) => handleRightsSelectorInput(e, index)}
                   />
                 </div>
+                <div
+                  className={`${styles.controls}`}
+                >
                 <Pictogram
                   type="delete"
                   cursor="pointer"
@@ -149,6 +156,7 @@ export default function ProjectsElements({ roles, rights, edit }: TProjectsEleme
                     onClick={() => addPropertie(projectForEdit, 'roles', dispatch)}
                   />
                 )}
+                </div>
               </div>
             )})}
           </div>

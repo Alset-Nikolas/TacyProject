@@ -130,6 +130,9 @@ export const stateApi = createApi({
     getRoles: builder.query<Array<{user: TUser & { id: number }, role: TRole & { project: number }}>, number>({
       query: (initiativeId) => `components/initiative/role/?id=${initiativeId}`,
     }),
+    getExportUrl: builder.query<{ url: string }, number>({
+      query: (initiativeId) => `components/initiative/info/list/file/?id=${initiativeId}`,
+    }),
   }),
 });
 
@@ -143,4 +146,5 @@ export const {
   useAddInitiativeMutation,
   useSetRolesMutation,
   useGetRolesQuery,
+  useGetExportUrlQuery,
 } = stateApi;

@@ -6,16 +6,18 @@ import InitiativeCoordination from "../../components/initiative-coordination/ini
 import EventsDiagram from "../../components/initiative-events/initiative-events";
 import InitiativeManagement from "../../components/initiative-management/initiative-management";
 import InitiativesTable from "../../components/initiatives-table/initiatives-table";
+import Pictogram from "../../components/pictogram/pictogram";
 import RiskManagement from "../../components/risk-management/risk-management";
 import RolesAlloction from "../../components/roles-allocation/roles-allocation";
-import { paths } from "../../consts";
+import { paths, REACT_APP_BACKEND_BASE_URL } from "../../consts";
 import { useGetAuthInfoByIdQuery } from "../../redux/auth/auth-api";
 import { getComponentsThunk } from "../../redux/components-slice";
 import { setCurrentInitiativeId } from "../../redux/initiatives-slice";
 import {
   useGetProjectInfoQuery,
   useGetInitiativeByIdQuery,
-  useGetInitiativesListQuery
+  useGetInitiativesListQuery,
+  useGetExportUrlQuery
 } from "../../redux/state/state-api";
 import { closeLoader, showLoader } from "../../redux/state/state-slice";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
@@ -53,10 +55,42 @@ export default function InitiativesRegistryPage() {
     skip: !currentInitiativeId,
   });
   const isInitiativeApproved = initiative?.initiative.status?.value === -1;
+  const { data: exportData } = useGetExportUrlQuery(currentId ? currentId : -1);
 
   const onAddClickHandler = () => {
     // dispatch(addInitiativeThunk());
     navigate(`/${paths.registry}/add`);
+  };
+
+  const exportHandler = () => {
+    if (exportData) fetch(`${REACT_APP_BACKEND_BASE_URL}/${exportData.url}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/pdf',
+      },
+    })
+    .then((response) => response.blob())
+    .then((blob) => {
+      // Create blob link to download
+      const url = window.URL.createObjectURL(
+        new Blob([blob]),
+      );
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute(
+        'download',
+        `FileName.xlsx`,
+      );
+
+      // Append to html link element page
+      document.body.appendChild(link);
+
+      // Start download
+      link.click();
+
+      // Clean up and remove the link
+      link.parentNode?.removeChild(link);
+    });
   };
 
   useEffect(() => {
@@ -97,6 +131,18 @@ export default function InitiativesRegistryPage() {
     <div
       className={`${styles.wrapper}`}
     >
+      <section>
+        <div>
+
+        </div>
+        <div>
+          <Pictogram
+            type="export"
+            cursor="pointer"
+            onClick={exportHandler}
+          />
+        </div>
+      </section>
       <section
         className={`${styles.tableWrapper}`}
       >

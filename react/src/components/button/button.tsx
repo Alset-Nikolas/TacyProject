@@ -5,6 +5,7 @@ import { MouseEventHandler } from 'react';
 type TCustomizedButtonProps = {
   value: string;
   color?: 'green' | 'blue' | 'transparent';
+  noBorder?: boolean;
   type?: 'button' | 'submit'; 
   className?: string;
   onClick?: MouseEventHandler<HTMLButtonElement>;
@@ -64,10 +65,19 @@ const TransparentButton = styled(BlueButton)({
   },
 });
 
+const TransparentButtonNoBorder = styled(TransparentButton)({
+  border: 'none',
+  color: '#504F4F',
+  '&:hover': {
+    color: '#504F4F',
+  },
+});
+
 export default function CustomizedButton({
   value,
   className='',
   color='green',
+  noBorder=false,
   type='button',
   onClick,
   disabled,
@@ -87,17 +97,31 @@ export default function CustomizedButton({
     );
   }
   if (color === 'transparent') {
-    return (
-      <TransparentButton
-        className={className}
-        variant="contained"
-        disableRipple
-        onClick={onClick}
-        type={type}
-      >
-        {value}
-      </TransparentButton>
-    );
+    if (!noBorder) {
+      return (
+        <TransparentButton
+          className={className}
+          variant="contained"
+          disableRipple
+          onClick={onClick}
+          type={type}
+        >
+          {value}
+        </TransparentButton>
+      );
+    } else {
+      return (
+        <TransparentButtonNoBorder
+          className={className}
+          variant="contained"
+          disableRipple
+          onClick={onClick}
+          type={type}
+        >
+          {value}
+        </TransparentButtonNoBorder>
+      );
+    }
   }
   return  (
     <GreenButton

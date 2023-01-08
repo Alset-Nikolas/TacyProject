@@ -6,6 +6,8 @@
   box-shadow: 0px 2px 22px 4px rgba(0, 0, 0, 0.1);
   border-radius: 10px;
   margin: 0 0 48px 0;
+  min-width: 500px;
+  max-width: 525px;
 
   &.edit {
     box-shadow: none;
@@ -21,6 +23,11 @@
 
   &.edit {
     justify-content: flex-start;
+    border: 1px solid #504F4F;
+    background-color: #FFF;
+    border-radius: 3px;
+    width: fit-content;
+    padding: 20px;
   }
 }
 
@@ -74,4 +81,19 @@
 
 .selector {
   width: 204px;
+}
+
+.roleInputWrapper {
+  flex: 1 1;
+  input {
+    width: 100%;
+  }
+}
+
+.rightsInputWrapper {
+  flex: 1 1;
+}
+
+.controls {
+  flex: 1 1;
 }

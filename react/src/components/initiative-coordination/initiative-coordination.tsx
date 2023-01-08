@@ -93,7 +93,7 @@ export default function InitiativeCoordination() {
       });
     }
     if (project) {
-      dispatch(getBossesListThunk(project.id));
+      // dispatch(getBossesListThunk(project.id));
     }
   }, [initiative, project]);
 
@@ -112,7 +112,7 @@ export default function InitiativeCoordination() {
       >
         Согласование инициативы
       </SectionHeader>
-      {userRights && userRights.user_is_author && (
+      {/* {userRights && userRights.user_is_author && (
         <div
           className={`${styles.topSection}`}
         >
@@ -124,17 +124,10 @@ export default function InitiativeCoordination() {
             />
           </div>
           <div>
-            <CustomizedButton
-              value={`${userRights?.init_failure ? 'Восстановить инициативу' : "Отозвать инициативу"}`}
-              color="blue"
-              onClick={() => dispatch(closeInitiativeThunk({
-                initiative: initiative ? initiative?.initiative.id : -1,
-                failure: !userRights?.init_failure,
-              }))}
-            />
+            
           </div>
         </div>
-      )}
+      )} */}
       <div
         className={`${styles.content}`}
       >
@@ -167,21 +160,35 @@ export default function InitiativeCoordination() {
               <div
                 className={`${styles.buttonWrapper}`}
               >
+                <div
+                  className={`${styles.commentButtonsWrapper}`}
+                >
+                  <CustomizedButton
+                    className={`${styles.button}`}
+                    value="Комментировать"
+                    color="transparent"
+                    disabled={!userRights?.user_add_comment}
+                    onClick={postCommentHandler}
+                  />
+                  <CustomizedButton
+                    className={`${styles.button}`}
+                    value="Согласовать"
+                    color="blue"
+                    disabled={coordinationButtonIsDisabled}
+                    onClick={postCoordinateHandler}
+                  />
+                </div>
                 <CustomizedButton
-                  className={`${styles.button}`}
-                  value="Оставить комментарий"
-                  color="blue"
-                  disabled={!userRights?.user_add_comment}
-                  onClick={postCommentHandler}
-                />
-                <CustomizedButton
-                  className={`${styles.button}`}
-                  value="Согласовать"
-                  color="blue"
-                  disabled={coordinationButtonIsDisabled}
-                  onClick={postCoordinateHandler}
+                  value={`${userRights?.init_failure ? 'Восстановить инициативу' : "Отозвать инициативу"}`}
+                  color="transparent"
+                  noBorder
+                  onClick={() => dispatch(closeInitiativeThunk({
+                    initiative: initiative ? initiative?.initiative.id : -1,
+                    failure: !userRights?.init_failure,
+                  }))}
                 />
               </div>
+              
             </>
           )}
         </div>

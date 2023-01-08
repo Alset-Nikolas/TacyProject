@@ -25,8 +25,8 @@
 
 .closeButton {
   position: absolute;
-  top: 20px;
-  right: 20px;
+  top: 13px;
+  right: 13px;
 }
 
 .header {
@@ -55,6 +55,7 @@
 
 .input {
   margin: 0px;
+  border-radius: 3px;
 }
 
 .propertieWrapper {
@@ -72,8 +73,8 @@
   &.edit {
     border: 1px solid #504F4F;
     background-color: #FFF;
-    border-radius: 0px;
-    padding: 26px 19px 26px 55px;
+    border-radius: 3px;
+    padding: 20px 12px 20px 20px;
   }
 }
 
