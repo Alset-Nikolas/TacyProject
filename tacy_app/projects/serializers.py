@@ -6,13 +6,14 @@ from rest_framework import serializers
 from .models import (
     MetricsProject,
     Project,
+    ProjectFiles,
     ProjectStages,
     PropertiesItemsProject,
     PropertiesProject,
     PropertiesСommunityProject,
-    RightsUSerInProject,
-    RolesUserInProject,
     СommunityProject,
+    RolesProject,
+    IntermediateDateProject,
 )
 from notifications.email import EmailManage
 from notifications.models import NotificationsUser
@@ -21,18 +22,17 @@ from coordination.models import StagesCoordinationInitiative
 User = get_user_model()
 
 
-class IntermediateDateSerializer(serializers.Serializer):
+class IntermediateDateSerializer(serializers.ModelSerializer):
     """
     Промежуточная дата проект
     """
 
-    title = serializers.CharField(
-        label="title",
-        write_only=True,
-    )
-    date = serializers.DateField(
-        label="date",
-    )
+    class Meta:
+        model = IntermediateDateProject
+        fields = (
+            "title",
+            "date",
+        )
 
 
 class IntermediateDatesSerializer(serializers.Serializer):
@@ -44,14 +44,26 @@ class IntermediateDatesSerializer(serializers.Serializer):
 
 
 class PropertiesItemsProjectSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField(default=-1)
+    id = serializers.IntegerField()
 
     class Meta:
         model = PropertiesItemsProject
         fields = (
             "id",
             "value",
+            "value_short",
         )
+
+    def validate_id(self, id):
+
+        if id > 0 and not PropertiesItemsProject.get_property_item_by_id(id):
+            raise serializers.ValidationError(
+                {
+                    "id": "id not exist",
+                    "msg_er": "Свойств с таким id не существует",
+                }
+            )
+        return id
 
 
 class PropertieSerializer(serializers.Serializer):
@@ -59,12 +71,51 @@ class PropertieSerializer(serializers.Serializer):
     Свойство проекта
     """
 
-    id = serializers.IntegerField(default=-1)
+    id = serializers.IntegerField()
     title = serializers.CharField(
         label="title",
         write_only=True,
     )
     values = PropertiesItemsProjectSerializer(many=True)
+
+    def validate_id(self, id):
+        if id > 0 and not PropertiesProject.get_property_by_id(id):
+            raise serializers.ValidationError(
+                {
+                    "id ": "id not exist",
+                    "msg_er": "Таких свойств в базе нету",
+                }
+            )
+        return id
+
+
+class RolesProjectSerializer(serializers.ModelSerializer):
+    """
+    Все возможные права проекта
+    """
+
+    id = serializers.IntegerField()
+
+    class Meta:
+        model = RolesProject
+        fields = (
+            "id",
+            "name",
+            "is_approve",
+            "is_update",
+        )
+
+        # read_only_fields = ["name", "is_approve", "is_update"]
+
+    def validate_id(self, id):
+        if id > 0 and not RolesProject.get_by_id(id):
+            raise serializers.ValidationError(
+                {
+                    "id ": "id not exist",
+                    "msg_er": "Таких ролей в базе нету",
+                }
+            )
+        return id
 
 
 class ProjectStagesSerializer(serializers.ModelSerializer):
@@ -96,7 +147,7 @@ class MetrcsProjectSerializer(serializers.ModelSerializer):
     Метрика проекта
     """
 
-    id = serializers.IntegerField(default=-1)
+    id = serializers.IntegerField()
 
     class Meta:
         model = MetricsProject
@@ -107,7 +158,20 @@ class MetrcsProjectSerializer(serializers.ModelSerializer):
             "target_value",
             "units",
             "active",
+            "description",
+            "is_aggregate",
         )
+
+    def validate_id(self, id):
+        if id > 0:
+            if not MetricsProject.get_metric_by_id(id):
+                raise serializers.ValidationError(
+                    {
+                        "id ": "id not exist",
+                        "msg_er": "Метрики с таким idв базе нет",
+                    }
+                )
+        return super().validate(id)
 
 
 class CreateProjectSerializer(serializers.ModelSerializer):
@@ -116,10 +180,13 @@ class CreateProjectSerializer(serializers.ModelSerializer):
     """
 
     id = serializers.IntegerField()
-    intermediate_dates = IntermediateDateSerializer(many=True)
-    stages = ProjectStagesSerializer(many=True)
-    metrics = MetrcsProjectSerializer(many=True)
-    properties = PropertieSerializer(many=True)
+    intermediate_dates = IntermediateDateSerializer(
+        many=True, required=False, default=[]
+    )
+    stages = ProjectStagesSerializer(many=True, default=[])
+    metrics = MetrcsProjectSerializer(many=True, required=False, default=[])
+    properties = PropertieSerializer(many=True, required=False, default=[])
+    roles = RolesProjectSerializer(many=True, required=False, default=[])
 
     def _validate_intermediate_dates(self, attrs):
         if "intermediate_dates" in attrs and attrs["intermediate_dates"]:
@@ -165,6 +232,13 @@ class CreateProjectSerializer(serializers.ModelSerializer):
             )
         if attrs["id"] > 0:
             pr = Project.get_project_by_id(attrs["id"])
+            if not pr:
+                raise serializers.ValidationError(
+                    {
+                        "id": "id not exist",
+                        "msg_er": "С таким id не существует в базе",
+                    }
+                )
             if pr.name != attrs["name"] and Project.get_project_by_name(
                 attrs["name"]
             ):
@@ -288,14 +362,17 @@ class CreateProjectSerializer(serializers.ModelSerializer):
         ]:
             project_info[x] = validated_data[x]
 
-        instanse = (
+        instance = (
             Project.get_project_by_id(validated_data["id"])
             if validated_data["id"] > 0
             else None
         )
         project: Project = Project.update_or_create_project(
-            instanse=instanse, update_correct_info=project_info
+            project=instance,
+            update_correct_info=project_info,
+            files=self.context.get("file"),
         )
+
         user = project_info["author"]
         user.project_active = project
         user.save()
@@ -311,11 +388,11 @@ class CreateProjectSerializer(serializers.ModelSerializer):
             "purpose",
             "tasks",
             "description",
-            "files",
             "intermediate_dates",
             "stages",
             "metrics",
             "properties",
+            "roles",
         )
 
 
@@ -337,6 +414,7 @@ class PropertiesSerializer(serializers.ModelSerializer):
 class InfoProjectSerializer(serializers.ModelSerializer):
     properties = PropertiesSerializer(many=True)
     metrics = MetrcsProjectSerializer(many=True)
+    roles = RolesProjectSerializer(many=True)
 
     class Meta:
         model = Project
@@ -351,10 +429,10 @@ class InfoProjectSerializer(serializers.ModelSerializer):
             "description",
             "intermediate_dates",
             "properties",
-            "roles",
-            "rights",
             "metrics",
             "stages",
+            "roles",
+            "files",
         ]
 
 
@@ -392,72 +470,46 @@ class UserBaseSerializer(serializers.ModelSerializer):
         )
 
 
-class RoleUSerSerializer(serializers.ModelSerializer):
+# class RightsUserSerializer(serializers.ModelSerializer):
+#     id = serializers.IntegerField()
+
+#     class Meta:
+#         depth = 1
+#         model = GlobalRightsUserInProject
+#         fields = (
+#             "id",
+#             "name",
+#         )
+
+#     def validate(self, data):
+#         print("data RightsUserSerializer", data)
+#         right_user_obj = GlobalRightsUserInProject.get_right_by_id(
+#             id=data["id"]
+#         )
+#         if not right_user_obj:
+#             raise serializers.ValidationError(
+#                 {
+#                     "rights_user id": "check  rights_user. There are no such values (rights_user) in the database. Obj not exist RightsUSerInProject.",
+#                     "msg_er": "Таких прав у пользователя не может быть.",
+#                 }
+#             )
+#         if right_user_obj.name != data["name"]:
+#             raise serializers.ValidationError(
+#                 {
+#                     "rights_user name": f"check rights_user. ights with pk={data['id']} -> name=={right_user_obj.name}, you get name={data['name']}",
+#                     "msg_er": "Название прав пользователя не соответсвует id.",
+#                 }
+#             )
+
+#         return data
+
+
+class PropertiesProjectSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
 
     class Meta:
-        depth = 1
-        model = RolesUserInProject
-        fields = (
-            "id",
-            "name",
-        )
-
-    def validate(self, data):
-        print("RoleUSerSerializer data", data)
-        role_user_obj = RolesUserInProject.get_roles_by_id(id=data["id"])
-        if not role_user_obj:
-            raise serializers.ValidationError(
-                {
-                    "role_user id": "check role_user. There are no such values (role_user) in the database. Obj not exist RolesUserInProject",
-                    "msg_er": "Такой роли у пользователя не может быть.",
-                }
-            )
-        if role_user_obj.name != data["name"]:
-            raise serializers.ValidationError(
-                {
-                    "role_user name": f"check role_user. role with pk={data['id']} -> name=={role_user_obj.name}, you get name={data['name']}",
-                    "msg_er": "Навзание роли не соотвествует id.",
-                }
-            )
-
-        return data
-
-
-class RightsUserSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField()
-
-    class Meta:
-        depth = 1
-        model = RightsUSerInProject
-        fields = (
-            "id",
-            "name",
-        )
-
-    def validate(self, data):
-        print("data RightsUserSerializer", data)
-        right_user_obj = RightsUSerInProject.get_right_by_id(id=data["id"])
-        if not right_user_obj:
-            raise serializers.ValidationError(
-                {
-                    "rights_user id": "check  rights_user. There are no such values (rights_user) in the database. Obj not exist RightsUSerInProject.",
-                    "msg_er": "Таких прав у пользователя не может быть.",
-                }
-            )
-        if right_user_obj.name != data["name"]:
-            raise serializers.ValidationError(
-                {
-                    "rights_user name": f"check rights_user. ights with pk={data['id']} -> name=={right_user_obj.name}, you get name={data['name']}",
-                    "msg_er": "Название прав пользователя не соответсвует id.",
-                }
-            )
-
-        return data
-
-
-class PropertiesProjectSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
+        model = PropertiesProject
+        fields = ("id", "title")
 
     def validate_id(self, id):
         project = self.context.get("project")
@@ -479,8 +531,12 @@ class PropertiesProjectSerializer(serializers.Serializer):
         return id
 
 
-class PropertiesItemsIdProjectSerializer(serializers.Serializer):
+class PropertiesItemsIdProjectSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
+
+    class Meta:
+        model = PropertiesItemsProject
+        fields = ("id", "value")
 
 
 class ProperitsUserSerializer(serializers.Serializer):
@@ -518,42 +574,21 @@ class ProperitsUserSerializer(serializers.Serializer):
 
 class CommunityInfoSerializer(serializers.ModelSerializer):
     user = UserBaseSerializer()
-    role_user = RoleUSerSerializer()
-    rights_user = RightsUserSerializer(many=True)
     properties = ProperitsUserSerializer(many=True)
 
     class Meta:
         depth = 1
         model = СommunityProject
-        fields = ("user", "role_user", "rights_user", "properties")
-
-    def validate(self, data):
-        print("data CommunityInfoSerializer", data)
-        # super().validate(data)
-
-        project = self.context.get("project")
-        role_user_obj = RolesUserInProject.get_roles_by_id(
-            id=data["role_user"]["id"]
+        fields = (
+            "user",
+            "is_create",
+            "properties",
+            "is_author",
+            "date_create",
         )
 
-        if role_user_obj.project != project:
-            raise serializers.ValidationError(
-                {
-                    "role_user": f"The project does not have such roles: your project {project}, this role belongs project pk={role_user_obj.project}",
-                    "msg_er": "Таких ролей нет в этом проекте.",
-                }
-            )
-        for right_user in data["rights_user"]:
-            right_user_obj = RightsUSerInProject.get_right_by_id(
-                right_user["id"]
-            )
-            if right_user_obj.project != project:
-                raise serializers.ValidationError(
-                    {
-                        "rights_user": f"The project does not have such right: your project {project}, this right belongs project {right_user_obj.project}",
-                        "msg_er": "Таких прав нет в этом проекте.",
-                    }
-                )
+    def validate(self, data):
+        project = self.context.get("project")
         all_properties_in_project = project.properties.all()
         if len(all_properties_in_project) != len(data["properties"]):
             raise serializers.ValidationError(
@@ -577,8 +612,8 @@ class UpdateCommunityProjectSerializer(serializers.ModelSerializer):
     def create_community(self, validated_data):
         project = self.context.get("project")
         community_ids_not_del = []
-        for user_obj in validated_data["community_info"]:
-            user_info = user_obj["user"]
+        for community_obj in validated_data["community_info"]:
+            user_info = community_obj["user"]
             user: User = User.get_user_by_email(user_info["email"])
             new_account = bool(not user)
             print("user_info", user_info)
@@ -603,16 +638,16 @@ class UpdateCommunityProjectSerializer(serializers.ModelSerializer):
                     text=f"Добро пожаловать в приложение {settings.SITE_FULL_NAME}. Это ваш первый проект '{project.name}'",
                 )
 
-            role_id = user_obj["role_user"]["id"]
-            right_ids = [x["id"] for x in user_obj["rights_user"]]
             community_item = (
                 СommunityProject.create_or_update_user_in_community(
-                    project, user, role_id, right_ids
+                    project,
+                    user,
+                    community_obj.get("is_create"),
                 )
             )
             community_ids_not_del.append(community_item.id)
             PropertiesСommunityProject.create_or_update_properties_user_in_community(
-                community_item, user_obj["properties"]
+                community_item, community_obj["properties"]
             )
         for del_person in (
             СommunityProject.objects.filter(project=project)
@@ -633,29 +668,15 @@ class UpdateCommunityProjectSerializer(serializers.ModelSerializer):
 
 
 class PropertiesUserSerializer(serializers.Serializer):
-    role = serializers.IntegerField(
-        label="role",
-        write_only=True,
-        required=True,
-    )
+
     right = serializers.IntegerField(
         label="right",
         write_only=True,
         required=True,
     )
 
-    def validate_role(self, role):
-        if not RolesUserInProject.objects.filter(pk=role).first():
-            raise serializers.ValidationError(
-                {
-                    "role": f"Not exist role pk {role}",
-                    "msg_er": "Такой роли нет.",
-                }
-            )
-        return role
-
     def validate_right(self, right):
-        if not RightsUSerInProject.objects.filter(pk=right).first():
+        if not GlobalRightsUserInProject.objects.filter(pk=right).first():
             raise serializers.ValidationError(
                 {
                     "right": f"Not exist right pk {right}",

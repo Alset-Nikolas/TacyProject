@@ -93,7 +93,7 @@ export async function getProjectsList(
 }
 
 export function createProjectRequest(
-  body: TProject | TProjectForEdit,
+  body: TProject | TProjectForEdit | FormData,
   successCallback: (response: AxiosResponse) => void,
   errorCallback: (error: AxiosError) => void,
 ) {

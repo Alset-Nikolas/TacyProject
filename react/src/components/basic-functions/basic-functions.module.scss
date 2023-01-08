@@ -37,8 +37,9 @@
   gap: 20px;
   // margin-left: -20px;
   div {
-    flex: 1 1;
+    flex: 1 1 110px;
   }
+  width: 100%;
 }
 textarea.error {
   border: 1px solid #B04040;

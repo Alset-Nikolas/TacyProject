@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { REACT_APP_BACKEND_URL } from '../../consts';
-import { TInitiative } from '../../types';
+import { TInitiative, TUser, TRole } from '../../types';
 import { setCurrentInitiativeId } from '../initiatives-slice';
 
 export const initiativesApi = createApi({
@@ -67,13 +67,27 @@ export const initiativesApi = createApi({
       //   }
       // },
       invalidatesTags: ['list'],
-    })
+    }),
+    setRoles: builder.mutation<any, { initiativeId: number, body:  Array<{user: TUser & { id: number }, role: TRole}> }>({
+      query({initiativeId, body}) {
+        return {
+          url: `components/initiative/role/?id=${initiativeId}`,
+          method: 'POST',
+          body,
+        }
+      }
+    }),
+    getRoles: builder.query<Array<{user: TUser & { id: number }, role: TRole & { project: number }}>, number>({
+      query: (initiativeId) => `components/initiative/role/?id=${initiativeId}`,
+    }),
   }),
 });
 
-export const {
-  useGetInitiativesListQuery,
-  useGetPersonalInitiativesListQuery,
-  useGetInitiativeByIdQuery,
-  useAddInitiativeMutation,
-} = initiativesApi;
+// export const {
+//   useGetInitiativesListQuery,
+//   useGetPersonalInitiativesListQuery,
+//   useGetInitiativeByIdQuery,
+//   useAddInitiativeMutation,
+//   useSetRolesMutation,
+//   useGetRolesQuery,
+// } = initiativesApi;

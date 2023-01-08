@@ -4,7 +4,7 @@ from rest_framework import serializers
 
 from .models import CoordinationInitiativeHistory, StagesCoordinationInitiative
 from components.models import Initiatives
-from projects.models import Project, RightsUSerInProject
+from projects.models import Project
 from components.models import Initiatives
 
 
@@ -54,7 +54,7 @@ class SentForApprovalSerializer(serializers.Serializer):
                 }
             )
 
-        rights_user: RightsUSerInProject = (
+        rights_user: GlobalRightsUserInProject = (
             community_user_info.rights_user.all()
         )
         if not any(x.flags.is_coordinate for x in rights_user):

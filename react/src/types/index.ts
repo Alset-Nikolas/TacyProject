@@ -27,14 +27,19 @@ export type TMetrica = {
   value: number;
   target_value: number;
   active: boolean;
+  description: string;
+  is_aggregate: boolean;
   units: string;
 };
 
 export type TRole = {
+  [prop: string]: unknown;
   id: number;
   name: string;
-  coverage: number;
-  project: number;
+  // coverage: number;
+  // project: number;
+  is_approve: boolean;
+  is_update: boolean;
 };
 
 export type TRight = {
@@ -60,6 +65,7 @@ export type TPropertieEdit = {
   values: Array<{
     id: number;
     value: string;
+    value_short: string;
   }>;
 };
 
@@ -114,6 +120,7 @@ export type TTeamMember = {
   role: string;
   email: string;
   phone: string;
+  is_create: boolean;
   // unit: Array<string>;
   properties: Array<{
     id: number;
@@ -141,20 +148,23 @@ export type TUser = {
 
 export type TRequestTeamListItem<T> = {
   user: T;
-  role_user: {
-    id: number;
-    name: string;
-  };
-  rights_user: Array<{
-    id: number;
-    name: string;
-  }>;
+  // role_user: {
+  //   id: number;
+  //   name: string;
+  // };
+  // rights_user: Array<{
+  //   id: number;
+  //   name: string;
+  // }>;
+  is_create: boolean;
   properties: Array<{
     title: {
       id: number;
+      title: string;
     },
     values: Array<{
       id: number;
+      value: string;
     }>
   }>;
 }
@@ -258,6 +268,10 @@ export type TInitiative = {
     properties_fields: Array<TInitiativePropertiesFields>;
     metric_fields: Array<TInitiativeMetricsFields>;
     addfields: Array<TInitiativeAdditionalFields>;
+    roles: Array<{
+      users: Array<TUser & { id: number }>;
+      role: TRole & { project: number };
+    }>;
 }
 
 export type TCurrentInitiative = {

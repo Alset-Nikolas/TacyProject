@@ -2,6 +2,7 @@ import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { REACT_APP_BACKEND_URL } from '../../consts';
 import { TProject, TRequestTeamListItem, TTeamMember, TUserRequest } from '../../types';
 import { stateApi } from '../state/state-api';
+import { openErrorModal, openMessageModal } from '../state/state-slice';
 
 export const teamApi = createApi({
   reducerPath: 'teamQuery',
@@ -24,8 +25,9 @@ export const teamApi = createApi({
           member.name = `${resItem.user.last_name} ${resItem.user.first_name} ${resItem.user.second_name}`;
           member.email = resItem.user.email;
           member.phone = resItem.user.phone;
-          member.role = resItem.role_user.name;
-          member.rights = resItem.rights_user.map((right) => right.name);
+          member.is_create = resItem.is_create;
+          // member.role = resItem.role_user.name;
+          // member.rights = resItem.rights_user.map((right) => right.name);
           member.properties = resItem.properties.map((resPropertie) => {
             const projectPropertie = project?.properties.find((el) => el.id === resPropertie.title.id);
             if (!projectPropertie) throw new Error('Propertie doesn\'t exist');
@@ -55,20 +57,24 @@ export const teamApi = createApi({
         }
       },
       invalidatesTags: ['Team'],
-      // async onQueryStarted({ projectId }, { dispatch, queryFulfilled, getState }) {
-      //   // const { data: project } = stateApi.useGetProjectInfoQuery(projectId);
-      //   const state = getState();
-      //   try {
-      //     const { data: updatedTeamList } = await queryFulfilled
-      //     const patchResult = dispatch(
-      //       teamApi.util.updateQueryData('getTeamList', { id: projectId, project: null }, (draft) => {
-      //         Object.assign(draft, updatedTeamList);
-      //       })
-      //     )
-      //   } catch (e) {
-      //     console.log(e);
-      //   }
-      // },
+      async onQueryStarted({ projectId }, { dispatch, queryFulfilled, getState }) {
+        // const { data: project } = stateApi.useGetProjectInfoQuery(projectId);
+        const state = getState();
+        try {
+          const { data } = await queryFulfilled;
+          // const patchResult = dispatch(
+          //   teamApi.util.updateQueryData('getTeamList', { id: projectId, project: null }, (draft) => {
+          //     Object.assign(draft, updatedTeamList);
+          //   })
+          // )
+          if (data.code === 200) {
+            dispatch(openMessageModal(data.msg));
+          }
+        } catch (e) {
+          console.log(e);
+          dispatch(openErrorModal('Произошла ошибка'));
+        }
+      },
     }),
   }),
 });

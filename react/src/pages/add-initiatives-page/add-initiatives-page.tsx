@@ -4,8 +4,11 @@ import CustomizedButton from "../../components/button/button";
 import CustomizedSelect from "../../components/select/Select";
 import { paths } from "../../consts";
 import { addInitiativeThunk, setInitiativesState } from "../../redux/initiatives-slice";
-import { useAddInitiativeMutation, useGetInitiativesListQuery } from "../../redux/initiatives/initiatives-api";
-import { useGetProjectInfoQuery } from "../../redux/state/state-api";
+import {
+  useGetProjectInfoQuery,
+  useAddInitiativeMutation,
+  useGetInitiativesListQuery
+} from "../../redux/state/state-api";
 import {
   TInitiativeMetricsFields, 
   IRegistryPropertie

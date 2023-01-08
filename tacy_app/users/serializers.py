@@ -1,6 +1,6 @@
 from django.contrib.auth import authenticate, get_user_model
 from rest_framework import serializers
-from projects.models import СommunityProject, RightsUSerInProject
+from projects.models import СommunityProject
 from projects.serializers import UserBaseSerializer
 
 User = get_user_model()
@@ -52,19 +52,7 @@ class UserSerializer(serializers.ModelSerializer):
         ]
 
 
-class RightUserSerializer(serializers.ModelSerializer):
-    class Meta:
-        depth = 1
-        model = RightsUSerInProject
-        fields = [
-            "id",
-            "name",
-            "flags",
-        ]
-
-
 class СommunityProjectSerializer(serializers.ModelSerializer):
-    rights_user = RightUserSerializer(many=True)
     user = UserBaseSerializer()
 
     class Meta:
@@ -72,7 +60,8 @@ class СommunityProjectSerializer(serializers.ModelSerializer):
         model = СommunityProject
         fields = [
             "id",
-            "rights_user",
             "user",
-            "role_user",
+            "is_create",
+            "is_author",
+            "date_create",
         ]

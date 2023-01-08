@@ -5,29 +5,37 @@ import BasicSettingsEdit from '../../components/basic-settings-edit/basic-settin
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import { clearProjectForEdit, closeModal, createProjectThunk, getProjectInfoThunk, setProjectBackup, setProjectForEdit, updateProjectState } from '../../redux/state/state-slice';
 import { makeProjectFordit } from '../../utils';
+import { useGetProjectInfoQuery, usePostProjectMutation } from '../../redux/state/state-api';
 
 export default function BasicSettingsPage() {
   const dispatch = useAppDispatch();
   const {
-    project,
+    // project,
     backupProjectState,
     projectForEdit,
-    projectCreate,
   } = useAppSelector((store) => store.state);
-  const isDeleteSuccess = useAppSelector((store) => store.state.projectDelete.isGetRequestSuccess);
-  const isCreateSuccess = useAppSelector((store) => store.state.projectCreate.isGetRequestSuccess);
+  const currentId = useAppSelector((store) => store.state.project.currentId);
+  const { data: project, refetch: refetchProjectInfo } = useGetProjectInfoQuery(currentId);
+  useEffect(() => {
+    dispatch(getProjectInfoThunk(currentId));
+  }, []);
+  // const isDeleteSuccess = useAppSelector((store) => store.state.projectDelete.isGetRequestSuccess);
+  // const isCreateSuccess = useAppSelector((store) => store.state.projectCreate.isGetRequestSuccess);
   const [isEdit, setIsEdit] = useState(false);
+  const [saveProject, { isSuccess: isCreateSuccess }] = usePostProjectMutation();
+
   const onEditClick = () => {
     setIsEdit(true);
-    if (project.value) {
-      dispatch(setProjectBackup(project.value));
-      dispatch(setProjectForEdit(makeProjectFordit(project.value)));
+    if (project) {
+      dispatch(setProjectBackup(project));
+      dispatch(setProjectForEdit(makeProjectFordit(project)));
     }
   };
 
   const onSaveClick = () => {
     if (projectForEdit) {
-      dispatch(createProjectThunk(projectForEdit));
+      // dispatch(createProjectThunk(projectForEdit));
+      saveProject(projectForEdit);
     }
   };
 
@@ -37,20 +45,18 @@ export default function BasicSettingsPage() {
     if (projectForEdit) dispatch(clearProjectForEdit());
   };
 
-  useEffect(() => {
-    if (!project.value) dispatch(getProjectInfoThunk(project.currentId));
-  }, [project.currentId]);
+  // useEffect(() => {
+  //   if (!project.value) dispatch(getProjectInfoThunk(project.currentId));
+  // }, [project.currentId]);
 
   useEffect(() => {
-    if ((isDeleteSuccess || isCreateSuccess) && project.currentId) dispatch(getProjectInfoThunk(project.currentId));
-  }, [isDeleteSuccess, isCreateSuccess]);
-
-  useEffect(() => {
-    if (projectCreate.isGetRequestSuccess) {
+    if (isCreateSuccess && currentId) {
+      // dispatch(getProjectInfoThunk(currentId));
       setIsEdit(false);
-      dispatch(clearProjectForEdit())
+      dispatch(clearProjectForEdit());
+      refetchProjectInfo();
     }
-  }, [projectCreate.isGetRequestSuccess])
+  }, [isCreateSuccess]);
 
   if (isEdit) {
     return (

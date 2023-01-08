@@ -14,10 +14,11 @@ import { TTeamMember } from "../../types";
 type TTeamTableProps = {
   teamList: Array<TTeamMember>;
   removeMember?: (index: number) => void;
+  setList?: any;
   edit?: boolean;
 }
 
-export default function TeamTable({ edit, teamList, removeMember }: TTeamTableProps) {
+export default function TeamTable({ edit, teamList, removeMember, setList }: TTeamTableProps) {
   const dispatch = useAppDispatch();
   // const teamList = useAppSelector((store) => store.team.list);
   const { currentId } = useAppSelector((store) => store.state.project);
@@ -64,6 +65,7 @@ export default function TeamTable({ edit, teamList, removeMember }: TTeamTablePr
               edit={edit}
               index={index}
               member={member}
+              setList={setList}
               removeMember={removeMember}
               key={member.id !== -1 ? member.id : `new_member_${index}`}
             />

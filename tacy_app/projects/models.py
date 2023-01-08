@@ -2,16 +2,18 @@ import typing
 
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.utils import timezone
+
 
 User = get_user_model()
 
 
 def directory_path(instance, filename):
-    return "files/description/{0}/{1}".format(instance.pk, filename)
+    print(instance)
+    return f"files/project/{instance.project.name}/{filename}"
 
 
 class Project(models.Model):
-
     name = models.CharField(
         max_length=300,
         verbose_name="Название проекта",
@@ -37,16 +39,17 @@ class Project(models.Model):
         through="СommunityProject",
     )
     purpose = models.TextField(
-        verbose_name="Цель проекта", default="Мои цели на этот проект"
+        verbose_name="Цель проекта",
+        default="Мои цели на этот проект",
     )
     tasks = models.TextField(
-        verbose_name="Задачи проекта", default="Мои задачи на этот проект"
+        verbose_name="Задачи проекта",
+        default="Мои задачи на этот проект",
     )
     description = models.TextField(
-        verbose_name="Описание проекта", default="Мои цели на этот проект"
+        verbose_name="Описание проекта",
+        default="Мои цели на этот проект",
     )
-
-    files = models.FileField(upload_to=directory_path, null=True)
 
     class Meta:
         db_table = "projects_tb"
@@ -67,24 +70,27 @@ class Project(models.Model):
         return cls.objects.filter(name=name).first()
 
     @classmethod
-    def update_or_create_project(cls, instanse, update_correct_info):
+    def update_or_create_project(
+        cls, project, update_correct_info, files=None
+    ):
 
-        if instanse:
-            instanse.name = update_correct_info["name"]
-            instanse.date_start = update_correct_info["date_start"]
-            instanse.date_end = update_correct_info["date_end"]
+        if project:
+            project.name = update_correct_info["name"]
+            project.date_start = update_correct_info["date_start"]
+            project.date_end = update_correct_info["date_end"]
             if "purpose" in update_correct_info:
-                instanse.purpose = update_correct_info["purpose"]
+                project.purpose = update_correct_info["purpose"]
             if "tasks" in update_correct_info:
-                instanse.tasks = update_correct_info["tasks"]
+                project.tasks = update_correct_info["tasks"]
             if "description" in update_correct_info:
-                instanse.description = update_correct_info["description"]
+                project.description = update_correct_info["description"]
 
         else:
-
-            instanse: Project = Project.objects.create(**update_correct_info)
-        instanse.save()
-        return instanse
+            project: Project = Project.objects.create(**update_correct_info)
+            if files:
+                ProjectFiles.objects.create(file=files, project=project)
+        project.save()
+        return project
 
     @classmethod
     def get_project_by_id(cls, id: int):
@@ -100,47 +106,38 @@ class Project(models.Model):
     @staticmethod
     def get_user_rights_flag_in_project(user: User, project: "Project"):
         if user.is_superuser:
-            return {"is_create": True, "is_coordinate": True, "is_watch": True}
+            return {"is_create": True}
         is_create = False
-        is_coordinate = False
-        is_watch = False
-        for rights_list in [
-            x.rights_user.all()
-            for x in СommunityProject.objects.filter(user=user)
+
+        user_in_community: СommunityProject = (
+            СommunityProject.objects.filter(user=user)
             .filter(project=project)
             .all()
-        ]:
-            for right in rights_list:
-                flags = right.flags
-                is_create = flags.is_create or is_create
-                is_coordinate = flags.is_coordinate or is_coordinate
-                is_watch = flags.is_watch or is_watch
-        return {
-            "is_create": is_create,
-            "is_coordinate": is_coordinate,
-            "is_watch": is_watch,
-        }
+        )
+        is_create = user_in_community.is_create
+        # добавить права из инициативы
+        return {"is_create": is_create}
 
-    @staticmethod
-    def get_bosses_in_project(project):
-        bosses = []
-        ids_boss = set()
-        for info_community in СommunityProject.objects.filter(
-            project=project
-        ).all():
-            user = info_community.user
-            is_coordinate = Project.get_user_rights_flag_in_project(
-                user, project
-            ).get("is_coordinate")
-            if is_coordinate and user.id not in ids_boss:
-                bosses.append(user)
-                ids_boss.add(user.id)
-        return bosses
+
+class ProjectFiles(models.Model):
+    project = models.ForeignKey(
+        Project,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="files",
+        verbose_name="Проект",
+    )
+    file = models.FileField(upload_to=directory_path, null=True)
+
+    @classmethod
+    def add_file(cls, project: Project, file):
+        cls.objects.create(project=project, file=file)
 
 
 class IntermediateDateProject(models.Model):
     project = models.ForeignKey(
-        "Project",
+        Project,
         on_delete=models.CASCADE,
         blank=True,
         null=True,
@@ -187,6 +184,9 @@ class MetricsProject(models.Model):
         help_text="Проект к которому относятся метрики",
         verbose_name="Проект",
     )
+    description = models.TextField(
+        help_text="Пояснение к метрики",
+    )
     title = models.CharField(
         max_length=200,
         help_text="Введите название метрики",
@@ -206,7 +206,12 @@ class MetricsProject(models.Model):
         verbose_name="Единицы измерения метрики",
         max_length=200,
     )
-    active = models.BooleanField()
+    active = models.BooleanField(
+        help_text="Нужно ли выводить метрику для всего проекта",
+    )
+    is_aggregate = models.BooleanField(
+        help_text="Метрика является агрегированной"
+    )
     initiative_activate = models.BooleanField(default=True)
 
     class Meta:
@@ -237,6 +242,8 @@ class MetricsProject(models.Model):
                 metric_old.active = metric_info["active"]
                 metric_old.target_value = metric_info["target_value"]
                 metric_old.units = metric_info["units"]
+                metric_old.description = metric_info["description"]
+                metric_old.is_aggregate = metric_info["is_aggregate"]
                 metric_old.save()
             else:
                 metric_old = cls.objects.create(
@@ -245,6 +252,8 @@ class MetricsProject(models.Model):
                     active=metric_info["active"],
                     target_value=metric_info["target_value"],
                     units=metric_info["units"],
+                    description=metric_info.get("description"),
+                    is_aggregate=metric_info.get("is_aggregate"),
                 )
             metric_info["id"] = metric_old.id
             ids_not_delete.append(metric_old.id)
@@ -275,6 +284,12 @@ class PropertiesItemsProject(models.Model):
         verbose_name="Значение свойства",
     )
 
+    value_short = models.CharField(
+        max_length=10,
+        help_text="Сокращение для графиков",
+        verbose_name="Сокращение значения свойства",
+    )
+
     class Meta:
         db_table = "properties_item"
 
@@ -297,17 +312,20 @@ class PropertiesItemsProject(models.Model):
         propertie,
         values: typing.List[str],
     ):
+        print("update_properties_values_for_project !!!!", values)
         ids_not_delete = []
         for val in values:
             id = val.get("id")
             if id and id > 0:
                 val_obj = cls.get_property_item_by_id(id)
                 val_obj.value = val.get("value")
+                val_obj.value_short = val.get("value_short")
                 val_obj.save()
             else:
                 val_obj = cls.objects.create(
                     propertie=propertie,
                     value=val.get("value"),
+                    value_short=val.get("value_short"),
                 )
             ids_not_delete.append(val_obj.id)
             val["id"] = val_obj.id
@@ -375,22 +393,26 @@ class PropertiesProject(models.Model):
 
 
 class СommunityProject(models.Model):
+    project = models.ForeignKey(
+        "Project",
+        on_delete=models.CASCADE,
+        related_name="community_info",
+    )
     user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        # related_name="",
     )
-    project = models.ForeignKey(
-        "Project", on_delete=models.CASCADE, related_name="community_info"
+    is_create = models.BooleanField(
+        default=False,
+        help_text="Возможность созданияиния инциативы",
     )
-
-    role_user = models.ForeignKey(
-        "RolesUserInProject",
-        on_delete=models.CASCADE,
+    is_author = models.BooleanField(
+        default=False,
+        help_text="Флаг автора",
     )
-    rights_user = models.ManyToManyField(
-        "RightsUSerInProject",
-        # on_delete=models.CASCADE,
+    date_create = models.DateField(
+        verbose_name="Дата создания проекта",
+        default=timezone.now,
     )
 
     class Meta:
@@ -401,23 +423,20 @@ class СommunityProject(models.Model):
 
     @classmethod
     def create_or_update_user_in_community(
-        cls, project: Project, user: User, role: int, rights: list
+        cls,
+        project: Project,
+        user: User,
+        is_create: bool,
+        is_author: bool = False,
     ):
-        community = (
-            cls.objects.filter(project=project).filter(user=user).first()
+        defaults = {
+            "is_create": is_create,
+            "is_author": is_author,
+        }
+        obj, flag = cls.objects.update_or_create(
+            project=project, user=user, defaults=defaults
         )
-        if not community:
-            community = cls.objects.create(
-                project=project,
-                user=user,
-                role_user_id=role,
-            )
-        community.rights_user.clear()
-        for right_id in rights:
-            community.rights_user.add(right_id)
-            community.save()
-
-        return community
+        return obj
 
 
 class PropertiesСommunityProject(models.Model):
@@ -470,144 +489,49 @@ class PropertiesСommunityProject(models.Model):
         ).delete()
 
 
-class RolesUserInProject(models.Model):
+class RolesProject(models.Model):
+    """
+    Роли проекта
+    """
+
     project = models.ForeignKey(
         "Project",
         on_delete=models.CASCADE,
         blank=True,
         null=True,
         related_name="roles",
-        help_text="Проект к которому относятся роли",
+        help_text="Проект к которому относятся права пользователей",
         verbose_name="Проект",
     )
     name = models.CharField(max_length=200)
-    coverage = models.IntegerField(default=0)
+    is_approve = models.BooleanField(default=False)
+    is_update = models.BooleanField(default=False)
 
     class Meta:
         db_table = "roles_project_tb"
 
     @classmethod
-    def get_roles_by_id(cls, id):
+    def get_by_id(cls, id):
         return cls.objects.filter(id=id).first()
 
     @classmethod
-    def create_default(cls, project: Project):
-        items = [
-            {
-                "name": "Наблюдать",
-                "coverage": 0,
-            },
-            {
-                "name": "Эксперт по направлению",
-                "coverage": 1,
-            },
-            {
-                "name": "Функциональный эксперт",
-                "coverage": 2,
-            },
-            {
-                "name": "Дирекор",
-                "coverage": 3,
-            },
-        ]
-        ids_not_delete = []
-
-        for item in items:
-            item_obj = (
-                cls.objects.filter(project=project)
-                .filter(name=item["name"])
-                .filter(coverage=item["coverage"])
-                .first()
-            )
-            if not item_obj:
-                item_obj = cls.objects.create(
-                    project=project,
-                    name=item["name"],
-                    coverage=item["coverage"],
-                )
-            ids_not_delete.append(item_obj.id)
-        cls.objects.filter(project=project).exclude(
-            id__in=ids_not_delete
-        ).delete()
-
-
-class RightsUserBool(models.Model):
-    project = models.ForeignKey("Project", on_delete=models.CASCADE)
-    is_create = models.BooleanField(default=False)
-    is_coordinate = models.BooleanField(default=False)
-    is_watch = models.BooleanField(default=False)
-
-    class Meta:
-        db_table = "user_rights_bool_tb"
-
-
-class RightsUSerInProject(models.Model):
-    project = models.ForeignKey(
-        "Project",
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True,
-        related_name="rights",
-        help_text="Проект к которому относятся права пользователей",
-        verbose_name="Проект",
-    )
-    name = models.CharField(max_length=200)
-    flags = models.ForeignKey(
-        "RightsUserBool",
-        on_delete=models.CASCADE,
-    )
-
-    class Meta:
-        db_table = "rights_project_tb"
+    def get_roles_by_project(cls, project):
+        return cls.objects.filter(project=project).order_by("name").all()
 
     @classmethod
-    def get_right_by_id(cls, id):
-        return cls.objects.filter(id=id).first()
-
-    @classmethod
-    def create_default(cls, project: Project):
-        items = [
-            {
-                "name": "Создать инициативу",
-                "flags": RightsUserBool.objects.create(
-                    project=project,
-                    is_create=True,
-                    is_coordinate=False,
-                    is_watch=True,
-                ),
-            },
-            {
-                "name": "Согласовать инициативу",
-                "flags": RightsUserBool.objects.create(
-                    project=project,
-                    is_create=False,
-                    is_coordinate=True,
-                    is_watch=True,
-                ),
-            },
-            {
-                "name": "Просмотр",
-                "flags": RightsUserBool.objects.create(
-                    project=project,
-                    is_create=False,
-                    is_coordinate=False,
-                    is_watch=True,
-                ),
-            },
-        ]
+    def create_or_update(cls, project: Project, roles):
         ids_not_delete = []
-        for item in items:
-            item_obj = (
-                cls.objects.filter(project=project)
-                .filter(name=item["name"])
-                .first()
-            )
-            if not item_obj:
-                item_obj = cls.objects.create(
-                    project=project, name=item["name"], flags=item["flags"]
+        for item in roles:
+            id = item.get("id")
+            if id > 0:
+                item_obj, _ = cls.objects.update_or_create(
+                    id=item.get("id"), defaults=item
                 )
-
+            else:
+                id = item.pop("id")
+                item_obj = cls.objects.create(**item, project=project)
             ids_not_delete.append(item_obj.id)
+            item["id"] = item_obj.id
         cls.objects.filter(project=project).exclude(
             id__in=ids_not_delete
         ).delete()

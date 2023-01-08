@@ -18,6 +18,7 @@ import { addPropertie, isPropertie, isStage, makeProjectFordit } from '../../uti
 import Properties from '../properties/properties';
 import { clearProjectForEdit, closeModal, setProjectForEdit } from '../../redux/state/state-slice';
 import ModalInfo from '../modal-info/modal-info';
+import { useGetProjectInfoQuery } from '../../redux/state/state-api';
 
 type TBasicSettingsEditProps = {
   onSaveClick: MouseEventHandler<HTMLButtonElement>;
@@ -26,7 +27,9 @@ type TBasicSettingsEditProps = {
 
 export default function BasicSettingsEdit({ onSaveClick, onCancelClick }: TBasicSettingsEditProps) {
   const dispatch = useAppDispatch();
-  const project = useAppSelector((store) => store.state.project.value);
+  // const project = useAppSelector((store) => store.state.project.value);
+  const { currentId } = useAppSelector((store) => store.state.project);
+  const { data: project } = useGetProjectInfoQuery(currentId);
   const modal = useAppSelector((store) => store.state.app.modal);
 
   useEffect(() => {
@@ -54,12 +57,12 @@ export default function BasicSettingsEdit({ onSaveClick, onCancelClick }: TBasic
         <Metrics
           edit
         />
-        <TargetEffect
+        {/* <TargetEffect
           edit
         />
         <ProjectsEffect
           edit
-        />
+        /> */}
       </section>
       <section>
         {/* {!project.properties.length ? 
@@ -83,6 +86,11 @@ export default function BasicSettingsEdit({ onSaveClick, onCancelClick }: TBasic
         rights={project.rights}
         edit
       />
+      {/* <section>
+        <Roles
+          edit
+        />
+      </section> */}
       <div className={`${styles.bottomSectionWrapper}`}>
         <CustomizedButton
           value="Отменить"

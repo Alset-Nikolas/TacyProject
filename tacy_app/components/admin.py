@@ -16,7 +16,9 @@ from .models import (
     EventMetricsFields,
     SettingsStatusInitiative,
     SettingsComponents,
+    RolesUserInInitiative,
 )
+
 
 admin.site.register(Initiatives)
 admin.site.register(InitiativesAddFields)
@@ -34,3 +36,5 @@ admin.site.register(Events)
 admin.site.register(EventsAddFields)
 admin.site.register(SettingsAddFeldsEvent)
 admin.site.register(EventMetricsFields)
+
+admin.site.register(RolesUserInInitiative)

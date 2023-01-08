@@ -7,6 +7,7 @@ import styles from './initiatives-table.module.scss';
 import sectionStyles from '../../styles/sections.module.scss';
 import { TInitiative } from "../../types";
 import { getInitiativeByIdThunk, setCurrentInitiativeId } from "../../redux/initiatives-slice";
+import { useGetProjectInfoQuery } from "../../redux/state/state-api";
 
 type TInitiativesTableProps = {
   initiativesList: Array<TInitiative>;
@@ -18,7 +19,9 @@ export default function InitiativesTable({ initiativesList }: TInitiativesTableP
   const initiative = useAppSelector((store) => store.initiatives.initiative);
   const { currentInitiativeId } = useAppSelector((store) => store.initiatives);
   const components = useAppSelector((store) => store.components.value);
-  const project = useAppSelector((store) => store.state.project.value);
+  // const project = useAppSelector((store) => store.state.project.value);
+  const { currentId } = useAppSelector((store) => store.state.project);
+  const { data: project } = useGetProjectInfoQuery(currentId);
 
   // if (!components) return null;
 

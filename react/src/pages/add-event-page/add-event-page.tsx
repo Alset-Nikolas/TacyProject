@@ -1,25 +1,39 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { paths } from "../../consts";
-import { addInitiativeThunk, setInitiativesState } from "../../redux/initiatives-slice";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import CustomizedButton from "../../components/button/button";
-import CustomizedSelect from "../../components/select/Select";
+import { setEventsState } from "../../redux/evens-slice";
+import InitiativeManagement from "../../components/initiative-management/initiative-management";
+import DateInput from "../../components/date-input/date-input";
+import { useGetInitiativeByIdQuery } from "../../redux/state/state-api";
+import { useAddEventMutation, useGetEventsListQuery } from "../../redux/events/events-api";
 
 //Styles
 import styles from './add-event-page.module.scss';
-import { addEventThunk, setEventsState } from "../../redux/evens-slice";
-import InitiativeManagement from "../../components/initiative-management/initiative-management";
-import DateInput from "../../components/date-input/date-input";
 
 export default function AddEventPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const location = useLocation();
   // const currentProjectId = useAppSelector((store) => store.state.project.currentId);
   // const project = useAppSelector((store) => store.state.project.value);
   const components = useAppSelector((store) => store.components.value);
-  const { addInitiativeRequestSuccess, initiative } = useAppSelector((store) => store.initiatives)
-  const { addEventRequestSuccess } = useAppSelector((store) => store.events)
+  // const { addInitiativeRequestSuccess, initiative } = useAppSelector((store) => store.initiatives);
+  const {
+    currentInitiativeId
+  } = useAppSelector((store) => store.initiatives);
+  const {
+    data: initiative,
+    // isFetching: isFetchingInitiative,
+  } = useGetInitiativeByIdQuery(currentInitiativeId ? currentInitiativeId : -1, {
+    skip: !currentInitiativeId,
+  });
+  // const { addEventRequestSuccess } = useAppSelector((store) => store.events);
+  const { refetch: refetchEventsList } = useGetEventsListQuery(initiative?.initiative.id ? initiative.initiative.id : -1, {
+    skip: !initiative?.initiative.id,
+  });
+  const [addEvent, { isSuccess: addEventRequestSuccess }] = useAddEventMutation();
 
   if (!initiative) return null;
 
@@ -54,7 +68,8 @@ export default function AddEventPage() {
 
   const onSubmitHandler = (e: FormEvent) => {
     e.preventDefault();
-    dispatch(addEventThunk(newEventState));
+    // dispatch(addEventThunk(newEventState));
+    addEvent(newEventState);
   }
 
   const onInitiativeInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -99,7 +114,11 @@ export default function AddEventPage() {
   };
 
   useEffect(() => {
-    if (addEventRequestSuccess) navigate(`/${paths.events}`);
+    if (addEventRequestSuccess) {
+      refetchEventsList()
+      // navigate(`/${paths.events}`);
+      navigate(`/${paths.registry}`, { state: { initiativeId: location.state?.initiativeId }});
+    }
     return () => {
       dispatch(setEventsState({
         addEventRequest: false,

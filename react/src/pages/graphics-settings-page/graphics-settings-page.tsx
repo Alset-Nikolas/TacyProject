@@ -7,6 +7,7 @@ import SectionHeader from '../../components/section/section-header/section-heade
 import SelectUnits from '../../components/select-units/select-units';
 import CustomizedSelect from '../../components/select/Select';
 import { getGraphicsSettingsThunk, updateGraphicsSettingsThunk } from '../../redux/graphics-slice';
+import { useGetProjectInfoQuery } from '../../redux/state/state-api';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 
 // Styles
@@ -14,7 +15,9 @@ import styles from './graphics-settings-page.module.scss';
 
 export default function GraphicsSettingsPage() {
   const dispatch = useAppDispatch();
-  const project = useAppSelector((store) => store.state.project.value);
+  // const project = useAppSelector((store) => store.state.project.value);
+  const { currentId } = useAppSelector((store) => store.state.project);
+  const { data: project } = useGetProjectInfoQuery(currentId);
   const modal = useAppSelector((store) => store.state.app.modal);
   const graphicsSettings = useAppSelector((store) => store.graphics.settings);
   const [newSettingState, setNewSettingState] = useState([...graphicsSettings]);

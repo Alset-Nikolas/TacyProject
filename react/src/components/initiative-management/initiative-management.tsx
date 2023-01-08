@@ -12,7 +12,7 @@ import { paths } from "../../consts";
 import styles from './initiative-management.module.scss';
 import { setInitiativeEdit } from "../../redux/state/state-slice";
 import CustomizedButton from "../button/button";
-import { useGetInitiativeByIdQuery, useGetInitiativesListQuery } from "../../redux/initiatives/initiatives-api";
+import { useGetInitiativeByIdQuery, useGetInitiativesListQuery } from "../../redux/state/state-api";
 
 type TInitiativeManagementProps = {
   edit?: boolean;
@@ -44,12 +44,12 @@ export default function InitiativeManagement({ edit, editButton }: TInitiativeMa
     skip: !currentInitiativeId,
   });
 
-  useEffect(() => {
-    if (!currentInitiativeId && initiativesList?.length) {
-      dispatch((getInitiativeByIdThunk(initiativesList[0].initiative.id)));
-      dispatch(setCurrentInitiativeId(initiativesList[0].initiative.id));
-    }
-  }, [currentInitiativeId, initiativesList]);
+  // useEffect(() => {
+  //   if (!currentInitiativeId && initiativesList?.length) {
+  //     dispatch((getInitiativeByIdThunk(initiativesList[0].initiative.id)));
+  //     dispatch(setCurrentInitiativeId(initiativesList[0].initiative.id));
+  //   }
+  // }, [currentInitiativeId, initiativesList]);
 
   if (!components) return null;
 

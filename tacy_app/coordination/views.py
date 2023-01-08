@@ -22,6 +22,8 @@ from rest_framework.response import Response
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
 from projects.models import Project
+from components.models import RolesUserInInitiative
+from components.serializers import CommunityRolesInInitiativeSerializer
 from django.contrib.auth import get_user_model
 from notifications.models import NotificationsUser
 from drf_yasg.utils import swagger_auto_schema
@@ -145,8 +147,8 @@ class InfoInitiativeRole(views.APIView):
                 "user_add_comment": CoordinationInitiativeHistory.check_person_add_comment(
                     initiative_id, user
                 ),
-                "user_rights_flag": Project.get_user_rights_flag_in_project(
-                    user, initiative.project
+                "user_rights_flag": Initiatives.get_user_rigts(
+                    user, initiative
                 ),
             },
             200,
@@ -309,5 +311,22 @@ class Switch(views.APIView):
 
         return Response(
             f"Инициатива {text}",
+            200,
+        )
+
+
+class CommunityViews(views.APIView):
+    def get(self, request):
+        initiative = get_object_or_404(
+            Initiatives, id=self.request.GET.get("id")
+        )
+        community_roles = initiative.get_community_roles()
+        ans = []
+        for community_item in community_roles:
+            if community_item.get("role").is_approve:
+                ans.append(community_item)
+        s = CommunityRolesInInitiativeSerializer(instance=ans, many=True)
+        return Response(
+            s.data,
             200,
         )

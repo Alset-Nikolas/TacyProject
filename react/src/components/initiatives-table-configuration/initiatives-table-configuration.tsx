@@ -1,5 +1,6 @@
 import { ChangeEvent } from "react";
 import { updateTableRegistry } from "../../redux/components-slice";
+import { useGetProjectInfoQuery } from "../../redux/state/state-api";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import SectionContent from "../section/section-content/section-content";
 import SectionHeader from "../section/section-header/section-header";
@@ -9,7 +10,9 @@ import styles from './initiatives-table-configuration.module.scss';
 
 export default function InitiativesTableConfiguration() {
   const dispatch = useAppDispatch();
-  const project = useAppSelector((store) => store.state.project.value);
+  // const project = useAppSelector((store) => store.state.project.value);
+  const { currentId } = useAppSelector((store) => store.state.project);
+  const { data: project } = useGetProjectInfoQuery(currentId);
   const tableRegistry = useAppSelector((store) => store.components.value?.table_registry);
 
   const handleCheckboxChange = (

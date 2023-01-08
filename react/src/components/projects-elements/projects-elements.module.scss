@@ -1,5 +1,5 @@
 .wrapper {
-  width: 100%;
+  width: 45%;
   display: flex;
   flex-direction: column;
   background: #FFFFFF;
@@ -36,4 +36,42 @@
   display: flex;
   flex-direction: column;
   gap: 4.24px;
+}
+
+.sectionHeader {
+  display: flex;
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 30px;
+  color: #504F4F;
+}
+
+.rolesHeader {
+  margin-right: 194px;
+}
+
+.rolesList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.roleWrapper {
+  display: flex;
+  gap: 10px;
+}
+
+.roleName {
+  flex: 1 1 50px;
+}
+
+.rights {
+  flex: 3 1;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.selector {
+  width: 204px;
 }

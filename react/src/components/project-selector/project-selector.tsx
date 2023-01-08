@@ -8,7 +8,7 @@ import CustomizedSelect from "../select/Select";
 import styles from './project-selector.module.scss';
 import textStyles from '../../styles/text.module.scss';
 import { useGetProjectInfoQuery, useGetProjectsListQuery } from "../../redux/state/state-api";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function ProjectSelector() {
   const dispatch = useAppDispatch();
@@ -20,6 +20,7 @@ export default function ProjectSelector() {
   const [selectedId, setSlectedId] = useState(savedProjectId ? Number.parseInt(savedProjectId) : null);
   const [isSkipFetch, setSkipIsFetch] = useState(true);
   const value = projectsList && projectsList.find((el) => el.id === selectedId)?.name;
+  const { currentId } = useAppSelector((store) => store.state.project);
 
   const onSelectorChange = (e: SelectChangeEvent<string>) => {
     const selectedListItem =  projectsList && projectsList.find((el) => el.name === e.target.value);
@@ -38,6 +39,10 @@ export default function ProjectSelector() {
   if (isSuccess) {
     setSkipIsFetch(true);
   }
+
+  useEffect(() => {
+    setSlectedId(currentId);
+  }, [currentId]);
 
   return (
     <div>

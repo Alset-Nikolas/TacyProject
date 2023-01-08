@@ -5,11 +5,21 @@ import editIconSrc from '../../images/icons/edit.svg';
 import addIconSrc from '../../images/icons/add.svg';
 import addFilledIconSrc from '../../images/icons/add_filled.svg';
 import deleteIconSrc from '../../images/icons/delete.svg';
+import deleteFilledIconSrc from '../../images/icons/delete_filled.svg';
 import showIconSrc from '../../images/icons/arrow.svg';
 import { MouseEventHandler } from 'react';
 
 type TPictogramProps = {
-  type: 'settings' | 'notifications' | 'logout' | 'edit' | 'delete' | 'add' | 'add-filled' | 'show' | 'close';
+  type: 'settings' |
+    'notifications' |
+    'logout' |
+    'edit' |
+    'delete' |
+    'delete-filled'
+    | 'add' |
+    'add-filled' |
+    'show' |
+    'close';
   cursor?: 'pointer' | 'default', 
   onClick?: MouseEventHandler<HTMLImageElement>;
 };
@@ -31,6 +41,9 @@ export default function Pictogram({ type, onClick, cursor = 'default' }: TPictog
     break;
     case 'delete':
       iconSrc = deleteIconSrc;
+    break;
+    case 'delete-filled':
+      iconSrc = deleteFilledIconSrc;
     break;
     case 'add':
       iconSrc = addIconSrc;

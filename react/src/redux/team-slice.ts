@@ -168,8 +168,8 @@ export const getTeamThunk = (id: number) => (dispatch: AppDispatch, getState: ()
           member.name = `${resItem.user.last_name} ${resItem.user.first_name} ${resItem.user.second_name}`;
           member.email = resItem.user.email;
           member.phone = resItem.user.phone;
-          member.role = resItem.role_user.name;
-          member.rights = resItem.rights_user.map((right) => right.name);
+          // member.role = resItem.role_user.name;
+          // member.rights = resItem.rights_user.map((right) => right.name);
           member.properties = resItem.properties.map((resPropertie) => {
             const projectPropertie = project.properties.find((el) => el.id === resPropertie.title.id);
             if (!projectPropertie) throw new Error('Propertie doesn\'t exist');
@@ -214,26 +214,28 @@ export const postTeamThunk = (id: number) => (dispatch: AppDispatch, getState: (
       email: member.email,
       phone: member.phone,
     };
-    listItem.role_user = {
-      id: project!.roles.find((role) => role.name === member.role)!.id,
-      name: member.role,
-    };
-    listItem.rights_user = [];
-    member.rights.forEach((right) => {
-      listItem.rights_user.push({
-        id: project!.rights.find((el) => el.name === right)!.id,
-        name: right,
-      });
-    });
+    // listItem.role_user = {
+    //   id: project!.roles.find((role) => role.name === member.role)!.id,
+    //   name: member.role,
+    // };
+    // listItem.rights_user = [];
+    // member.rights.forEach((right) => {
+    //   listItem.rights_user.push({
+    //     id: project!.rights.find((el) => el.name === right)!.id,
+    //     name: right,
+    //   });
+    // });
     listItem.properties = [];
     member.properties.forEach((el, index) => {
       listItem.properties.push({
         title: {
           id: project!.properties.find((propertie) => propertie.title === el.title)!.id,
+          title: el.title,
         },
         values: el.values.map((value) => {
           return {
             id: project!.properties[index].items.find((item) => item.value === value)!.id,
+            value,
           };
         }),
       });

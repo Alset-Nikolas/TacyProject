@@ -12,8 +12,10 @@ from .models import (
     Project,
     ProjectStages,
     PropertiesProject,
-    RightsUSerInProject,
-    RolesUserInProject,
+    RolesProject,
+    RolesProject,
+    ProjectFiles,
+    СommunityProject,
 )
 from .serializers import (
     InfoProjectSerializer,
@@ -138,7 +140,10 @@ class CreateProjectView(views.APIView):
     def post(self, request, format=None):
         serializer_project = serializers.CreateProjectSerializer(
             data=request.data,
-            context={"request": request},
+            context={
+                "request": request,
+                "file": self.request.FILES.get("file"),
+            },
         )
         serializer_project.is_valid(raise_exception=True)
         validated_data: tp.OrderedDict = serializer_project.validated_data
@@ -160,16 +165,21 @@ class CreateProjectView(views.APIView):
             project,
             validated_data["properties"],
         )
-        RolesUserInProject.create_default(
+        RolesProject.create_or_update(
             project,
+            validated_data["roles"],
         )
-        RightsUSerInProject.create_default(
-            project,
-        )
+
         settings_project = SettingsComponents.create(project.id)
         SettingsStatusInitiative.generate_defauld_status(settings_project)
         data = serializer_project.data
         data["id"] = project.id
+        СommunityProject.create_or_update_user_in_community(
+            project=project,
+            user=self.request.user,
+            is_create=True,
+            is_author=True,
+        )
         return Response(
             data,
             status=status.HTTP_200_OK,
@@ -316,11 +326,12 @@ class UpdateCommunityProjectView(views.APIView):
         )
         s.is_valid(raise_exception=True)
         s.create_community(request.data)
+
         return Response(
             {
                 "code": 200,
                 "msg": "Команда проекта обновлена",
-                "community": s.validated_data,
+                "community": s.data,
             },
             status=status.HTTP_200_OK,
         )
@@ -452,58 +463,14 @@ class DeleteProjectView(views.APIView):
         return Response({"msg": "Проект удален"}, status=status.HTTP_200_OK)
 
 
-class BossesProjectView(views.APIView):
-    response_schema_dict = {
-        "200": openapi.Response(
-            description="Список людей, с правами согласования инициативы.",
-            examples={
-                "application/json": [
-                    {
-                        "id": 1,
-                        "email": "z@mail.ru",
-                        "first_name": "z",
-                        "last_name": "z",
-                        "second_name": "z",
-                        "phone": "1",
-                        "is_superuser": True,
-                    },
-                ]
-            },
-        ),
-        "400": openapi.Response(
-            description="Передан id несуществующего проекта",
-            examples={
-                "application/json": {"id": ["project pk = 100 not exist"]}
-            },
-        ),
-        "401": openapi.Response(
-            description="Токен идентификации не был передан",
-            examples={
-                "application/json": {
-                    "detail": "Учетные данные не были предоставлены."
-                }
-            },
-        ),
-    }
+class FileProjectView(views.APIView):
+    def post(self, request):
+        project = get_object_or_404(Project, id=self.request.GET.get("id"))
+        file = self.request.FILES.get("file")
+        ProjectFiles.add_file(project, file)
+        return Response({"msg": "Файл добавлен"}, status=status.HTTP_200_OK)
 
-    @swagger_auto_schema(
-        operation_description="Список лиц у которых есть права согласовывать инициативы в проекте.",
-        responses=response_schema_dict,
-        manual_parameters=[
-            openapi.Parameter(
-                name="id",
-                in_=openapi.IN_QUERY,
-                type=openapi.TYPE_STRING,
-                description="ID проекта",
-            )
-        ],
-    )
-    def get(self, request):
-        project: Project = get_object_or_404(Project, id=request.GET.get("id"))
-        s = UserSerializer(
-            instance=Project.get_bosses_in_project(project), many=True
-        )
-        return Response(
-            s.data,
-            status=status.HTTP_200_OK,
-        )
+    def delete(self, request):
+        file = get_object_or_404(ProjectFiles, id=self.request.GET.get("id"))
+        file.delete()
+        return Response({"msg": "Файл удален"}, status=status.HTTP_200_OK)

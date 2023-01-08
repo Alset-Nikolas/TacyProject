@@ -11,4 +11,5 @@ urlpatterns = [
     path("initiative/add-comment/", views.AddComment.as_view()),
     path("initiative/approval/", views.Approval.as_view()),
     path("initiative/switch/", views.Switch.as_view()),
+    path("initiative/community/", views.CommunityViews.as_view()),
 ]

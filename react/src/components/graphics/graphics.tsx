@@ -1,6 +1,7 @@
 import { IconButton, Tooltip } from "@mui/material";
 import { useEffect, useState } from "react";
 import { getGraphicsThunk } from "../../redux/graphics-slice";
+import { useGetProjectInfoQuery } from "../../redux/state/state-api";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import CustomBarChart from "../custom-bar-chart/custom-bar-chart";
 import SectionContent from "../section/section-content/section-content";
@@ -12,7 +13,9 @@ import styles from './graphics.module.scss';
 export default function Graphics() {
   const dispatch = useAppDispatch();
   const { graphics, statusGraphics } = useAppSelector((store) => store.graphics);
-  const project = useAppSelector((store) => store.state.project.value);
+  // const project = useAppSelector((store) => store.state.project.value);
+  const { currentId } = useAppSelector((store) => store.state.project);
+  const { data: project } = useGetProjectInfoQuery(currentId);
   const chartsProperties = graphics.map((el) => el.propertieName);
   const [ currentPropertieIndex, setCurrentPropertieIndex ] = useState<number>(0);
 

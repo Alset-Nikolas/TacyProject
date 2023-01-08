@@ -1,4 +1,5 @@
 import { ChangeEvent } from 'react';
+import { isReturnStatement } from 'typescript';
 import { updateSettings } from '../redux/components-slice';
 import { updateProjectForEdit } from "../redux/state/state-slice";
 import { AppDispatch } from "../redux/store";
@@ -14,7 +15,8 @@ import {
   TStageEdit,
   TSettings,
   TAdditionalField,
-  TStatusField
+  TStatusField,
+  TRole
 } from "../types";
 
 export const handleInputChange = (
@@ -22,10 +24,18 @@ export const handleInputChange = (
   project: TProject | TProjectForEdit,
   dispatch: AppDispatch,
 ) => {
+  // const
   if (Object.prototype.hasOwnProperty.call(project, e.target.name)) {
-    dispatch(updateProjectForEdit({
-      [e.target.name]: e.target.name.match('date') ? e.target.value.replaceAll('.', '-') : e.target.value,
-    }));
+    if (e.target.type !== 'file') {
+      dispatch(updateProjectForEdit({
+        [e.target.name]: e.target.name.match('date') ? e.target.value.replaceAll('.', '-') : e.target.value,
+      }));
+    } else {
+      const files = (e.target as HTMLInputElement).files;
+      dispatch(updateProjectForEdit({
+        [e.target.name]: files ? files[0] : null,
+      }));
+    }
   }
 };
 
@@ -33,14 +43,16 @@ type KeysOfUnion<T> = T extends T ? keyof T: never;
 
 export const handlePropertieInutChange = (
   index: number,
-  project: TProjectForEdit,
+  project: TProjectForEdit | null,
   propType: keyof TProjectForEdit,
-  key: KeysOfUnion<TMetrica | TIntermediateDate | TStage>, 
+  key: KeysOfUnion<TMetrica | TIntermediateDate | TStage | TRole> | 'values_short', 
   value: string,
   dispatch: AppDispatch,
   propertieIndex?: number,
 ) => {
-  if (propType === 'metrics' || propType === 'intermediate_dates' || propType === 'stages') {
+  if (!project) return;
+  
+  if (propType === 'metrics' || propType === 'intermediate_dates' || propType === 'stages' || propType === 'roles') {
     const propsArray = [...project[propType]];
 
     const propsArrayElement = {...propsArray[index]};
@@ -66,6 +78,13 @@ export const handlePropertieInutChange = (
       currentPropertie.value = value;
       propVluesArray[propertieIndex] = currentPropertie;
       propsArrayElement[key] = propVluesArray;
+    } else if (key === 'values_short' && typeof propertieIndex === 'number') {
+      const propVluesArray = [...propsArrayElement['values']];
+      const currentPropertie = { ...propVluesArray[propertieIndex] };
+      currentPropertie.value_short = value;
+      propVluesArray[propertieIndex] = currentPropertie;
+      propsArrayElement['values'] = propVluesArray;
+
     }
 
     propsArray[index] = propsArrayElement;
@@ -79,12 +98,14 @@ export const handlePropertieInutChange = (
 };
 
 export const addPropertie = (
-  newProjectState: TProjectForEdit,
+  newProjectState: TProjectForEdit | null,
   key: keyof TProject,
   dispatch: AppDispatch,
 ) => {
-  let newPropertyElement: TMetrica | TIntermediateDate | TStageEdit | TPropertieEdit | undefined ;
+  let newPropertyElement: TMetrica | TIntermediateDate | TStageEdit | TPropertieEdit | TRole | undefined ;
 
+  if (!newProjectState) return;
+  
   switch (key) {
     case 'metrics':
       newPropertyElement = {
@@ -93,6 +114,8 @@ export const addPropertie = (
         value: 0,
         target_value: 0,
         units: 'бм',
+        description: '',
+        is_aggregate: false,
         active: false,
       };
       break;
@@ -117,8 +140,19 @@ export const addPropertie = (
           {
             id: -1,
             value: '',
+            value_short: '',
           },
         ],
+      };
+      break;
+    case 'roles':
+      newPropertyElement = {
+        id: -1,
+        name: '',
+        // coverage: 0,
+        // project: -1,
+        is_approve: false,
+        is_update: false,
       };
       break;
   }
@@ -128,7 +162,8 @@ export const addPropertie = (
     (key === 'metrics' ||
       key === 'intermediate_dates' ||
       key === 'stages' ||
-      key === 'properties'
+      key === 'properties' ||
+      key === 'roles'
   )) {
     dispatch(updateProjectForEdit({
       [key]: [
@@ -146,7 +181,7 @@ export const removePropertie = (
   dispatch: AppDispatch
 ) => {
 
-  if (newProjectState && (key === 'metrics' || key === 'intermediate_dates' || key === 'stages' || key === 'properties')) {
+  if (newProjectState && (key === 'metrics' || key === 'intermediate_dates' || key === 'stages' || key === 'properties' || key === 'roles')) {
     const propsArray = [...newProjectState[key]];
     propsArray.splice(removeIndex, 1);
     dispatch(updateProjectForEdit({
@@ -164,18 +199,21 @@ export const addPropertieValue = (
   const propsArray = [...projectForEditState.properties];
   const propertie = { ...propsArray[indexOfPropertie] } as TPropertieEdit;
   // const indexOfPropertie = propsArray.findIndex((propertie) => propertie.title === propTitle);
+  try {
+  if (!propertie || typeof indexOfPropertie === 'undefined') throw new Error('Propertie doesn\'t exist');
 
-  if (!propertie || typeof indexOfPropertie === 'undefined') return;
+    propertie.values = [ ...propertie.values, { id: -1, value: '', value_short: ''} ];
 
-  propertie.values = [ ...propertie.values, { id: -1, value: ''} ];
+    propsArray[indexOfPropertie] = propertie;
 
-  propsArray[indexOfPropertie] = propertie;
-
-  dispatch(updateProjectForEdit({
-    properties: [
-      ...propsArray,
-    ],
-  }));
+    dispatch(updateProjectForEdit({
+      properties: [
+        ...propsArray,
+      ],
+    }));
+  } catch(e) {
+    console.log(e);
+  }
 };
 
 export const removePropertieValue = (
@@ -188,7 +226,7 @@ export const removePropertieValue = (
   const propertie = { ...propsArray.find((propertie) => propertie.title === propTitle) } as TPropertieEdit;
   const indexOfPropertie = propsArray.findIndex((propertie) => propertie.title === propTitle);
 
-  if (!propertie.title || typeof indexOfPropertie === 'undefined') return;
+  if (typeof propertie === 'undefined' || indexOfPropertie === -1) return;
 
   const values = [ ...propertie.values ];
   values.splice(index, 1)
@@ -241,6 +279,7 @@ export function makeProjectFordit(project: TProject): TProjectForEdit {
               title: el.title,
               // values: el.items.map((el) => el.value),
               values: el.items,
+              id: el.id,
             });
           }
         });
@@ -284,22 +323,25 @@ export function makeProjectFordit(project: TProject): TProjectForEdit {
     } else if (key === 'metrics' && value instanceof Array) {
       projectForEdit[key] = [];
       if (value.length === 0) {
-        projectForEdit[key].push({
-          title: '',
-          value: 0,
-          target_value: 0,
-          units: 'бм ',
-          active: false,
-        });
+        // projectForEdit[key].push({
+        //   title: '',
+        //   value: 0,
+        //   target_value: 0,
+        //   units: 'бм ',
+        //   active: false,
+        // });
       } else { 
         value.forEach((el) => {
           if (isMetric(el)) {
             projectForEdit[key].push({
+              id: el.id,
               title: el.title,
               value: el.value,
               target_value: el.target_value,
               units: el.units,
+              description: el.description,
               active: el.active,
+              is_aggregate: el.is_aggregate,
             });
           }
         });

@@ -4,6 +4,7 @@ from projects.models import (
     PropertiesProject,
     PropertiesItemsProject,
     MetricsProject,
+    RolesProject,
 )
 from django.contrib.auth import get_user_model
 from django.utils import timezone
@@ -125,6 +126,19 @@ class Initiatives(models.Model):
     def get_by_id(cls, id):
         return cls.objects.filter(id=id).first()
 
+    def get_community_roles(self):
+        community_in_init: list[RolesUserInInitiative] = self.user_roles.all()
+        roles_in_project: list[
+            RolesProject
+        ] = RolesProject.get_roles_by_project(self.project)
+        ans = [{"role": x, "users": []} for x in roles_in_project]
+        for user_in_init in community_in_init:
+            for item in ans:
+                if item.get("role") == user_in_init.role:
+                    item["users"].append(user_in_init.user)
+                    break
+        return ans
+
     @classmethod
     def create_or_update(cls, info) -> int:
         if "project" in info:
@@ -187,7 +201,6 @@ class Initiatives(models.Model):
 
     def update_addfields(self):
         settings_initiatives = self.project.settings_initiatives.first()
-        print("settings_initiatives", settings_initiatives)
         for new_field in SettingsAddFeldsInitiative.objects.filter(
             settings_project=settings_initiatives
         ).all():
@@ -261,6 +274,25 @@ class Initiatives(models.Model):
             )
         init.status = status
         init.save()
+
+    @classmethod
+    def get_user_rigts(cls, user, initiative):
+        flags = Project.get_user_rights_flag_in_project(
+            user, initiative.project
+        )
+
+        role: RolesProject = RolesUserInInitiative.get_user_role(
+            user, initiative
+        )
+        is_approve = None
+        is_update = None
+        if user.is_superuser:
+            is_approve = True
+            is_update = True
+        print(flags)
+        flags["is_approve"] = is_approve or role.is_approve
+        flags["is_update"] = is_update or role.is_update
+        return flags
 
 
 class InitiativesAddFields(models.Model):
@@ -1116,3 +1148,36 @@ class SettingsAddFeldsRisks(models.Model):
 
 
 # -------------------------------------------------------------------
+
+
+class RolesUserInInitiative(models.Model):
+    initiative = models.ForeignKey(
+        Initiatives,
+        on_delete=models.CASCADE,
+        related_name="user_roles",
+    )
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+    )
+    role = models.ForeignKey(
+        RolesProject,
+        on_delete=models.CASCADE,
+    )
+
+    @classmethod
+    def get_user_role(cls, user, initiative):
+        role_user_fact = (
+            cls.objects.filter(user=user).filter(initiative=initiative).first()
+        )
+        if role_user_fact:
+            return role_user_fact.role
+
+    @classmethod
+    def get_users_can_approved(cls, initiative):
+        community_init: list = (
+            cls.objects.filter(initiative=initiative)
+            .filter(role__is_approve=True)
+            .all()
+        )
+        return [c.user for c in community_init]

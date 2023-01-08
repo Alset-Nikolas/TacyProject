@@ -1,8 +1,9 @@
-from django.contrib import admin
 from django.urls import include, path
+
 from . import views
 
 app_name = "components"
+
 
 urlpatterns = [
     path("settings/", views.UpdateSettingsInitiativeView.as_view()),
@@ -11,8 +12,15 @@ urlpatterns = [
     path("initiative/info/", views.InfoInitiativeView.as_view()),
     path("initiative/info/list/", views.ListInitiativesView.as_view()),
     path(
+        "initiative/info/list/file/", views.ListInitiativesFileView.as_view()
+    ),
+    path(
         "initiative/user/statistics/",
         views.UserStatisticsInitiativesView.as_view(),
+    ),
+    path(
+        "initiative/role/",
+        views.RolesInitiativeView.as_view(),
     ),
     path("risk/create/", views.CreateRiskView.as_view()),
     path("risk/info/", views.InfoRiskView.as_view()),

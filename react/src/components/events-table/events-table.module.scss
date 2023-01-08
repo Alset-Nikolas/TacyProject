@@ -1,8 +1,30 @@
 .wrapper {
   display: flex;
   flex-direction: column;
-  margin-bottom: 40px;
+  margin-bottom: 20px;
+}
+.content {
+  display: flex;
+}
+
+.tableWrapper {
   overflow-x: auto;
+  min-width: 100%;
+}
+
+.tableWrapper::-webkit-scrollbar {
+  height: 3px;
+}
+
+.tableWrapper::-webkit-scrollbar-track {
+  background-color: none;
+}
+
+.tableWrapper::-webkit-scrollbar-thumb {
+  /*border-radius: 100px;*/
+  background-color: #17598C;
+  height: 100%;
+  border-radius: 1.5px;
 }
 
 .toEventsLinkWrapper {
@@ -52,14 +74,23 @@
 }
 
 .table {
+  position: relative;
   background-color: #f4f4f4;
   border-collapse: collapse;
+  min-width: 100%;
 
   td,
   th {
     padding-right: 20px;
   }
-  
+
+  td {
+    vertical-align: top;
+  }
+
+  tr:last-child td {
+    padding-bottom: 20px;
+  }
 }
 
 .tableHeader {
@@ -71,6 +102,8 @@
 }
 
 .titleCol {
+  position: sticky;
+  // left: 0;
   min-width: 365px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -88,5 +121,10 @@
 
 .statusCol {
   min-width: 160px;
-  padding-left: 20px;
+  padding-left: 20px;  
+}
+
+.emptyEvents {
+  padding: 20px;
+  border-right: 0.5px solid #504F4F;
 }

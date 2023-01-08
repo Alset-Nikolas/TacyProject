@@ -11,12 +11,14 @@ type TBasicFunctionsProps = {
   edit?: boolean;
   create?: boolean;
   error?: any;
+  setFile?: any;
 }
 
 export default function BasicFunctions({
   edit,
   create,
   error,
+  setFile,
 }: TBasicFunctionsProps) {
   const dispatch = useAppDispatch();
   const { sectionHeaderText } = textStyles;
@@ -25,8 +27,15 @@ export default function BasicFunctions({
   const { data: project } = useGetProjectInfoQuery(currentId);
   const projectForEdit = useAppSelector((store) => store.state.projectForEdit);
 
-  const onChangeHandler = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    if (projectForEdit) handleInputChange(e, projectForEdit, dispatch);
+  const onChangeHandler = (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+    if (projectForEdit) {
+      if (e.target.name !== 'file') {
+        handleInputChange(e, projectForEdit, dispatch);
+      } else {
+        const files = (e.target as HTMLInputElement).files;
+        setFile(files ? files[0] : null);
+      }
+    }
   };
 
   if (create) {
@@ -81,6 +90,13 @@ export default function BasicFunctions({
               onChange={onChangeHandler}
             />
             {/* {!! description && description} */}
+            <div>
+              <input
+                type="file"
+                name="file"
+                onChange={onChangeHandler}
+              />
+            </div>
           </div>
         </div>
       </div>

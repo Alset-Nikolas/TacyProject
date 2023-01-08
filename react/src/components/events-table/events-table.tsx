@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { paths } from "../../consts";
 import { GanttD3 } from "../../d3/GanttD3/GanttD3";
@@ -6,13 +6,15 @@ import { getEventsListThunk } from "../../redux/evens-slice";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import CustomizedButton from "../button/button";
 import SectionHeader from "../section/section-header/section-header";
+import { useGetAuthInfoByIdQuery } from "../../redux/auth/auth-api";
+import { useGetInitiativeByIdQuery } from "../../redux/state/state-api";
+import moment from "moment";
 
 // styles
 import sectionStyles from '../../styles/sections.module.scss';
 import styles from './events-table.module.scss';
-import { useGetAuthInfoByIdQuery } from "../../redux/auth/auth-api";
-import { useGetInitiativeByIdQuery } from "../../redux/initiatives/initiatives-api";
-import moment from "moment";
+import { useGetEventsListQuery } from "../../redux/events/events-api";
+
 
 export default function EventsTable() {
   const navigate = useNavigate();
@@ -32,7 +34,19 @@ export default function EventsTable() {
   } = useGetInitiativeByIdQuery(currentInitiativeId ? currentInitiativeId : -1, {
     skip: !currentInitiativeId,
   });
-  const eventsList = useAppSelector((store) => store.events.list);
+  // const eventsList = useAppSelector((store) => store.events.list);
+  const { data: eventsList } = useGetEventsListQuery(initiative?.initiative.id ? initiative?.initiative.id : -1, {
+    skip: !initiative?.initiative.id,
+  });
+  // const tableData = useMemo(() => {
+  //   return eventsList.map((item) => {
+  //     return {
+  //       title: item.event.name,
+  //       dateStart: item.event.date_start,
+  //       dateEnd: item.event.date_end,
+  //     }
+  //   });
+  // }, [eventsList]);
   const statusStyles = new Map([
     ['В работе', styles.inProgress],
     ['Просрочено', styles.outdated],
@@ -46,90 +60,154 @@ export default function EventsTable() {
 
   return (
     <div
-      className={`${sectionStyles.wrapperBorder} ${styles.wrapper}`}
+      className={`${styles.wrapper}`}
     >
+      <div
+        className={`${sectionStyles.wrapperBorder}`}
+      >
       <SectionHeader>
         Мероприятия
       </SectionHeader>
-      <table
-        className={`${styles.table}`}
+
+      <div
+        className={`${styles.content}`}
       >
-        <thead>
-          <tr
-            className={`${styles.tableHeader}`}
+        {/* <div
+          className={`${styles.firstColumn}`}
+        >
+          <table
+            className={`${styles.table}`}
           >
-            <th
-              className={`${styles.titleCol}`}
-            >
-              Название мероприятия
-            </th>
-            <th
-              className={`${styles.statusCol}`}
-            >
-              Статус
-            </th>
-            <th
-              className={`${styles.dateCol}`}
-            >
-              Дата начала
-            </th>
-            <th
-              className={`${styles.dateCol}`}
-            >
-              Дата окончания
-            </th>
-            {!!components && components.settings?.event_addfields.map((addfield) => (
-              <th
-                key={addfield.id}
-                className={`${styles.additionalCol}`}
+            <thead>
+              <tr
+                className={`${styles.tableHeader}`}
               >
-                {addfield.title}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {!eventsList.length && (
-            <div>
-              Список мероприятий пуст
-            </div>
-          )}
-          {eventsList.map((event) => (
-            <tr
-              key={event.event.id}
-            >
-              <td
-                className={`${styles.titleCol}`}
+                <th
+                  className={`${styles.titleCol}`}
+                >
+                  Название мероприятия
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {eventsList.map((event) => (
+                <tr
+                  key={event.event.id}
+                >
+                  <td
+                    className={`${styles.titleCol}`}
+                  >
+                    {event.event.name}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div> */}
+        <div
+          className={`${styles.tableWrapper}`}
+        >
+
+          <table
+            className={`${styles.table}`}
+          >
+            <thead>
+              <tr
+                className={`${styles.tableHeader}`}
               >
-                {event.event.name}
-              </td>
-              <td
-                className={`${statusStyles.get(event.event_status)} ${styles.statusCol}`}
-              >
-                {event.event_status}
-              </td>
-              <td
-                className={`${styles.dateCol}`}
-              >
-                {moment(event.event.date_start).format('MM.DD.YYYY')}
-              </td>
-              <td
-                className={`${styles.dateCol}`}
-              >
-                {moment(event.event.date_end).format('MM.DD.YYYY')}
-              </td>
-              {event.addfields.map((addfield) => (
-              <th
-                key={addfield.id}
-                className={`${styles.additionalCol}`}
-              >
-                {addfield.value}
-              </th>
-            ))}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+                <th
+                  className={`${styles.titleCol}`}
+                >
+                  Название мероприятия
+                </th>
+                <th
+                  className={`${styles.statusCol}`}
+                >
+                  Статус
+                </th>
+                <th
+                  className={`${styles.dateCol}`}
+                >
+                  Дата начала
+                </th>
+                <th
+                  className={`${styles.dateCol}`}
+                >
+                  Дата окончания
+                </th>
+                {!!components && components.settings?.event_addfields.map((addfield) => (
+                  <th
+                    key={addfield.id}
+                    className={`${styles.additionalCol}`}
+                  >
+                    {addfield.title}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {!eventsList?.length && (
+                <tr>
+                  <td
+                    className={`${styles.emptyEvents}`}
+                  >
+                    Список мероприятий пуст
+                  </td>
+                </tr>
+              )}
+              {eventsList?.map((event) => (
+                <tr
+                  key={event.event.id}
+                >
+                  <td
+                    className={`${styles.titleCol}`}
+                  >
+                    {event.event.name}
+                  </td>
+                  <td
+                    className={`${statusStyles.get(event.event_status)} ${styles.statusCol}`}
+                  >
+                    {event.event_status}
+                  </td>
+                  <td
+                    className={`${styles.dateCol}`}
+                  >
+                    {moment(event.event.date_start).format('MM.DD.YYYY')}
+                  </td>
+                  <td
+                    className={`${styles.dateCol}`}
+                  >
+                    {moment(event.event.date_end).format('MM.DD.YYYY')}
+                  </td>
+                  {event.addfields.map((addfield) => (
+                  <td
+                    key={addfield.id}
+                    className={`${styles.additionalCol}`}
+                  >
+                    {addfield.value}
+                  </td>
+                ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      </div>
+
+      {(userRights?.user_is_author || user?.user.is_superuser) && (
+        <div
+          className={`${styles.buttonWraper}`}
+        >
+          <CustomizedButton
+            value="Добавить"
+            color="blue"
+            onClick={() => {
+              navigate(`/${paths.events}/add`, { state: { initiativeId: currentInitiativeId }});
+            }}
+          />
+        </div>
+      )}
     </div>
     
   )

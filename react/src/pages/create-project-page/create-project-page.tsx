@@ -15,14 +15,17 @@ import { TMetrica, TIntermediateDate } from '../../types';
 
 // Styles
 import styles from './create-project-page.module.scss';
-import { useGetProjectsListQuery } from '../../redux/state/state-api';
+import { useGetProjectsListQuery, usePostProjectMutation } from '../../redux/state/state-api';
+import ProjectsElements from '../../components/projects-elements/projects-elements';
 
 export default function CreateProjectPage() {
   const { refetch } = useGetProjectsListQuery();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const projectForEdit = useAppSelector((store) => store.state.projectForEdit);
-  const isCreateSuccess = useAppSelector((store) => store.state.projectCreate.isGetRequestSuccess);
+  const [file, setFile] = useState<Blob | null>(null);
+  // const isCreateSuccess = useAppSelector((store) => store.state.projectCreate.isGetRequestSuccess);
+  const [createProject, { isSuccess: isCreateSuccess }] = usePostProjectMutation();
   const modal = useAppSelector((store) => store.state.app.modal);
   const [validationError, setValidationError] = useState({
     name: false,
@@ -78,7 +81,26 @@ export default function CreateProjectPage() {
   const onSaveClick = () => {
     const isValid = validateEmptyInputs(); 
     if (projectForEdit && isValid) {
-      dispatch(createProjectThunk(projectForEdit));
+      const formData = new FormData();
+      const projectEntries = Object.entries(projectForEdit);
+      // formData.append("username", "abc123");
+
+      projectEntries.forEach((el, index) => {
+        // if (index !== event.target.elements.length - 1) {
+        //   if (el[0] === 'file') {
+            formData.append(el[0], el[1] instanceof Array || typeof el[1] === 'number' ? JSON.stringify(el[1]) : el[1]);
+          // } else {
+          //   formData.append(el.name, el.value);
+          // }
+        // }
+        // for (const p of formData.entries()) {
+        //   console.log(`${p[0]}: ${p[1]}`);
+        // }
+      });
+      formData.append('file', file ? file : '');
+
+      // dispatch(createProjectThunk(formData));
+      createProject(formData);
       refetch();
     }
   };
@@ -118,6 +140,7 @@ export default function CreateProjectPage() {
       <BasicFunctions
         create
         error={validationError}
+        setFile={setFile}
       />
       <section className={`${styles.middleSectionWrapper}`}>
         {!projectForEdit.metrics.length ? 
@@ -137,8 +160,12 @@ export default function CreateProjectPage() {
             />
           </>
         }
-
       </section>
+      <ProjectsElements
+        roles={projectForEdit.roles}
+        rights={projectForEdit.rights}
+        edit
+      />
       <div className={`${styles.buttonsWrapper}`}>
         <CustomizedButton
           value="Отменить"

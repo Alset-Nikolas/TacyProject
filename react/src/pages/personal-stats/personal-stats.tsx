@@ -6,6 +6,7 @@ import PersonalGraphics from "../../components/personal-graphics/personal-graphi
 import PersonalInitiativeTable from "../../components/personal-initiative-table/personal-initiative-table";
 import PersonalProjectEffect from "../../components/personal-project-effect/personal-project-effect";
 import { getPersonalStatsThunk } from "../../redux/personal-slice";
+import { useGetProjectInfoQuery } from "../../redux/state/state-api";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 
 // Styles
@@ -13,11 +14,12 @@ import styles from './personal-stats.module.scss';
 
 export default function PersonalStatsPage() {
   const dispatch = useAppDispatch();
-  const project = useAppSelector((store) => store.state.project.value);
+  // const project = useAppSelector((store) => store.state.project.value);
+  const { currentId } = useAppSelector((store) => store.state.project);
 
   useEffect(() => {
-    if (project) dispatch(getPersonalStatsThunk(project.id));
-  }, [project]);
+    if (currentId) dispatch(getPersonalStatsThunk(currentId));
+  }, [currentId]);
 
   return (
     <div

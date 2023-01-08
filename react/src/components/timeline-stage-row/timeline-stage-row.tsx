@@ -8,6 +8,7 @@ import { TStage, TStageEdit } from "../../types";
 import { addPropertie, handlePropertieInutChange, removePropertie } from "../../utils";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import DateInput from "../date-input/date-input";
+import { useGetProjectInfoQuery } from "../../redux/state/state-api";
 
 type TTimelineStageRowProps = {
   item: TStage | TStageEdit;
@@ -21,7 +22,9 @@ export default function TimelineStageRow({
   pictogramType,
 }: TTimelineStageRowProps) {
   const dispatch = useAppDispatch();
-  const project = useAppSelector((store) => store.state.project.value);
+  // const project = useAppSelector((store) => store.state.project.value);
+  const { currentId } = useAppSelector((store) => store.state.project);
+  const { data: project } = useGetProjectInfoQuery(currentId);
   const projectForEdit = useAppSelector((store) => store.state.projectForEdit);
   const { textInput } = inputStyles;
 

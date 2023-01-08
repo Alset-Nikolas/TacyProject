@@ -61,7 +61,7 @@ export default function Properties({
                 className={`${styles.closeButton}`}
               >
                 <Pictogram
-                  type="delete"
+                  type="delete-filled"
                   cursor="pointer"
                   onClick={() => removePropertie(index, projectForEdit, 'properties', dispatch)}
                 />
@@ -70,7 +70,7 @@ export default function Properties({
 
               </label>
               <input
-                className={`${inputStyles.textInput} ${styles.input}`}
+                className={`${inputStyles.textInput} ${styles.input} ${styles.titleInput}`}
                 value={el.title}
                 placeholder="Название"
                 name='title'
@@ -83,11 +83,23 @@ export default function Properties({
                   dispatch
                 )}
               />
-              {el.values.map((itemProp: { id: number, value: string }, itemIndex: number) => (
+              {/* {!el.values.length && (
+                <div>
+                <CustomizedButton
+                  value="Добавить"
+                  onClick={() => addPropertieValue(projectForEdit, index, dispatch)}
+
+                />
+                </div>
+              )} */}
+              {el.values.map((itemProp: { id: number, value: string, value_short: string }, itemIndex: number) => (
                 <div
                   key={`prop_${itemProp.id}_${itemIndex}`}
-                  style={{ display: 'flex', alignItems: 'center' }}
+                  className={`${styles.propertieValueWrapper}`}
                 >
+                  <div
+                    className={`${styles.value}`}
+                  >
                   <input
                     className={`${inputStyles.textInput} ${styles.input}`}
                     value={itemProp.value}
@@ -101,23 +113,48 @@ export default function Properties({
                       itemIndex,
                     )}
                   />
-                  {(itemIndex === el.values.length - 1) && (
-                    <div style={{ marginRight: '15px' }}>
+                  </div>
+                  <div
+                    className={`${styles.short}`}
+                  >
+                  <input
+                    className={`${inputStyles.textInput} ${styles.input}`}
+                    value={itemProp.value_short}
+                    placeholder="Cокращение"
+                    onChange={(e: ChangeEvent<HTMLInputElement>) => handlePropertieInutChange(
+                      index,
+                      projectForEdit,
+                      'properties',
+                      'values_short',
+                      e.target.value,
+                      dispatch,
+                      itemIndex,
+                    )}
+                  />
+                  </div>
+                  <div
+                    className={`${styles.control}`}
+                  >
+                    {(itemIndex !== 0 || el.values.length > 1) && (
+                      <div style={{ marginRight: '15px' }}>
+                        <Pictogram
+                          type="delete"
+                          cursor="pointer"
+                          onClick={() => removePropertieValue(projectForEdit, el.title, itemIndex, dispatch)}
+                        />
+                      </div>
+                    )}
+                    {(itemIndex === el.values.length - 1) && (
+
+                    <div>
                       <Pictogram
-                        type="delete"
+                        type="add"
                         cursor="pointer"
-                        onClick={() => removePropertieValue(projectForEdit, el.title, itemIndex, dispatch)}
+                        onClick={() => addPropertieValue(projectForEdit, index, dispatch)}
                       />
                     </div>
-                  )}
-                  <Pictogram
-                    type={`${itemIndex === el.values.length - 1 ? 'add' : 'delete'}`}
-                    cursor="pointer"
-                    onClick={itemIndex === el.values.length - 1 ?
-                      () => addPropertieValue(projectForEdit, index, dispatch)
-                      :
-                      () => removePropertieValue(projectForEdit, el.title, itemIndex, dispatch)}
-                  />
+                    )}
+                </div>
                 </div>
               ))}
               

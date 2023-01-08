@@ -96,7 +96,7 @@ class StagesCoordinationInitiative(models.Model):
         on_delete=models.CASCADE,
         # related_name="coordinator_initiatives",
     )
-    activate = models.BooleanField(default=False)
+    activate = models.BooleanField()
 
     @classmethod
     def add_stage(cls, info):

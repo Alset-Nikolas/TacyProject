@@ -17,6 +17,7 @@ from .serializers import (
     ListEventSerializer,
     UserPersonStatisticSerializer,
     DeleteRiskSerializer,
+    RolesUserInInitiativeSerializer,
 )
 from projects.serializers import UserProjectIdSerializer
 from .models import (
@@ -30,6 +31,7 @@ from .models import (
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
+from .permissions import IsAuthorPermission
 
 
 def get_project_by_id_or_active(request) -> tp.Optional[Project]:
@@ -392,7 +394,6 @@ class InfoInitiativeView(views.APIView):
     )
     def get(self, request):
         id_init = request.GET.get("id", None)
-        print(id_init, isinstance(id_init, int))
         if not id_init or not id_init.isdigit():
             return Response({"msg": "id init not valid"}, 400)
         init: Initiatives = get_object_or_404(
@@ -405,6 +406,7 @@ class InfoInitiativeView(views.APIView):
                 "addfields": init.addfields.all(),
                 "properties_fields": init.properties_fields.all(),
                 "metric_fields": init.metric_fields.all(),
+                "roles": init.get_community_roles(),
             }
         )
         return Response(s.data, 200)
@@ -586,12 +588,35 @@ class ListInitiativesView(views.APIView):
                     "addfields": initiative.addfields.all(),
                     "properties_fields": initiative.properties_fields.all(),
                     "metric_fields": initiative.metric_fields.all(),
+                    "roles": initiative.get_community_roles(),
                 }
                 for initiative in list_inits
             ]
         }
         s = ListInitiativeSerializer(instance=inst)
         return Response(s.data, 200)
+
+
+class ListInitiativesFileView(ListInitiativesView):
+    def get(self, request):
+        project = get_project_by_id_or_active(request)
+        list_inits = project.initiatives.all()
+        [x.check_updates() for x in list_inits]
+        inst = {
+            "project_initiatives": [
+                {
+                    "initiative": initiative,
+                    "addfields": initiative.addfields.all(),
+                    "properties_fields": initiative.properties_fields.all(),
+                    "metric_fields": initiative.metric_fields.all(),
+                    "roles": initiative.get_community_roles(),
+                }
+                for initiative in list_inits
+            ]
+        }
+        s = ListInitiativeSerializer(instance=inst)
+        url_file = s.create_excel(self.request.user, s.data)
+        return Response({"url": url_file}, 200)
 
 
 class UserStatisticsInitiativesView(views.APIView):
@@ -788,6 +813,42 @@ class UserStatisticsInitiativesView(views.APIView):
             instance=self._get_user_statistic(project, list_inits)
         )
         return Response(s.data, 200)
+
+
+class RolesInitiativeView(views.APIView):
+    permission_classes = [IsAuthorPermission]
+
+    def get(self, request):
+        id_init = request.GET.get("id", None)
+        if not id_init or not id_init.isdigit():
+            return Response({"msg": "id init not valid"}, 400)
+        init: Initiatives = get_object_or_404(
+            Initiatives, id=request.GET.get("id")
+        )
+        serializer = RolesUserInInitiativeSerializer(
+            instance=init.user_roles.all(), many=True
+        )
+        return Response(serializer.data, 200)
+
+    def post(self, request):
+        id_init = request.GET.get("id", None)
+        if not id_init or not id_init.isdigit():
+            return Response({"msg": "id init not valid"}, 400)
+        init: Initiatives = get_object_or_404(
+            Initiatives, id=request.GET.get("id")
+        )
+        serializer = RolesUserInInitiativeSerializer(
+            data=request.data,
+            context={
+                "init": init,
+                "items_not_delete": list(),
+            },
+            many=True,
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        RolesUserInInitiativeSerializer.check_delete_person(serializer.context)
+        return Response(serializer.data)
 
 
 # ++++++++++++++++++++++РИСКИ+++++++++++++++++++++++++++
@@ -1325,6 +1386,3 @@ class ListEventView(views.APIView):
         }
         s = ListEventSerializer(instance=inst)
         return Response(s.data, 200)
-
-
-#  Token d610730d92183eace7ca2c4f949982a34781cef8

@@ -16,9 +16,9 @@ export default function DateInput({ className, value, id, name, onChange }: TDat
       id={id}
       name={name}
       mask="9999.99.99"
+      placeholder="ГГГГ.ММ.ДД"
       value={value}
       maskPlaceholder="_"
-      alwaysShowMask
       onChange={onChange}
     />
   );

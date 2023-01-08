@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import CustomizedButton from "../../components/button/button";
 import EventsTable from "../../components/events-table/events-table";
 import InitiativeCoordination from "../../components/initiative-coordination/initiative-coordination";
@@ -12,8 +12,11 @@ import { paths } from "../../consts";
 import { useGetAuthInfoByIdQuery } from "../../redux/auth/auth-api";
 import { getComponentsThunk } from "../../redux/components-slice";
 import { setCurrentInitiativeId } from "../../redux/initiatives-slice";
-import { useGetInitiativeByIdQuery, useGetInitiativesListQuery } from "../../redux/initiatives/initiatives-api";
-import { useGetProjectInfoQuery } from "../../redux/state/state-api";
+import {
+  useGetProjectInfoQuery,
+  useGetInitiativeByIdQuery,
+  useGetInitiativesListQuery
+} from "../../redux/state/state-api";
 import { closeLoader, showLoader } from "../../redux/state/state-slice";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 
@@ -23,6 +26,7 @@ import styles from './initiatives-registry-page.module.scss';
 export default function InitiativesRegistryPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const location = useLocation();
   const {
     currentId,
   } = useAppSelector((store) => store.state.project);
@@ -76,7 +80,11 @@ export default function InitiativesRegistryPage() {
 
   useEffect(() => {
     if (!currentInitiativeId && initiativesList?.length) {
-      dispatch(setCurrentInitiativeId(initiativesList[0].initiative.id));
+      if (location.state?.initiativeId) {
+        dispatch(setCurrentInitiativeId(location.state?.initiativeId));
+      } else {
+        dispatch(setCurrentInitiativeId(initiativesList[0].initiative.id));
+      }
     }
     return () => {
       // dispatch(clearInitiativesList());
@@ -127,7 +135,7 @@ export default function InitiativesRegistryPage() {
             </div>
           </section>
           <section>
-            <EventsDiagram />
+            {/* <EventsDiagram /> */}
             <EventsTable />
           </section>
           <section>

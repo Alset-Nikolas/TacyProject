@@ -8,7 +8,7 @@ urlpatterns = [
     path("create/", views.CreateProjectView.as_view()),
     path("delete/", views.DeleteProjectView.as_view()),
     path("community/", views.UpdateCommunityProjectView.as_view()),
-    path("community/bosses/", views.BossesProjectView.as_view()),
     path("info/", views.InfoProjectView.as_view()),
     path("list/", views.GetProjectListView.as_view()),
+    path("file/", views.FileProjectView.as_view()),
 ]

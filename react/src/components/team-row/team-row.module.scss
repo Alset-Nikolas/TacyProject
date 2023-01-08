@@ -6,7 +6,7 @@
   align-items: center;
   height: fit-content;
   background-color: #F4F4F4;
-  // width: fit-content;
+  width: 100px;
 
   td,
   th {
@@ -26,7 +26,8 @@
     width: 100%;
   }
 
-  td:last-child {
+  td:last-child,
+  td:nth-last-child(2) {
     border-right: none;
   }
 
@@ -81,6 +82,10 @@
   // flex: 1 0 207px;
   width: 210px;
 }
+
+// .name{
+//   min-width: 210px;
+// }
 
 .email,
 .phone  {

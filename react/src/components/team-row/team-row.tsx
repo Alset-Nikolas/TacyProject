@@ -1,7 +1,9 @@
 import { SelectChangeEvent } from "@mui/material";
-import { ChangeEvent } from "react";
+import { ChangeEvent, useContext } from "react";
+import { useGetProjectInfoQuery } from "../../redux/state/state-api";
 import { closeModal, openDeleteMemberModal } from "../../redux/state/state-slice";
-import { addNotExistingPropertie, setList } from "../../redux/team-slice";
+// import { addNotExistingPropertie, setList } from "../../redux/team-slice";
+import { useGetTeamListQuery } from "../../redux/team/team-api";
 import { TTeamMember } from "../../types";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import CustomizedButton from "../button/button";
@@ -9,6 +11,9 @@ import Modal from "../modal/modal";
 import Pictogram from "../pictogram/pictogram";
 import SelectUnits from "../select-units/select-units";
 import CustomizedSelect from "../select/Select";
+import { rights as rightsObj } from '../../consts';
+import { TeamContext } from "../../pages/team-settings-page/team-settings-page";
+
 
 import styles from './team-row.module.scss';
 
@@ -17,12 +22,16 @@ type TTeamRowProps = {
   edit?: boolean;
   header?: boolean;
   index?: number;
+  setList?: any;
   removeMember?: (index: number) => void;
 };
 
-export default function TeamRow({ index, member, edit, header, removeMember }: TTeamRowProps) {
-  const project = useAppSelector((store) => store.state.project.value);
-  const membersList = useAppSelector((store) => store.team.list); 
+export default function TeamRow({ index, member, edit, header, removeMember, setList }: TTeamRowProps) {
+  // const project = useAppSelector((store) => store.state.project.value);
+  const { currentId } = useAppSelector((store) => store.state.project);
+  const { data: project } = useGetProjectInfoQuery(currentId ? currentId : -1);
+  // const membersList = useAppSelector((store) => store.team.list);
+  // const { data: membersList } = useGetTeamListQuery({ id: currentId ? currentId : -1, project: project ? project : null });
   const modal = useAppSelector((store) => store.state.app.modal);
   const dispatch = useAppDispatch();
   const selectStyle = {
@@ -33,6 +42,7 @@ export default function TeamRow({ index, member, edit, header, removeMember }: T
     paddingBottom: 0,
     background: '#FFF',
   };
+  const membersList = useContext(TeamContext);
 
   if (!project) return null;
 
@@ -44,9 +54,9 @@ export default function TeamRow({ index, member, edit, header, removeMember }: T
       <th className={`${styles.rights}`}>
         Права
       </th>
-      <th className={`${styles.role}`}>
+      {/* <th className={`${styles.role}`}>
         Роль
-      </th>
+      </th> */}
       <th className={`${styles.email}`}>
         E-mail
       </th>
@@ -68,7 +78,7 @@ export default function TeamRow({ index, member, edit, header, removeMember }: T
   );
 
   if (!member || typeof index === 'undefined') return null;
-  const { name, phone, email, role, rights, properties } = member;
+  const { name, phone, email, /* role, rights, */properties, is_create } = member;
 
   const onRemoveClickHandler = () => {
     dispatch(openDeleteMemberModal());
@@ -87,17 +97,26 @@ export default function TeamRow({ index, member, edit, header, removeMember }: T
   };
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const newMemberState = { ...member };
-    const name = e.target.name as keyof typeof newMemberState;
-    const value = e.target.value;
-    const newList = [...membersList];
+    try {
+      if (!membersList) throw new Error('Member list is not defined');
 
-    if ((name === 'name' || name === 'email' || name === 'phone') && typeof index !== 'undefined') {
-      newMemberState[name] = value;
-      newList[index] = newMemberState;
-      dispatch(setList([
-        ...newList,
-      ]));
+      const newMemberState = { ...member };
+      const name = e.target.name as keyof typeof newMemberState;
+      const value = e.target.value;
+      const newList = [...membersList];
+
+      if ((name === 'name' || name === 'email' || name === 'phone') && typeof index !== 'undefined') {
+        newMemberState[name] = value;
+        newList[index] = newMemberState;
+        // dispatch(setList([
+        //   ...newList,
+        // ]));
+        setList([
+          ...newList,
+        ]);
+      }
+    } catch (e) {
+      console.log(e);
     }
   };
 
@@ -105,44 +124,64 @@ export default function TeamRow({ index, member, edit, header, removeMember }: T
     const newMemberState = { ...member };
     const name = e.target.name as keyof typeof newMemberState;
     const value = e.target.value;
-    const newList = [...membersList];
+    const newList = membersList ? [...membersList] : [];
 
     if ((name === 'role') && typeof index !== 'undefined' && typeof value === 'string') {
       newMemberState[name] = value;
       newList[index] = newMemberState;
-      dispatch(setList([
+      // dispatch(setList([
+      //   ...newList,
+      // ]));
+      setList([
         ...newList,
-      ]));
+      ]);
     }
 
     if ((name === 'rights') && typeof index !== 'undefined' && value instanceof Array) {
-      newMemberState[name] = value;
+      if (value.includes(rightsObj.create)) {
+        newMemberState['is_create'] = true;
+      } else {
+        newMemberState['is_create'] = false;
+      }
       newList[index] = newMemberState;
-      dispatch(setList([
+      // dispatch(setList([
+      //   ...newList,
+      // ]));
+
+      setList([
         ...newList,
-      ]));
+      ]);
     }
   };
 
   const handlePropertieSelectorInput = (e: SelectChangeEvent<string | Array<string>>, propIndex: number) => {
-    const newMemberState = { ...member };
-    // const name = e.target.name as keyof typeof newMemberState;
-    const value = e.target.value;
-    const newList = [...membersList];
+    try {
+      if (!membersList) throw new Error('Member list is not defined');
+      
+      const newMemberState = { ...member };
+      // const name = e.target.name as keyof typeof newMemberState;
+      const value = e.target.value;
+      const newList = [...membersList];
 
-    const propertiesArray = [...newMemberState.properties]
-    const propertie = {...propertiesArray[propIndex]};
+      const propertiesArray = [...newMemberState.properties]
+      const propertie = {...propertiesArray[propIndex]};
 
-    if (value instanceof Array && typeof index !== 'undefined') {
-      propertie.values = value;
-      propertiesArray[propIndex] = propertie;
-      newMemberState.properties = propertiesArray;
-      newList[index] = newMemberState;
-      dispatch(setList([
-        ...newList,
-      ]));
+      if (value instanceof Array && typeof index !== 'undefined') {
+        propertie.values = value;
+        propertiesArray[propIndex] = propertie;
+        newMemberState.properties = propertiesArray;
+        newList[index] = newMemberState;
+        dispatch(setList([
+          ...newList,
+        ]));
+      }
+    } catch (e) {
+      console.log(e);
     }
   };
+
+  const rights = [] as Array<string>;
+  if (is_create) rights.push(rightsObj.create);
     
   return (
     <>
@@ -165,7 +204,7 @@ export default function TeamRow({ index, member, edit, header, removeMember }: T
           {edit ? (
             <SelectUnits 
               value={rights}
-              items={project.rights.map((right) => right.name)}
+              items={[rightsObj.create]}
               style={selectStyle}
               name="rights"
               onChange={handleSelectorInput}
@@ -176,7 +215,7 @@ export default function TeamRow({ index, member, edit, header, removeMember }: T
             </div>
           )}
         </td>
-        <td className={`${styles.role}`}>
+        {/* <td className={`${styles.role}`}>
           {edit ? (
             <CustomizedSelect
               value={role}
@@ -191,7 +230,7 @@ export default function TeamRow({ index, member, edit, header, removeMember }: T
             </div>
           )}
           
-        </td>
+        </td> */}
         <td className={`${styles.email}`}>
           {edit ? (
             <input
@@ -223,11 +262,11 @@ export default function TeamRow({ index, member, edit, header, removeMember }: T
         {!!project.properties.length && project.properties.map((propertie, propIndex) => {
           const outputPropertie = properties.find((prop) => prop.title === propertie.title);
           if (!outputPropertie) {
-            return <td key={`null_${propIndex}`}/>;
+            return <td key={`null_${propIndex}`}>У пользователя нет такого свойства</td>;
           }
           if (!project.properties[propIndex]) {
             console.log(`propertie ${propIndex} is undefined`);
-            return <td key={`null_${propIndex}`}/>;
+            return <td key={`null_${propIndex}`}>Данное свойство не существует</td>;
           }
           return (
             <td

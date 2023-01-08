@@ -8,14 +8,17 @@ import ProjectTimeline from '../../components/project-timeline/project-timeline'
 import ProjectsEffect from '../../components/projects-effect/projects-effect';
 import TargetEffectStatus from '../../components/target-effect-status/target-effect-status';
 import TargetEffect from '../../components/target-effect/target-effect';
+import { useGetProjectInfoQuery } from '../../redux/state/state-api';
 import { getProjectInfoThunk } from '../../redux/state/state-slice';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import styles from './project-status-page.module.scss';
 
 export default function ProjectStatusPage() {
   const dispatch = useAppDispatch();
-  const currentId = useAppSelector((store) => store.state.project.currentId);
-  const project = useAppSelector((store) => store.state.project.value);
+  // const currentId = useAppSelector((store) => store.state.project.currentId);
+  // const project = useAppSelector((store) => store.state.project.value);
+  const { currentId } = useAppSelector((store) => store.state.project);
+  const { data: project } = useGetProjectInfoQuery(currentId);
   useEffect(() => {
     dispatch(getProjectInfoThunk(currentId));
   }, []);

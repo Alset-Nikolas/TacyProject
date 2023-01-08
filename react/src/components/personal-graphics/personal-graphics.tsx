@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { GanttD3 } from "../../d3/GanttD3/GanttD3";
 import { getGraphicsThunk, getPersonalGraphicsThunk } from "../../redux/graphics-slice";
+import { useGetProjectInfoQuery } from "../../redux/state/state-api";
 import { ganttDataCreator } from "../../utils/ganttData";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import CustomBarChart from "../custom-bar-chart/custom-bar-chart";
@@ -14,7 +15,9 @@ import styles from './personal-graphics.module.scss';
 export default function PersonalGraphics() {
   const dispatch = useAppDispatch();
   const { personalGraphics, personalStatusGraphics } = useAppSelector((store) => store.graphics);
-  const project = useAppSelector((store) => store.state.project.value);
+  // const project = useAppSelector((store) => store.state.project.value);
+  const { currentId } = useAppSelector((store) => store.state.project);
+  const { data: project } = useGetProjectInfoQuery(currentId);
   const chartsProperties = personalGraphics.map((el) => el.propertieName);
   const [ currentPropertieIndex, setCurrentPropertieIndex ] = useState<number>(0);
 

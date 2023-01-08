@@ -35,10 +35,11 @@ export default function AddMemberModal({ addMember }: TAddMemberProps) {
     // secondName: '',
     // surname: '',
     rights: [],
-    role: project ? project.roles[0].name : '',
+    role: project && project.roles.length ? project.roles[0].name : '',
     email: '',
     phone: '',
-    properties: project!.properties.map((propertie) => {
+    is_create: false,
+    properties: project ? project.properties.map((propertie) => {
       const item = {} as {
         id: number;
         title: string;
@@ -49,7 +50,7 @@ export default function AddMemberModal({ addMember }: TAddMemberProps) {
       item.title = propertie.title;
       item.values = [];
       return item;
-    }),
+    }) : [],
   });
 
   const selectStyle = {
@@ -147,7 +148,7 @@ export default function AddMemberModal({ addMember }: TAddMemberProps) {
         setIsError(true);
       }
     }
-    stage < 3 ?
+    stage < 2 ?
       check()
     :
       checkStage3();
@@ -239,7 +240,7 @@ export default function AddMemberModal({ addMember }: TAddMemberProps) {
           </form>
         )
       }
-      {
+      {/* {
         stage === 3 && (
           <form
             className={`${styles.modalForm}`}
@@ -274,7 +275,7 @@ export default function AddMemberModal({ addMember }: TAddMemberProps) {
             </label>
           </form>
         )
-      }
+      } */}
       {isError && (
         <div
           className={`${styles.error}`}
@@ -284,7 +285,7 @@ export default function AddMemberModal({ addMember }: TAddMemberProps) {
       )}
       <CustomizedButton
         className={`${styles.button}`}
-        value={`${stage < 3 ? 'Далее' : 'Добавить'}`}
+        value={`${stage < 2 ? 'Далее' : 'Добавить'}`}
         color="blue"
         onClick={modalButtonHandler}
       />

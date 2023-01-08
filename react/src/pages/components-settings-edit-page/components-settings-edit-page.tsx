@@ -16,6 +16,7 @@ import { paths } from '../../consts';
 import styles from './components-settings-edit-page.module.scss';
 import InitiativesTableConfiguration from '../../components/initiatives-table-configuration/initiatives-table-configuration';
 import ModalInfo from '../../components/modal-info/modal-info';
+import RolesManagement from '../../components/roles-menagement/roles-menagement';
 
 export default function ComponentsSettingsEditPage() {
   const navigate = useNavigate();

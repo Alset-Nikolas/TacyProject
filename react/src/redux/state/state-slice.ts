@@ -192,6 +192,7 @@ export const stateSlice = createSlice({
         ],
         roles: [],
         rights: [],
+        // file: null,
       };
     },
     setProjectBackup: (state, action) => {
@@ -349,9 +350,10 @@ export const stateSlice = createSlice({
       state.app.modal.isOpen = true;
       state.app.modal.type.deleteEvent = true;
     },
-    openMessageModal: (state) => {
+    openMessageModal: (state, action) => {
       state.app.modal.isOpen = true;
       state.app.modal.type.message = true;
+      state.app.modal.message = action.payload;
     },
     closeModal: (state) => {
       state.app.modal.isOpen = false;
@@ -411,6 +413,7 @@ export const {
   openDeleteProjectModal,
   openDeleteEventModal,
   openErrorModal,
+  openMessageModal,
   setInitiativeEdit,
   showLoader,
   closeLoader,
@@ -452,7 +455,7 @@ export const getProjectsListThunk = () => (dispatch: AppDispatch) => {
   );
 };
 
-export const createProjectThunk = (body: TProject | TProjectForEdit) => (dispatch: AppDispatch) => {
+export const createProjectThunk = (body: TProject | TProjectForEdit | FormData) => (dispatch: AppDispatch) => {
   dispatch(projectCreateRequest());
   createProjectRequest(
     body,

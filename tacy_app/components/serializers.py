@@ -19,9 +19,14 @@ from .models import (
     InitiativesMetricsFields,
     EventMetricsFields,
     SettingsStatusInitiative,
+    RolesUserInInitiative,
+    RolesProject,
 )
 from projects.models import PropertiesProject, MetricsProject, Project
 from django.shortcuts import get_object_or_404
+from users.serializers import UserBaseSerializer
+import xlsxwriter
+import os
 
 User = get_user_model()
 
@@ -370,11 +375,92 @@ class InitiativesPropertiesFieldsSerializer(serializers.ModelSerializer):
         return super().validate(id)
 
 
+class RolesProjectSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+
+    class Meta:
+        model = RolesProject
+        ref_name = "role in project"
+        fields = [
+            "id",
+            "project",
+            "name",
+            "is_approve",
+            "is_update",
+        ]
+
+    def validate_id(self, id):
+        role = RolesProject.get_by_id(id)
+        if not role:
+            raise serializers.ValidationError({"id": "not exist"})
+        init = self.context.get("init")
+        if init.project != role.project:
+            raise serializers.ValidationError({"id": "project not correct"})
+        return id
+
+
+class RolesUserInInitiativeSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(read_only=True)
+    user = UserBaseSerializer()
+    role = RolesProjectSerializer()
+
+    class Meta:
+        model = RolesUserInInitiative
+        fields = [
+            "id",
+            "user",
+            "role",
+        ]
+
+    def update_user_in_data(self, validated_data):
+        user_info: dict = validated_data.get("user", {})
+        user_email = user_info.get("email")
+        user = User.objects.filter(email=user_email).first()
+        validated_data["user"] = user
+
+    def update_role_in_data(self, validated_data):
+        role_info: dict = validated_data.get("role", {})
+        role_id = role_info.get("id")
+        role = RolesProject.objects.filter(id=role_id).first()
+        validated_data["role"] = role
+
+    def create(self, validated_data):
+        self.update_user_in_data(validated_data)
+        self.update_role_in_data(validated_data)
+        init = validated_data["initiative"] = self.context.get("init")
+        instance = (
+            RolesUserInInitiative.objects.filter(initiative=init)
+            .filter(user=validated_data.get("user"))
+            .first()
+        )
+        if instance:
+            instance.role = validated_data.get("role")
+            instance.save()
+        else:
+            instance = RolesUserInInitiative.objects.create(**validated_data)
+        self.context["items_not_delete"].append(instance.id)
+        return instance
+
+    @classmethod
+    def check_delete_person(cls, context):
+        init = context.get("init")
+        items_not_delete = context.get("items_not_delete")
+        RolesUserInInitiative.objects.filter(initiative=init).exclude(
+            id__in=items_not_delete
+        ).delete()
+
+
+class CommunityRolesInInitiativeSerializer(serializers.Serializer):
+    users = UserBaseSerializer(many=True)
+    role = RolesProjectSerializer()
+
+
 class InitiativeSerializer(serializers.Serializer):
     initiative = MainInitiativeSerializer()
     properties_fields = InitiativesPropertiesFieldsSerializer(many=True)
     metric_fields = InitiativesMetricsFieldsSerializer(many=True)
     addfields = AddFieldsInitiativeSerializer(many=True)
+    roles = CommunityRolesInInitiativeSerializer(many=True, read_only=True)
 
     class Meta:
         fields = [
@@ -382,6 +468,7 @@ class InitiativeSerializer(serializers.Serializer):
             "properties_fields",
             "metric_fields",
         ]
+        read_only_fields = ["roles"]
 
     def validate_addfields(self, addfields):
         project = self.context.get("project")
@@ -563,6 +650,119 @@ class ListInitiativeSerializer(serializers.Serializer):
     """
 
     project_initiatives = InitiativeSerializer(many=True)
+
+    def create_excel(self, user, data):
+        def get_column_initiative(initiative, line, header):
+            line += [
+                initiative.get("id"),
+                initiative.get("name"),
+                initiative.get("status", {}).get("name"),
+            ]
+            header += [
+                {"header": "№"},
+                {"header": "Название инициативы"},
+                {"header": "Статус"},
+            ]
+
+        def get_column_properties_fields(properties_fields, line, header):
+            ans = []
+            headers = []
+            for properties_fields_item in properties_fields:
+                title_obj = properties_fields_item.get("title")
+                value_obj = properties_fields_item.get("value")
+                if title_obj.get("initiative_activate"):
+                    headers.append({"header": title_obj.get("title")})
+                    ans.append(value_obj.get("value"))
+            line += ans
+            header += headers
+
+        def get_column_metric_fields(metric_fields, line, header):
+            ans = []
+            headers = []
+            for metric_fields_item in metric_fields:
+                metric_obj = metric_fields_item.get("metric")
+                value = metric_fields_item.get("value")
+                if metric_obj.get("initiative_activate"):
+                    headers.append({"header": metric_obj.get("title")})
+                    ans.append(value)
+            line += ans
+            header += headers
+
+        def get_column_addfields(addfields, line, header):
+            ans = []
+            headers = []
+            for addfields_item in addfields:
+                headers.append(
+                    {"header": addfields_item.get("title").get("title")}
+                )
+                ans.append(addfields_item.get("value"))
+            line += ans
+            header += headers
+
+        def get_column_roles(roles, line, header):
+            ans = []
+            headers = []
+            for roles_item in roles:
+                role = roles_item.get("role")
+                users = roles_item.get("users")
+                headers.append({"header": role.get("name")})
+                for user in users:
+                    ans.append(
+                        f'{user.get("last_name")} {user.get("first_name")}.{user.get("second_name")}'
+                    )
+            line += ans
+            header += headers
+
+        A_Z = [chr(x) for x in range(ord("A"), ord("Z") + 1)]
+
+        file_path = f"media/files/user/{user.id}/"
+        file_name = "reestr.xlsx"
+        full_name_file_url = file_path + file_name
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
+
+        workbook = xlsxwriter.Workbook(full_name_file_url)
+        worksheet = workbook.add_worksheet()
+
+        bold_center = workbook.add_format({"bold": True})
+        bold_center.set_align("center")
+        bold_center.set_align("vcenter")
+
+        center = workbook.add_format()
+        center.set_align("center")
+        center.set_align("vcenter")
+
+        table_data = []
+        header = []
+        for i, line_table in enumerate(
+            data.get("project_initiatives"), start=2
+        ):
+            line = []
+            header = []
+            get_column_initiative(line_table.get("initiative"), line, header)
+            get_column_properties_fields(
+                line_table.get("properties_fields"), line, header
+            )
+            get_column_metric_fields(
+                line_table.get("metric_fields"), line, header
+            )
+            get_column_addfields(line_table.get("addfields"), line, header)
+            get_column_roles(line_table.get("roles"), line, header)
+            table_data.append(line.copy())
+        last_symvol = A_Z[(len(header) - 1) % len(A_Z)]
+        worksheet.add_table(
+            f"A1:{last_symvol}{len(table_data) + 1}",
+            {
+                "data": table_data,
+                "style": "Table Style Light 11",
+                "columns": header,
+            },
+        )
+        worksheet.set_column(0, len(line), 25, center)
+        worksheet.set_column(0, 0, 5, center)
+        worksheet.set_column(1, 1, 45, center)
+        workbook.close()
+        return full_name_file_url
 
 
 class AddFieldRiskSerializer(serializers.ModelSerializer):

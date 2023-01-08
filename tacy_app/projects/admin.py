@@ -9,10 +9,8 @@ from .models import (
     PropertiesItemsProject,
     PropertiesProject,
     PropertiesСommunityProject,
-    RightsUserBool,
-    RightsUSerInProject,
-    RolesUserInProject,
     СommunityProject,
+    RolesProject,
 )
 
 
@@ -31,12 +29,10 @@ class ProjectAdmin(admin.ModelAdmin):
 
 admin.site.register(Project, ProjectAdmin)
 admin.site.register(MetricsProject)
+admin.site.register(RolesProject)
 admin.site.register(IntermediateDateProject)
 admin.site.register(PropertiesProject)
 admin.site.register(PropertiesItemsProject)
 admin.site.register(СommunityProject)
 admin.site.register(PropertiesСommunityProject)
-admin.site.register(RolesUserInProject)
-admin.site.register(RightsUserBool)
-admin.site.register(RightsUSerInProject)
 admin.site.register(ProjectStages)

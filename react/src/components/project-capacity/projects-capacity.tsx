@@ -1,3 +1,4 @@
+import { useGetProjectInfoQuery } from '../../redux/state/state-api';
 import { useAppSelector } from '../../utils/hooks';
 import Pictogram from '../pictogram/pictogram';
 import SectionContent from '../section/section-content/section-content';
@@ -9,7 +10,9 @@ type TProjectCapacityProps = {
 };
 
 export default function ProjectCapacity({ edit }: TProjectCapacityProps) {
-  const project = useAppSelector((store) => store.state.project.value);
+  // const project = useAppSelector((store) => store.state.project.value);
+  const { currentId } = useAppSelector((store) => store.state.project);
+  const { data: project } = useGetProjectInfoQuery(currentId);
   const projectForEdit = useAppSelector((store) => store.state.projectForEdit);
 
   if (!project || !projectForEdit) return null;

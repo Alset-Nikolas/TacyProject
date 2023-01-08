@@ -14,6 +14,7 @@ import { stateApi } from './state/state-api';
 import { initiativesApi } from './initiatives/initiatives-api';
 import { teamApi } from './team/team-api';
 import { authApi } from './auth/auth-api';
+import { eventsApi } from './events/events-api';
 
 export const store = configureStore({
   reducer: {
@@ -28,6 +29,7 @@ export const store = configureStore({
     [initiativesApi.reducerPath]: initiativesApi.reducer,
     risks: risksReducer,
     events: eventsReducer,
+    [eventsApi.reducerPath]: eventsApi.reducer,
     coordination: coordinationReducer,
     notifications: notificationsReducer,
     graphics: graphicsReducer,
@@ -39,6 +41,7 @@ export const store = configureStore({
       initiativesApi.middleware,
       teamApi.middleware,
       authApi.middleware,
+      eventsApi.middleware,
     ]),
 });
 
