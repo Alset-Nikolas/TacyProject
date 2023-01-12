@@ -2,7 +2,7 @@ import { AxiosResponse } from 'axios';
 import { AppDispatch, RootState } from './store';
 import { createSlice } from '@reduxjs/toolkit';
 import { getRequest, postRequest } from '../utils/requests';
-import { TBoss, TCoordinationHistoryItem } from '../types';
+import { TBoss, TCoordinationHistoryItem, TUser } from '../types';
 import { getUserRightsThunk } from './auth-slice';
 import { getInitiativesListThunk } from './initiatives-slice';
 
@@ -220,7 +220,7 @@ export const getChatThunk = (initiativeId: number) => (dispatch: AppDispatch, ge
 };
 
 export const postCommentThunk = (body: { text: string, initiative: number }) => (dispatch: AppDispatch, getState: () => RootState) => {
-  const initiative = getState().initiatives.initiative;
+  const currentInitiativeId = getState().initiatives.currentInitiativeId;
 
   dispatch(postCommentRequest());
   postRequest(
@@ -228,10 +228,10 @@ export const postCommentThunk = (body: { text: string, initiative: number }) => 
     body,
     (res: AxiosResponse) => {
       try {
-        if (!initiative) {
+        if (!currentInitiativeId) {
           throw new Error('Initiative is missing');
         }
-        dispatch(getChatThunk(initiative.initiative.id));
+        dispatch(getChatThunk(currentInitiativeId));
         dispatch(postCommentRequestSuccess());
       } catch (error) {
         console.log(error);
@@ -279,12 +279,12 @@ export const coordinateThunk = (
 
 export const sendForApprovalThunk = (
   body: {
-    text: string,
-    initiative: number,
-    coordinator: number,
+    text: string;
+    initiative: number;
+    coordinators: Array<TUser & {id: number}>;
   }) => (dispatch: AppDispatch, getState: () => RootState) => {
-  const initiative = getState().initiatives.initiative;
-  const project = getState().state.project.value;
+  const currentInitiativeId = getState().initiatives.currentInitiativeId;
+  const currentProjectId = getState().state.project.currentId;
 
   dispatch(sendForApprovalRequest());
   postRequest(
@@ -292,12 +292,12 @@ export const sendForApprovalThunk = (
     body,
     (res: AxiosResponse) => {
       try {
-        if (!initiative || !project) {
+        if (!currentInitiativeId || !currentProjectId) {
           throw new Error('Project or initiative is missing')
         }
-        dispatch(getChatThunk(initiative.initiative.id));
-        dispatch(getUserRightsThunk(initiative.initiative.id));
-        dispatch(getInitiativesListThunk(project.id));
+        dispatch(getChatThunk(currentInitiativeId));
+        dispatch(getUserRightsThunk(currentInitiativeId));
+        dispatch(getInitiativesListThunk(currentProjectId));
         dispatch(sendForApprovalRequestSuccess());
       } catch (error) {
         console.log(error);

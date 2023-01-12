@@ -13,13 +13,13 @@ export const stateApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ['initiative', 'list', 'project'],
+  tagTypes: ['initiative', 'initiatives-list', 'list', 'project'],
   endpoints: (builder) => ({
     getProjectInfo: builder.query<TProject, number | null>({
       query: (id) => `/project/info${id ? `/?id=${id}` : ''}`,
       providesTags: ['project'],
     }),
-    postProject: builder.mutation<TProject, TProject | TProjectForEdit | FormData>({
+    postProject: builder.mutation<TProject, TProject | TProjectForEdit>({
       query(project) {
         return {
           url: `/project/create/`,
@@ -41,6 +41,16 @@ export const stateApi = createApi({
           // `onError` side-effect
           console.log(err);
         }
+      },
+      invalidatesTags: ['initiative', 'project', 'list'],
+    }),
+    deleteProject: builder.mutation<any, number>({
+      query(projectId) {
+        return {
+          url: `/project/delete/`,
+          method: 'DELETE',
+          body: { id: projectId },
+        };
       },
       invalidatesTags: ['initiative', 'project', 'list'],
     }),
@@ -82,7 +92,8 @@ export const stateApi = createApi({
           // `onError` side-effect
           console.log(err);
         }
-      },      
+      },
+      providesTags: ['initiatives-list'],
     }),
     getPersonalInitiativesList: builder.query<Array<TInitiative>, number>({
       query: (id) => `components/initiative/info/list/user/?id=${id}`,
@@ -125,13 +136,14 @@ export const stateApi = createApi({
           method: 'POST',
           body,
         }
-      }
+      },
+      invalidatesTags: ['initiatives-list'],
     }),
     getRoles: builder.query<Array<{user: TUser & { id: number }, role: TRole & { project: number }}>, number>({
       query: (initiativeId) => `components/initiative/role/?id=${initiativeId}`,
     }),
     getExportUrl: builder.query<{ url: string }, number>({
-      query: (initiativeId) => `components/initiative/info/list/file/?id=${initiativeId}`,
+      query: (projectId) => `components/initiative/info/list/file/?id=${projectId}`,
     }),
   }),
 });
@@ -139,6 +151,7 @@ export const stateApi = createApi({
 export const {
   useGetProjectInfoQuery,
   usePostProjectMutation,
+  useDeleteProjectMutation,
   useGetProjectsListQuery,
   useGetInitiativesListQuery,
   useGetPersonalInitiativesListQuery,
@@ -147,4 +160,5 @@ export const {
   useSetRolesMutation,
   useGetRolesQuery,
   useGetExportUrlQuery,
+  useLazyGetExportUrlQuery,
 } = stateApi;

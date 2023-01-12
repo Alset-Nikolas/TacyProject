@@ -90,13 +90,7 @@ export default function BasicFunctions({
               onChange={onChangeHandler}
             />
             {/* {!! description && description} */}
-            <div>
-              <input
-                type="file"
-                name="file"
-                onChange={onChangeHandler}
-              />
-            </div>
+            
           </div>
         </div>
       </div>

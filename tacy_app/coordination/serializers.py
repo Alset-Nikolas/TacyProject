@@ -25,7 +25,7 @@ class CoordinationHistorySerializer(serializers.Serializer):
 class SentForApprovalSerializer(serializers.Serializer):
     initiative = serializers.IntegerField()
     text = serializers.CharField()
-    coordinator = serializers.IntegerField()
+    coordinators = serializers.ListField(child=UserBaseSerializer())
 
     def validate_coordinator(self, coordinator):
         user = self.context.get("user")
@@ -43,27 +43,19 @@ class SentForApprovalSerializer(serializers.Serializer):
             attrs["initiative"]
         )
         project: Project = initiative_obj.project
-        community_user_info = project.community_info.filter(
-            user_id=attrs.get("coordinator")
-        ).first()
-        if not community_user_info:
-            raise serializers.ValidationError(
-                {
-                    "coordinator": "coordinator error",
-                    "msg": "Такого пользователя нет в сообществе проекта",
-                }
-            )
+        for coordinator_user in attrs.get("coordinators"):
+            print(coordinator_user)
+            community_user_info = project.community_info.filter(
+                user_id=coordinator_user.get("id")
+            ).first()
+            if not community_user_info:
+                raise serializers.ValidationError(
+                    {
+                        "coordinator": "coordinator error",
+                        "msg": "Такого пользователя нет в сообществе проекта",
+                    }
+                )
 
-        rights_user: GlobalRightsUserInProject = (
-            community_user_info.rights_user.all()
-        )
-        if not any(x.flags.is_coordinate for x in rights_user):
-            raise serializers.ValidationError(
-                {
-                    "coordinator": "coordinator error",
-                    "msg": "Не имеет прав 'согласовывать'",
-                }
-            )
         return super().validate(attrs)
 
     def validate_initiative(self, initiative):

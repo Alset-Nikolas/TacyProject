@@ -179,7 +179,8 @@ export const getTeamThunk = (id: number) => (dispatch: AppDispatch, getState: ()
             return {
               id: projectPropertie ? projectPropertie.id : -1,
               title: projectPropertie ? projectPropertie.title : 'No propertie',
-              values: propertieValuesArray,
+              // values: propertieValuesArray,
+              values: resPropertie.values,
             };
           });
 
@@ -232,12 +233,13 @@ export const postTeamThunk = (id: number) => (dispatch: AppDispatch, getState: (
           id: project!.properties.find((propertie) => propertie.title === el.title)!.id,
           title: el.title,
         },
-        values: el.values.map((value) => {
-          return {
-            id: project!.properties[index].items.find((item) => item.value === value)!.id,
-            value,
-          };
-        }),
+        // values: el.values.map((value) => {
+        //   return {
+        //     id: project!.properties[index].items.find((item) => item.value === value)!.id,
+        //     value,
+        //   };
+        // }),
+        values: el.values,
       });
     });
 

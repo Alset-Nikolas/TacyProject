@@ -1,4 +1,5 @@
 import { ChangeEvent } from 'react';
+import moment from 'moment';
 import textStyles from '../../styles/text.module.scss';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import { handleInputChange } from '../../utils';
@@ -140,6 +141,9 @@ export default function ProjectName({
   }
 
   if (!project) return null;
+  const dateStart = new Date(project.date_start);
+  const dateEnd = new Date(project.date_end);
+
   return (
     <div className={`${styles.wrapper}`}>
       {/* <div className={`${textStyles.sectionHeaderText} ${sectionsStyles.header}`}>
@@ -150,10 +154,10 @@ export default function ProjectName({
         {project.name}
       </div>
       <div className={`${styles.date}`}>
-        <span className={`${styles.contentBoldText}`}>Дата начала:</span> {project.date_start}
+        <span className={`${styles.contentBoldText}`}>Дата начала:</span> {moment(dateStart).format('DD.MM.YYYY')}
       </div>
       <div className={`${styles.date}`}>
-        <span className={`${styles.contentBoldText}`}>Дата окончания:</span> {project.date_end}
+        <span className={`${styles.contentBoldText}`}>Дата окончания:</span> {moment(dateEnd).format('DD.MM.YYYY')}
       </div>
     </div>
   );

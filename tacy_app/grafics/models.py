@@ -86,22 +86,23 @@ class GraficsProject(models.Model):
             p_id = p_project.id
             if p_id not in res:
                 res[p_id] = dict()
-            for m_project in MetricsProject.objects.filter(
-                project=project
-            ).all():
-                m_id = m_project.id
-                if m_id not in res[p_id]:
-                    res[p_id][m_id] = {}
-                grafic_info = res[p_id][m_id]
-                for p_value_obj in p_project.items.all():
-                    p_item_value_name = p_value_obj.value
+                res[p_id]["enum"] = dict()
+
+            for p_value_obj in p_project.items.all():
+                p_item_value_name = p_value_obj.value
+                for m_project in MetricsProject.objects.filter(
+                    project=project
+                ).all():
+                    m_id = m_project.id
+                    if m_id not in res[p_id]:
+                        res[p_id][m_id] = {}
+                    grafic_info = res[p_id][m_id]
                     if p_item_value_name not in grafic_info:
                         grafic_info[p_item_value_name] = 0
-                grafic_info = res[p_id]["enum"] = dict()
-                for p_value_obj in p_project.items.all():
-                    p_item_value_name = p_value_obj.value
-                    if p_item_value_name not in grafic_info:
-                        grafic_info[p_item_value_name] = 0
+                grafic_info_enum = res[p_id]["enum"]
+                if p_item_value_name not in grafic_info_enum:
+                    grafic_info_enum[p_item_value_name] = 0
+        print("generate_start_statistic res", res)
         return res
 
     @classmethod
@@ -180,6 +181,7 @@ class GraficsProject(models.Model):
             for init_propertie_field in init.properties_fields.all():
                 propertie_title_id = init_propertie_field.title.id
                 if init_propertie_field.value:
+                    print("res", res)
                     propertie_value_name = init_propertie_field.value.value
                     grafic_enum = res[propertie_title_id]["enum"]
                     grafic_enum[propertie_value_name] += 1

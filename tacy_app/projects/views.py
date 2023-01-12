@@ -16,12 +16,14 @@ from .models import (
     RolesProject,
     ProjectFiles,
     СommunityProject,
+    PropertiesСommunityProject,
 )
 from .serializers import (
     InfoProjectSerializer,
     ListProjecttSerializer,
     UpdateCommunityProjectSerializer,
     UserProjectIdSerializer,
+    ProjectFilesSerializer,
 )
 from components.models import SettingsComponents
 from users.serializers import UserSerializer
@@ -142,13 +144,11 @@ class CreateProjectView(views.APIView):
             data=request.data,
             context={
                 "request": request,
-                "file": self.request.FILES.get("file"),
             },
         )
         serializer_project.is_valid(raise_exception=True)
         validated_data: tp.OrderedDict = serializer_project.validated_data
         project: Project = serializer_project.create_or_update(validated_data)
-
         IntermediateDateProject.create_or_update_intermediate_dates_for_project(
             project,
             validated_data["intermediate_dates"],
@@ -161,10 +161,12 @@ class CreateProjectView(views.APIView):
             project,
             validated_data["metrics"],
         )
-        PropertiesProject.update_properties_for_project(
+        properties = PropertiesProject.update_properties_for_project(
             project,
             validated_data["properties"],
         )
+        print(validated_data)
+        print(validated_data["roles"])
         RolesProject.create_or_update(
             project,
             validated_data["roles"],
@@ -174,11 +176,14 @@ class CreateProjectView(views.APIView):
         SettingsStatusInitiative.generate_defauld_status(settings_project)
         data = serializer_project.data
         data["id"] = project.id
-        СommunityProject.create_or_update_user_in_community(
+        community_item = СommunityProject.create_or_update_user_in_community(
             project=project,
             user=self.request.user,
             is_create=True,
             is_author=True,
+        )
+        PropertiesСommunityProject.create_default_properties_user_in_community(
+            community_item, properties
         )
         return Response(
             data,
@@ -469,6 +474,11 @@ class FileProjectView(views.APIView):
         file = self.request.FILES.get("file")
         ProjectFiles.add_file(project, file)
         return Response({"msg": "Файл добавлен"}, status=status.HTTP_200_OK)
+
+    def get(self, request):
+        project = get_object_or_404(Project, id=self.request.GET.get("id"))
+        s = ProjectFilesSerializer(instance=project.files.all(), many=True)
+        return Response(s.data, status=status.HTTP_200_OK)
 
     def delete(self, request):
         file = get_object_or_404(ProjectFiles, id=self.request.GET.get("id"))

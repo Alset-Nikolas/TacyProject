@@ -49,6 +49,7 @@ type TState = {
         deleteEvent: boolean;
         error: boolean;
         message: boolean,
+        coordination: boolean,
       };
       message: string | Array<string>;
       data: any;
@@ -98,6 +99,7 @@ const initialState: TState = {
         deleteEvent: false,
         error: false,
         message: false,
+        coordination: false,
       },
       message: '',
       data: null,
@@ -355,6 +357,10 @@ export const stateSlice = createSlice({
       state.app.modal.type.message = true;
       state.app.modal.message = action.payload;
     },
+    openCoordinationModal: (state) => {
+      state.app.modal.isOpen = true;
+      state.app.modal.type.coordination = true;
+    },
     closeModal: (state) => {
       state.app.modal.isOpen = false;
       state.app.modal.type = {
@@ -364,6 +370,7 @@ export const stateSlice = createSlice({
         deleteEvent: false,
         error: false,
         message: false,
+        coordination: false,
       };
       state.app.modal.message = '';
     },
@@ -414,6 +421,7 @@ export const {
   openDeleteEventModal,
   openErrorModal,
   openMessageModal,
+  openCoordinationModal,
   setInitiativeEdit,
   showLoader,
   closeLoader,

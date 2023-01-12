@@ -23,7 +23,7 @@ export default function AddInitiativePage() {
   const dispatch = useAppDispatch();
   const currentProjectId = useAppSelector((store) => store.state.project.currentId);
   // const project = useAppSelector((store) => store.state.project.value);
-  const { data: project } = useGetProjectInfoQuery(currentProjectId)
+  const { data: project } = useGetProjectInfoQuery(currentProjectId);
   const components = useAppSelector((store) => store.components.value);
   // const { addInitiativeRequestSuccess } = useAppSelector((store) => store.initiatives)
   const [newInitiativeState, setNewInitiativeState] = useState({

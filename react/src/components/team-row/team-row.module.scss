@@ -17,7 +17,11 @@
   }
 
   td {
-    border-right: 0.5px solid #504F4F;
+    border-left: 0.5px solid #504F4F;
+
+    &.delete {
+      border-left: none;
+    }
   }
 
   input {
@@ -26,13 +30,8 @@
     width: 100%;
   }
 
-  td:last-child,
-  td:nth-last-child(2) {
-    border-right: none;
-  }
-
-  .last {
-    border-right: none;
+  td:first-child {
+    border-left: none;
   }
 
   &.header {

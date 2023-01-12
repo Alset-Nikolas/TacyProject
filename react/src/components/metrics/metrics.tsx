@@ -61,7 +61,7 @@ export default function Metrics({
             className={`${styles.headerRow}`}
           >
             <div
-              className={`${styles.metricCell} ${styles.header}`}
+              className={`${styles.metricCell} ${styles.header} ${styles.edit}`}
             >
               {title}
               <CustomizedButton

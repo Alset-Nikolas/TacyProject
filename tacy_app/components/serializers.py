@@ -22,11 +22,17 @@ from .models import (
     RolesUserInInitiative,
     RolesProject,
 )
-from projects.models import PropertiesProject, MetricsProject, Project
+from projects.models import (
+    PropertiesProject,
+    MetricsProject,
+    Project,
+    СommunityProject,
+)
 from django.shortcuts import get_object_or_404
 from users.serializers import UserBaseSerializer
 import xlsxwriter
 import os
+from projects.serializers import ProperitsUserSerializer
 
 User = get_user_model()
 
@@ -450,9 +456,23 @@ class RolesUserInInitiativeSerializer(serializers.ModelSerializer):
         ).delete()
 
 
+class CommunityUserInInitiativeSerializer(serializers.ModelSerializer):
+    user = UserBaseSerializer()
+    properties = ProperitsUserSerializer(many=True)
+
+    class Meta:
+        model = СommunityProject
+        fields = ("user", "properties")
+
+
+class StatusUserInInitiativeSerializer(serializers.Serializer):
+    user_info = CommunityUserInInitiativeSerializer()
+    status = serializers.BooleanField()
+
+
 class CommunityRolesInInitiativeSerializer(serializers.Serializer):
-    users = UserBaseSerializer(many=True)
     role = RolesProjectSerializer()
+    community = StatusUserInInitiativeSerializer(many=True)
 
 
 class InitiativeSerializer(serializers.Serializer):
@@ -704,12 +724,19 @@ class ListInitiativeSerializer(serializers.Serializer):
             headers = []
             for roles_item in roles:
                 role = roles_item.get("role")
-                users = roles_item.get("users")
+                community = roles_item.get("community")
+
                 headers.append({"header": role.get("name")})
-                for user in users:
-                    ans.append(
-                        f'{user.get("last_name")} {user.get("first_name")}.{user.get("second_name")}'
+                user_in_roles = ""
+                for community_item in community:
+                    user_info = community_item.get("user_info")
+                    user = user_info.get("user")
+                    user_in_roles = (
+                        user_in_roles
+                        + f'{user.get("last_name")} {user.get("first_name")}.{user.get("second_name")}'
+                        + "; "
                     )
+                ans.append(user_in_roles)
             line += ans
             header += headers
 
@@ -734,6 +761,8 @@ class ListInitiativeSerializer(serializers.Serializer):
 
         table_data = []
         header = []
+        line = []
+        print(data)
         for i, line_table in enumerate(
             data.get("project_initiatives"), start=2
         ):

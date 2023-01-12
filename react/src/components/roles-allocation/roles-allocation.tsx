@@ -55,16 +55,12 @@ export default function RolesAlloction() {
     setRoles((prevState) => {
       const newState = [...prevState];
       const currentRole = { ...newState[index] };
-      const currentRoleUsers = [...currentRole.users];
+      const currentRoleUsers = [...currentRole.community];
       currentRoleUsers.push({
-        id: -1,
-        first_name: '',
-        last_name: '',
-        second_name: '',
-        email : '',
-        phone: '',
+        user_info: null,
+        status: null,
       });
-      currentRole.users = currentRoleUsers;
+      currentRole.community = currentRoleUsers;
       newState[index] = currentRole;
 
       return newState;
@@ -75,9 +71,9 @@ export default function RolesAlloction() {
     setRoles((prevState) => {
       const newState = [...prevState];
       const currentRole = { ...newState[roleIndex] };
-      const currentRoleUsers = [...currentRole.users];
+      const currentRoleUsers = [...currentRole.community];
       currentRoleUsers.splice(personIndex, 1);
-      currentRole.users = currentRoleUsers;
+      currentRole.community = currentRoleUsers;
       newState[roleIndex] = currentRole;
 
       return newState;
@@ -87,17 +83,18 @@ export default function RolesAlloction() {
   const onRolesPersonChange = (e: SelectChangeEvent<string>, roleIndex: number, personIndex: number) => {
     try {
       let previousMember = {} as {
-        id: number,
-        first_name: string,
-        second_name: string,
-        last_name: string,
-        email: string,
-        phone: string,
+        user_info: {
+          user: TUser & { id: number },
+          // properties: Array<TPropertie>,
+          properties: Array<any>,
+
+        } | null,
+        status: boolean | null
       };
       setRoles((prevState) => {
         const newState = [...prevState];
         const currentRole = { ...newState[roleIndex] };
-        const currentRoleUsers = [...currentRole.users];
+        const currentRoleUsers = [...currentRole.community];
         previousMember = currentRoleUsers[personIndex];
 
         if (!teamList) throw new Error('Team list is missing');
@@ -111,6 +108,7 @@ export default function RolesAlloction() {
               name: '  ',
               email : '',
               phone: '',
+              properties: [] as unknown,
             } as TTeamMember;
           } else {
             throw new Error('Team member not found');
@@ -119,25 +117,40 @@ export default function RolesAlloction() {
 
         const splitedName = selectedUser.name.split(' ');
         currentRoleUsers[personIndex] = {
-          id: selectedUser.id,
-          first_name: splitedName[1],
-          second_name: splitedName[2],
-          last_name: splitedName[0],
-          email: selectedUser.email,
-          phone: selectedUser.phone,
+          user_info: {
+            user: {
+              id: selectedUser.id,
+              first_name: splitedName[1],
+              second_name: splitedName[2],
+              last_name: splitedName[0],
+              email: selectedUser.email,
+              phone: selectedUser.phone,
+            },
+            properties: selectedUser.properties.map((propertie) => {
+              return {
+                title: {
+                  id: propertie.id,
+                  title: propertie.title,
+                },
+                values: propertie.values,
+              }
+            }),
+          },
+          status: null,
         };
 
-        currentRole.users = currentRoleUsers;
+        currentRole.community = currentRoleUsers;
         newState[roleIndex] = currentRole;
 
         return newState;
       });
       setMembersList((prevState) => {
         const newState = [...prevState];
+        if (previousMember.user_info) {
         const memberIndex = prevState.findIndex((member) => member === e.target.value);
-        if (memberIndex > -1) newState.splice(memberIndex, 1);
-        if (previousMember.id !== -1) newState.push(`${previousMember.last_name} ${previousMember.first_name} ${previousMember.second_name}`);
-
+          if (memberIndex > -1) newState.splice(memberIndex, 1);
+          if (previousMember.user_info.user.id > -1) newState.push(`${previousMember.user_info.user.last_name} ${previousMember.user_info.user.first_name} ${previousMember.user_info.user.second_name}`);
+        }
         return newState;
       });
     } catch(e) {
@@ -151,10 +164,10 @@ export default function RolesAlloction() {
 
       const body: Array<{user: TUser & { id: number }, role: TRole}> = [];
       roles.forEach((item) => {
-        item.users.forEach((user) => {
-          if (user.id !== -1) {
+        item.community.forEach((member) => {
+          if (member.user_info) {
             body.push({
-              user,
+              user: member.user_info.user,
               role : {
                 id: item.role.id,
                 name: item.role.name,
@@ -202,6 +215,10 @@ export default function RolesAlloction() {
     setMembersList(newMemberList);
 
   }, [rolePersonList, fullMembersList]);
+
+  useEffect(() => {
+  setRoles(initiative ? initiative.roles : []);
+  }, [initiative])
 
   return (
     <div
@@ -251,22 +268,24 @@ export default function RolesAlloction() {
                       key={item.role.id}
                       className={`${styles.cell}`}
                     >
-                      {!item.users.length && (
+                      {!item.community.length && (
                         <Pictogram
                           type="add-filled"
                           cursor="pointer"
                           onClick={() => addPersonToRole(roleIndex)}
                         />
                       )}
-                      {item.users.map((user, userIndex) => (
+                      {item.community.map((member, userIndex) => {
+                        // if (!member.user_info) return null;
+                        return (
                           <div
-                            key={user.id}
+                            key={member.user_info ? member.user_info.user.id : `new_${userIndex}`}
                             className={`${styles.selectorWrapper}`}
                           >
                             <CustomizedSelect
                               style={selectorStyle}
-                              items={membersList ? [...membersList, notAllocated, `${user.last_name} ${user.first_name} ${user.second_name}`] : [notAllocated]}
-                              value={user.id !== -1 ? `${user.last_name} ${user.first_name} ${user.second_name}` : notAllocated}
+                              items={membersList ? member.user_info ? [...membersList, notAllocated, `${member.user_info?.user.last_name} ${member.user_info?.user.first_name} ${member.user_info?.user.second_name}`] : [...membersList, notAllocated] : [notAllocated]}
+                              value={(member.user_info && member.user_info.user.id !== -1) ? `${member.user_info.user.last_name} ${member.user_info.user.first_name} ${member.user_info.user.second_name}` : notAllocated}
                               onChange={(e) => onRolesPersonChange(e, roleIndex, userIndex)}
                             />
                             <Pictogram
@@ -274,7 +293,7 @@ export default function RolesAlloction() {
                               cursor="pointer"
                               onClick={() => deletePersonFromRole(roleIndex, userIndex)}
                             />
-                            {(userIndex === item.users.length - 1) && (
+                            {(userIndex === item.community.length - 1) && (
                               <Pictogram
                               type="add-filled"
                               cursor="pointer"
@@ -282,8 +301,8 @@ export default function RolesAlloction() {
                             />
                             )}
                           </div>
-                        ))
-                      }
+                        );
+                      })}
                       
                     </div>
                   ))

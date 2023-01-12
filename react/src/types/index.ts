@@ -125,7 +125,11 @@ export type TTeamMember = {
   properties: Array<{
     id: number;
     title: string;
-    values: Array<string>;
+    // values: Array<string>;
+    values: Array<{
+      id: number,
+      value:  string,
+    }>;
   }>;
 }
 
@@ -269,8 +273,30 @@ export type TInitiative = {
     metric_fields: Array<TInitiativeMetricsFields>;
     addfields: Array<TInitiativeAdditionalFields>;
     roles: Array<{
-      users: Array<TUser & { id: number }>;
+      // users: Array<TUser & { id: number }>;
       role: TRole & { project: number };
+      community: Array<{
+        user_info: {
+          user: TUser & { id: number },
+          // proerties: Array<TPropertie>,
+          properties: Array<{
+            title: {
+              id: number,
+              title: string,
+            },
+            values: Array<{
+              id: number,
+              value: string,
+            }>,
+          }>,
+          // properties: Array<{
+          //   id: number;
+          //   title: string;
+          //   values: Array<string>;
+          // }>,
+        } | null,
+        status: boolean | null
+      }>;
     }>;
 }
 
@@ -470,12 +496,13 @@ export type TCoordinationHistoryItem = {
 export type TUserRights = {
   init_failure: boolean;
   user_is_author: boolean;
+  user_is_superuser: boolean;
   user_now_apprwed: boolean;
   user_add_comment: boolean;
   user_rights_flag: {
     is_create: boolean;
-    is_coordinate: boolean;
-    is_watch: boolean;
+    is_approve: boolean;
+    is_update: boolean;
   }
 }
 

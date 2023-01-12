@@ -37,7 +37,8 @@ export const teamApi = createApi({
             return {
               id: projectPropertie ? projectPropertie.id : -1,
               title: projectPropertie ? projectPropertie.title : 'No propertie',
-              values: propertieValuesArray,
+              // values: propertieValuesArray,
+              values: resPropertie.values,
             };
           });
 

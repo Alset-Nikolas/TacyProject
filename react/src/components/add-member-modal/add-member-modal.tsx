@@ -43,7 +43,10 @@ export default function AddMemberModal({ addMember }: TAddMemberProps) {
       const item = {} as {
         id: number;
         title: string;
-        values: Array<string>;
+        values: Array<{
+          id: number,
+          value: string,
+        }>;
       };
 
       item.id = propertie.id;

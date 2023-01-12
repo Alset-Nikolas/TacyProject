@@ -11,6 +11,7 @@ from .models import (
     PropertiesСommunityProject,
     СommunityProject,
     RolesProject,
+    ProjectFiles,
 )
 
 
@@ -28,6 +29,7 @@ class ProjectAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Project, ProjectAdmin)
+admin.site.register(ProjectFiles)
 admin.site.register(MetricsProject)
 admin.site.register(RolesProject)
 admin.site.register(IntermediateDateProject)

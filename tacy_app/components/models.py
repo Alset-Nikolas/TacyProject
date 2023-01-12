@@ -5,6 +5,7 @@ from projects.models import (
     PropertiesItemsProject,
     MetricsProject,
     RolesProject,
+    СommunityProject,
 )
 from django.contrib.auth import get_user_model
 from django.utils import timezone
@@ -131,11 +132,35 @@ class Initiatives(models.Model):
         roles_in_project: list[
             RolesProject
         ] = RolesProject.get_roles_by_project(self.project)
-        ans = [{"role": x, "users": []} for x in roles_in_project]
+        ans = [{"role": x, "community": []} for x in roles_in_project]
         for user_in_init in community_in_init:
+            print(user_in_init)
+            print("user_in_init.user", user_in_init.user)
+            print("user_in_init.user.id", user_in_init.user.id)
+            print("project", self.project)
             for item in ans:
                 if item.get("role") == user_in_init.role:
-                    item["users"].append(user_in_init.user)
+                    elemant = dict()
+                    elemant["user_info"] = (
+                        СommunityProject.objects.filter(project=self.project)
+                        .filter(user=user_in_init.user)
+                        .first()
+                    )
+                    coordination_init = (
+                        self.stages_coordination.filter(
+                            coordinator_stage=user_in_init.user
+                        )
+                        .filter(status=self.status)
+                        .first()
+                    )
+
+                    if not coordination_init:
+                        status = None
+                    else:
+                        status = coordination_init.activate
+                    elemant["status"] = status
+                    item["community"].append(elemant)
+                    print(elemant)
                     break
         return ans
 
@@ -854,7 +879,6 @@ class SettingsStatusInitiative(models.Model):
         settings_initiatives: SettingsComponents = (
             project.settings_initiatives.first()
         )
-        print(settings_initiatives)
         return cls.objects.filter(settings_project=settings_initiatives).all()
 
     @classmethod

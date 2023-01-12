@@ -15,7 +15,8 @@ import {
   getProjectInfoThunk,
   closeModal,
   getProjectsListThunk,
-  openDeleteProjectModal
+  openDeleteProjectModal,
+  setCurrentProjectId
 } from '../../redux/state/state-slice';
 import ProjectCapacity from '../project-capacity/projects-capacity';
 // Mock data
@@ -25,7 +26,7 @@ import ProjectCapacity from '../project-capacity/projects-capacity';
 import styles from './basic-settings-view.module.scss';
 import Properties from '../properties/properties';
 import Modal from '../modal/modal';
-import { useGetProjectInfoQuery } from '../../redux/state/state-api';
+import { useDeleteProjectMutation, useGetProjectInfoQuery } from '../../redux/state/state-api';
 
 type TBasicSettingsViewProps = {
   onEditClick: MouseEventHandler<HTMLDivElement>;
@@ -36,15 +37,18 @@ export default function BasicSettingsView({ onEditClick }: TBasicSettingsViewPro
   const { currentId } = useAppSelector((store) => store.state.project);
   const { modal } = useAppSelector((store) => store.state.app);
   const { data: project } = useGetProjectInfoQuery(currentId);
+  const [ deleteProject ] = useDeleteProjectMutation();
 
   const deleteClickHandler = () => {
     dispatch(openDeleteProjectModal());
   };
 
   const confirmClickHandler = () => {
-    if (project) {
+    if (currentId) {
       dispatch(closeModal());
-      dispatch(deleteProjectThunk(project.id));
+      // dispatch(deleteProjectThunk(currentId));
+      deleteProject(currentId);
+      dispatch(setCurrentProjectId(null));
     }
   };
 

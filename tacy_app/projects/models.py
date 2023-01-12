@@ -9,7 +9,6 @@ User = get_user_model()
 
 
 def directory_path(instance, filename):
-    print(instance)
     return f"files/project/{instance.project.name}/{filename}"
 
 
@@ -70,9 +69,7 @@ class Project(models.Model):
         return cls.objects.filter(name=name).first()
 
     @classmethod
-    def update_or_create_project(
-        cls, project, update_correct_info, files=None
-    ):
+    def update_or_create_project(cls, project, update_correct_info):
 
         if project:
             project.name = update_correct_info["name"]
@@ -87,8 +84,6 @@ class Project(models.Model):
 
         else:
             project: Project = Project.objects.create(**update_correct_info)
-            if files:
-                ProjectFiles.objects.create(file=files, project=project)
         project.save()
         return project
 
@@ -112,7 +107,7 @@ class Project(models.Model):
         user_in_community: СommunityProject = (
             СommunityProject.objects.filter(user=user)
             .filter(project=project)
-            .all()
+            .first()
         )
         is_create = user_in_community.is_create
         # добавить права из инициативы
@@ -120,6 +115,7 @@ class Project(models.Model):
 
 
 class ProjectFiles(models.Model):
+    id = models.AutoField(primary_key=True)
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,
@@ -370,6 +366,7 @@ class PropertiesProject(models.Model):
         cls, project, properties: typing.List[typing.Dict]
     ):
         ids_not_delete = []
+        properties_obj = []
         for p in properties:
             id = p.get("id")
             if id and id > 0:
@@ -381,6 +378,10 @@ class PropertiesProject(models.Model):
                     project=project,
                     title=p["title"],
                 )
+                PropertiesСommunityProject.create_new_propertie_in_community(
+                    project, propertie
+                )
+            properties_obj.append(propertie)
             ids_not_delete.append(propertie.id)
 
             PropertiesItemsProject.update_properties_values_for_project(
@@ -390,6 +391,7 @@ class PropertiesProject(models.Model):
         cls.objects.filter(project=project).exclude(
             id__in=ids_not_delete
         ).delete()
+        return properties_obj
 
 
 class СommunityProject(models.Model):
@@ -441,7 +443,7 @@ class СommunityProject(models.Model):
 
 class PropertiesСommunityProject(models.Model):
     community = models.ForeignKey(
-        "СommunityProject",
+        СommunityProject,
         on_delete=models.CASCADE,
         blank=True,
         null=True,
@@ -458,6 +460,11 @@ class PropertiesСommunityProject(models.Model):
 
     def __str__(self):
         return f"<PropertiesСommunityProject title={self.title} value={self.values}>"
+
+    @classmethod
+    def create_new_propertie_in_community(cls, project, propertie):
+        for community_user in project.community_info.all():
+            cls.objects.create(community=community_user, title=propertie)
 
     @classmethod
     def create_or_update_properties_user_in_community(
@@ -487,6 +494,21 @@ class PropertiesСommunityProject(models.Model):
         cls.objects.filter(community=community).exclude(
             id__in=ids_not_delete
         ).delete()
+
+    @classmethod
+    def create_default_properties_user_in_community(
+        cls, community, properties
+    ):
+        for prop in properties:
+            if not (
+                cls.objects.filter(community=community)
+                .filter(title=prop)
+                .first()
+            ):
+                cls.objects.create(
+                    community=community,
+                    title=prop,
+                )
 
 
 class RolesProject(models.Model):
@@ -520,6 +542,7 @@ class RolesProject(models.Model):
 
     @classmethod
     def create_or_update(cls, project: Project, roles):
+        print("create_or_update", roles)
         ids_not_delete = []
         for item in roles:
             id = item.get("id")
@@ -530,8 +553,10 @@ class RolesProject(models.Model):
             else:
                 id = item.pop("id")
                 item_obj = cls.objects.create(**item, project=project)
+                print("item_obj", item_obj)
             ids_not_delete.append(item_obj.id)
             item["id"] = item_obj.id
+        print("ids_not_delete", ids_not_delete)
         cls.objects.filter(project=project).exclude(
             id__in=ids_not_delete
         ).delete()

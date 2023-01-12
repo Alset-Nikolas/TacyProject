@@ -14,7 +14,7 @@ export default function ModalInfo({ message }: TModalInfoProps) {
   const dispatch = useAppDispatch();
   return (
     <Modal
-          closeModal={() => dispatch(closeModal())}
+      closeModal={() => dispatch(closeModal())}
     >
       <div
         className={`${styles.modalWrapper}`}

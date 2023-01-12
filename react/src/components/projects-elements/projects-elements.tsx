@@ -31,7 +31,7 @@ export default function ProjectsElements({ roles, rights, edit }: TProjectsEleme
   const dispatch = useAppDispatch();
   const projectForEdit = useAppSelector((store) => store.state.projectForEdit);
   const SelectStyle = {
-    width: '100%',
+    width: '230px',
     height: '32px',
     border: '1px solid #504F4F',
     borderRadius: 0,
@@ -79,16 +79,20 @@ export default function ProjectsElements({ roles, rights, edit }: TProjectsEleme
     )
     return (
       <div className={`${styles.wrapper} ${styles.edit}`}>
-      <SectionHeader
+      {/* <SectionHeader
         edit
       >
-        Элементы проекта
-      </SectionHeader>
+        Роли
+      </SectionHeader> */}
       <div className={`${styles.contentWrapper} ${styles.edit}`}>
         {/* <SectionContent>
           {units.map((el) => el)}
         </SectionContent> */}
-        <div>
+        <div
+          style={{
+            width: 525,
+          }}
+        >
           <div
             className={`${styles.sectionHeader}`}
           >
@@ -100,16 +104,23 @@ export default function ProjectsElements({ roles, rights, edit }: TProjectsEleme
             <div>
               Права
             </div>
+            {!projectForEdit.roles.length && (
+              <div
+                style={{
+                  marginLeft: 70,
+                }}
+              >
+                <CustomizedButton
+                  value="Добавить"
+                  onClick={() => addPropertie(projectForEdit, 'roles', dispatch)}
+                />
+              </div>
+            )}
           </div>
           <div
             className={`${styles.rolesList}`}
           >
-            {!projectForEdit.roles.length && (
-              <CustomizedButton
-                value="Добавить"
-                onClick={() => addPropertie(projectForEdit, 'roles', dispatch)}
-              />
-            )}
+            
             {projectForEdit.roles.map((el, index) => {
               const selectorValue = [];
               if (el.is_approve) selectorValue.push(rightsObj.approve);

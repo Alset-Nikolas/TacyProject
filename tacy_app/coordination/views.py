@@ -76,36 +76,37 @@ class SentForApproval(views.APIView):
         request_body=SentForApprovalSerializer,
     )
     def post(self, request):
+        data = request.data
+        data["text"] = "Отправил на согласование"
         serializer = SentForApprovalSerializer(
-            data=request.data, context={"user": request.user}
+            data=data, context={"user": request.user}
         )
         serializer.is_valid(raise_exception=True)
+        for user_info in serializer.data.get("coordinators"):
+            coordinator_user = User.get_user_by_id(user_info.get("id"))
+            self._send_email(email=coordinator_user.email)
+            initiative_id = serializer.data.get("initiative")
+            status = self._get_status_initiative(initiative_id)
 
-        coordinator_obj = User.get_user_by_id(request.data.get("coordinator"))
-        self._send_email(email=coordinator_obj.email)
+            instace = {
+                "initiative_id": initiative_id,
+                "status": status,
+                "coordinator": coordinator_user,
+                "author_text": request.user,
+                "text": request.data.get("text"),
+                "action": TYPE_SEND_APPROVAL,
+            }
+            print(instace)
+            CoordinationInitiativeHistory.create(instace)
+            initiative = Initiatives.get_by_id(initiative_id)
+            NotificationsUser.sent_approval(initiative, instace)
 
-        initiative_id = request.data.get("initiative")
-        status = self._get_status_initiative(initiative_id)
-
-        instace = {
-            "initiative_id": initiative_id,
-            "status": status,
-            "coordinator": coordinator_obj,
-            "author_text": request.user,
-            "text": request.data.get("text"),
-            "action": TYPE_SEND_APPROVAL,
-        }
-        print(instace)
-        CoordinationInitiativeHistory.create(instace)
-        initiative = Initiatives.get_by_id(initiative_id)
-        NotificationsUser.sent_approval(initiative, instace)
-
-        instace = {
-            "initiative_id": initiative_id,
-            "status": status,
-            "coordinator_stage": coordinator_obj,
-        }
-        StagesCoordinationInitiative.add_stage(instace)
+            instace = {
+                "initiative_id": initiative_id,
+                "status": status,
+                "coordinator_stage": coordinator_user,
+            }
+            StagesCoordinationInitiative.add_stage(instace)
 
         return Response("Отправили на согласование удачно", 200)
 
@@ -193,7 +194,7 @@ class AddComment(views.APIView):
 
         CoordinationInitiativeHistory.create(instace)
         users = StagesCoordinationInitiative.get_coordinators(initiative)
-        NotificationsUser.add_comment(instace, users)
+        NotificationsUser.add_comment(initiative, users)
         return Response(
             "Новый комментарий добавлен",
             200,

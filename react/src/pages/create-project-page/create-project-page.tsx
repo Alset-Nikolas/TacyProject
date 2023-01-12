@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { ChangeEvent, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BasicFunctions from '../../components/basic-functions/basic-functions';
 import Metrics from '../../components/metrics/metrics';
@@ -9,7 +9,7 @@ import { paths } from '../../consts';
 import textStyles from '../../styles/text.module.scss';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import { closeModal, createProjectThunk, emptyProjectForEdit, getProjectInfoThunk, setState } from '../../redux/state/state-slice';
-import { addPropertie } from '../../utils';
+import { addPropertie, handleInputChange } from '../../utils';
 import Modal from '../../components/modal/modal';
 import { TMetrica, TIntermediateDate } from '../../types';
 
@@ -17,6 +17,7 @@ import { TMetrica, TIntermediateDate } from '../../types';
 import styles from './create-project-page.module.scss';
 import { useGetProjectsListQuery, usePostProjectMutation } from '../../redux/state/state-api';
 import ProjectsElements from '../../components/projects-elements/projects-elements';
+import Properties from '../../components/properties/properties';
 
 export default function CreateProjectPage() {
   const { refetch } = useGetProjectsListQuery();
@@ -83,24 +84,13 @@ export default function CreateProjectPage() {
     if (projectForEdit && isValid) {
       const formData = new FormData();
       const projectEntries = Object.entries(projectForEdit);
-      // formData.append("username", "abc123");
 
-      projectEntries.forEach((el, index) => {
-        // if (index !== event.target.elements.length - 1) {
-        //   if (el[0] === 'file') {
-            formData.append(el[0], el[1] instanceof Array || typeof el[1] === 'number' ? JSON.stringify(el[1]) : el[1]);
-          // } else {
-          //   formData.append(el.name, el.value);
-          // }
-        // }
-        // for (const p of formData.entries()) {
-        //   console.log(`${p[0]}: ${p[1]}`);
-        // }
+      projectEntries.forEach((el) => {
+        formData.append(el[0], el[1] instanceof Array || typeof el[1] === 'number' ? JSON.stringify(el[1]) : el[1]);
       });
       formData.append('file', file ? file : '');
 
-      // dispatch(createProjectThunk(formData));
-      createProject(formData);
+      createProject(projectForEdit);
       refetch();
     }
   };
@@ -108,6 +98,17 @@ export default function CreateProjectPage() {
   const onCancelClick = () => {
     dispatch(getProjectInfoThunk());
     returnToMainPage();
+  };
+
+  const onChangeHandler = (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+    if (projectForEdit) {
+      if (e.target.name !== 'file') {
+        handleInputChange(e, projectForEdit, dispatch);
+      } else {
+        const files = (e.target as HTMLInputElement).files;
+        setFile(files ? files[0] : null);
+      }
+    }
   };
 
   useEffect(() => {
@@ -134,8 +135,15 @@ export default function CreateProjectPage() {
         create
         error={validationError}
       />
+      <div>
+        <input
+          type="file"
+          name="file"
+          onChange={onChangeHandler}
+        />
+      </div>
       <ProjectTimeline
-        create
+        edit
       />
       <BasicFunctions
         create
@@ -143,24 +151,13 @@ export default function CreateProjectPage() {
         setFile={setFile}
       />
       <section className={`${styles.middleSectionWrapper}`}>
-        {!projectForEdit.metrics.length ? 
-          <div className={`${styles.createPropWrapper}`}>
-            <div className={`${textStyles.sectionHeaderText}`}>
-              Метрики проекта 
-            </div>
-            <CustomizedButton
-              value="Добавить"
-              onClick={() => addPropertie(projectForEdit, 'metrics', dispatch)}
-            />
-          </div>
-          :
-          <>
-            <Metrics
-              create
-            />
-          </>
-        }
+        <Metrics
+          edit
+        />
       </section>
+      <Properties
+        edit
+      />
       <ProjectsElements
         roles={projectForEdit.roles}
         rights={projectForEdit.rights}

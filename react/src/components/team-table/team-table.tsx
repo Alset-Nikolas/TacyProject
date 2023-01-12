@@ -20,25 +20,15 @@ type TTeamTableProps = {
 
 export default function TeamTable({ edit, teamList, removeMember, setList }: TTeamTableProps) {
   const dispatch = useAppDispatch();
-  // const teamList = useAppSelector((store) => store.team.list);
   const { currentId } = useAppSelector((store) => store.state.project);
   const { data: project } = useGetProjectInfoQuery(currentId);
-  // const { data: teamList } = useGetTeamListQuery(
-  //   {
-  //     id: currentId ? currentId : -1,
-  //     project: project ? project : null
-  //   }, {
-  //     skip: !project || !currentId,
-  //   }
-  // );
 
   const modal = useAppSelector((store) => store.state.app.modal);
 
-  // if (!teamList.length) return null;
   useEffect(() => {
     teamList?.forEach((member, index) => {
       if (project) {
-        project.properties.forEach((propertie, propIndex) => {
+        project.properties.forEach((propertie) => {
           let outputPropertie = member.properties.find((prop) => prop.title === propertie.title);
           if (!outputPropertie) {
             outputPropertie = {

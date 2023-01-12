@@ -1,5 +1,5 @@
 import { SelectChangeEvent } from "@mui/material";
-import { getProjectInfoThunk, setCurrentProjectId } from "../../redux/state/state-slice";
+import { setCurrentProjectId } from "../../redux/state/state-slice";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import CustomizedButton from "../button/button";
 import CustomizedSelect from "../select/Select";
@@ -12,9 +12,7 @@ import { useEffect, useState } from "react";
 
 export default function ProjectSelector() {
   const dispatch = useAppDispatch();
-  // const { project } = useAppSelector((store) => store.state);
   const { data: projectsList } = useGetProjectsListQuery();
-  // const projectsList = useAppSelector((store) => store.state.projectsList.value);
   const selectItems = projectsList ? [...projectsList.map((el) => el.name), ''] : [''];
   const savedProjectId = localStorage.getItem('project-id');
   const [selectedId, setSlectedId] = useState(savedProjectId ? Number.parseInt(savedProjectId) : null);
@@ -49,9 +47,9 @@ export default function ProjectSelector() {
       <span className={`${textStyles.sectionHeaderText}`}>Все проекты</span>
       <div className={`${styles.selectorWrapper}`}>
       <CustomizedSelect
-          value={value ? value : ''}
-          items={selectItems}
-          onChange={onSelectorChange}
+        value={value ? value : ''}
+        items={selectItems}
+        onChange={onSelectorChange}
       />
       <CustomizedButton
           value="Выбрать"

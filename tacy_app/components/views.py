@@ -638,6 +638,7 @@ class UserStatisticsInitiativesView(views.APIView):
                     "addfields": initiative.addfields.all(),
                     "properties_fields": initiative.properties_fields.all(),
                     "metric_fields": initiative.metric_fields.all(),
+                    "roles": initiative.get_community_roles(),
                 }
             )
             for m_obj in initiative.metric_fields.all():

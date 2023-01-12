@@ -79,13 +79,13 @@ export default function TeamSettingsPage() {
               title: el.title,
             },
             values: el.values.map((value) => {
-              const foundValue = project.properties[index].items.find((item) => item.value === value);
+              const foundValue = project.properties[index].items.find((item) => item.value === value.value);
               
               if (!foundValue) throw new Error('Value not found');
 
               return {
                 id: foundValue.id,
-                value,
+                value: value.value,
               };
             }),
           });

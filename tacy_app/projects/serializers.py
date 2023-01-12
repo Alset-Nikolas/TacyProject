@@ -370,7 +370,6 @@ class CreateProjectSerializer(serializers.ModelSerializer):
         project: Project = Project.update_or_create_project(
             project=instance,
             update_correct_info=project_info,
-            files=self.context.get("file"),
         )
 
         user = project_info["author"]
@@ -455,6 +454,7 @@ class UserProjectIdSerializer(serializers.Serializer):
 
 
 class UserBaseSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False)
     email = serializers.EmailField()
 
     class Meta:
@@ -468,40 +468,6 @@ class UserBaseSerializer(serializers.ModelSerializer):
             "email",
             "phone",
         )
-
-
-# class RightsUserSerializer(serializers.ModelSerializer):
-#     id = serializers.IntegerField()
-
-#     class Meta:
-#         depth = 1
-#         model = GlobalRightsUserInProject
-#         fields = (
-#             "id",
-#             "name",
-#         )
-
-#     def validate(self, data):
-#         print("data RightsUserSerializer", data)
-#         right_user_obj = GlobalRightsUserInProject.get_right_by_id(
-#             id=data["id"]
-#         )
-#         if not right_user_obj:
-#             raise serializers.ValidationError(
-#                 {
-#                     "rights_user id": "check  rights_user. There are no such values (rights_user) in the database. Obj not exist RightsUSerInProject.",
-#                     "msg_er": "Таких прав у пользователя не может быть.",
-#                 }
-#             )
-#         if right_user_obj.name != data["name"]:
-#             raise serializers.ValidationError(
-#                 {
-#                     "rights_user name": f"check rights_user. ights with pk={data['id']} -> name=={right_user_obj.name}, you get name={data['name']}",
-#                     "msg_er": "Название прав пользователя не соответсвует id.",
-#                 }
-#             )
-
-#         return data
 
 
 class PropertiesProjectSerializer(serializers.ModelSerializer):
@@ -616,7 +582,6 @@ class UpdateCommunityProjectSerializer(serializers.ModelSerializer):
             user_info = community_obj["user"]
             user: User = User.get_user_by_email(user_info["email"])
             new_account = bool(not user)
-            print("user_info", user_info)
             if not new_account and (
                 project not in Project.get_user_projects(user)
             ):
@@ -643,6 +608,7 @@ class UpdateCommunityProjectSerializer(serializers.ModelSerializer):
                     project,
                     user,
                     community_obj.get("is_create"),
+                    project.author == user,
                 )
             )
             community_ids_not_del.append(community_item.id)
@@ -675,16 +641,6 @@ class PropertiesUserSerializer(serializers.Serializer):
         required=True,
     )
 
-    def validate_right(self, right):
-        if not GlobalRightsUserInProject.objects.filter(pk=right).first():
-            raise serializers.ValidationError(
-                {
-                    "right": f"Not exist right pk {right}",
-                    "msg_er": "Таких прав нет.",
-                }
-            )
-        return right
-
 
 class CommunitySerializer(serializers.Serializer):
     user = UserBaseSerializer()
@@ -712,5 +668,10 @@ class MinInfoProject(serializers.ModelSerializer):
 
 
 class ListProjecttSerializer(serializers.Serializer):
-
     items = MinInfoProject(many=True)
+
+
+class ProjectFilesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProjectFiles
+        fields = "__all__"

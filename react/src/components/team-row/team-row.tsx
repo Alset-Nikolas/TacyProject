@@ -73,7 +73,7 @@ export default function TeamRow({ index, member, edit, header, removeMember, set
       {/* <div className={`${styles.unit}`}>
         Подразделение
       </div> */}
-      <th className={`${styles.delete}`} />
+      {edit && (<th className={`${styles.delete}`} />)}
     </tr>
   );
 
@@ -167,7 +167,14 @@ export default function TeamRow({ index, member, edit, header, removeMember, set
       const propertie = {...propertiesArray[propIndex]};
 
       if (value instanceof Array && typeof index !== 'undefined') {
-        propertie.values = value;
+        propertie.values = value.map((item) => {
+          const foundPropertie = project.properties.find((el) => el.id === propertie.id);
+          const valueId = foundPropertie?.items.find((el) => el.value === item)?.id;
+          return {
+            id: valueId ? valueId : -1,
+            value: item,
+          };
+        });
         propertiesArray[propIndex] = propertie;
         newMemberState.properties = propertiesArray;
         newList[index] = newMemberState;
@@ -275,14 +282,14 @@ export default function TeamRow({ index, member, edit, header, removeMember, set
             >
               {edit ? (
                 <SelectUnits
-                  value={outputPropertie.values}
+                  value={outputPropertie.values.map((item) => item.value)}
                   items={project.properties[propIndex].items.map((item) => item.value)}
                   style={selectStyle}
                   onChange={(e) => handlePropertieSelectorInput(e, propIndex)}
                 />
               ) : (
                 <div className={`${styles.cell}`}>
-                  {outputPropertie.values.join(', ')}
+                  {outputPropertie.values.map((el) => el.value).join(', ')}
                 </div>
               )}
             </td>

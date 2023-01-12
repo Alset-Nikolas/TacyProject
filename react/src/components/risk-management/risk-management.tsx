@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { paths } from "../../consts";
 import { getRisksListThunk } from "../../redux/risks-slice";
+import { useGetInitiativeByIdQuery } from "../../redux/state/state-api";
 import { setInitiativeEdit } from "../../redux/state/state-slice";
 import { addComponentItem, handleComponentInputChange, removeComponentItem } from "../../utils";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
@@ -23,7 +24,16 @@ export default function RiskManagement({ edit, editButton, isSettings }: TRiskMa
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const components = useAppSelector((store) => store.components.value);
-  const { initiative } = useAppSelector((store) => store.initiatives);
+  // const { initiative } = useAppSelector((store) => store.initiatives);
+  const {
+      currentInitiativeId
+    } = useAppSelector((store) => store.initiatives);
+    const {
+      data: initiative,
+      isFetching: isFetchingInitiative,
+    } = useGetInitiativeByIdQuery(currentInitiativeId ? currentInitiativeId : -1, {
+      skip: !currentInitiativeId,
+    });
   const risksList = useAppSelector((store) => store.risks.list);
 
   const handleRiskEditClick = (riskIndex: number, riskId: number) => {
