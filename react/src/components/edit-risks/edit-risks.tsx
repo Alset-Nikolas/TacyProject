@@ -66,27 +66,27 @@ export default function EditRisks() {
     });
   };
 
-  const onPropertieInputChange = (value: string, index: number) => {
-    setNewInitiativeState((prevState) => {
-      const propertiesArray = [ ...prevState.properties_fields ];
-      const currentPropertie = { ...propertiesArray[index] };
-      if (!currentPropertie.value) {
-        currentPropertie.value = { propertie: prevState.properties_fields[index].id } as {
-          id: number;
-          value: string;
-          propertie: number;
-        }
-      }
-      currentPropertie.value.value = value;
-      const currentPropertieValueId = components?.table_registry.properties[index].items.find((item) => item.value === value)?.id;
-      currentPropertie.value.id = currentPropertieValueId ? currentPropertieValueId : -1;
-      propertiesArray[index] = currentPropertie;
-      return {
-        ...prevState,
-        properties_fields: propertiesArray,
-      };
-    });
-  };
+  // const onPropertieInputChange = (value: string, index: number) => {
+  //   setNewInitiativeState((prevState) => {
+  //     const propertiesArray = [ ...prevState.properties_fields ];
+  //     const currentPropertie = { ...propertiesArray[index] };
+  //     if (!currentPropertie.value) {
+  //       currentPropertie.value = { propertie: prevState.properties_fields[index].id } as {
+  //         id: number;
+  //         value: string;
+  //         propertie: number;
+  //       }
+  //     }
+  //     currentPropertie.value.value = value;
+  //     const currentPropertieValueId = components?.table_registry.properties[index].items.find((item) => item.value === value)?.id;
+  //     currentPropertie.value.id = currentPropertieValueId ? currentPropertieValueId : -1;
+  //     propertiesArray[index] = currentPropertie;
+  //     return {
+  //       ...prevState,
+  //       properties_fields: propertiesArray,
+  //     };
+  //   });
+  // };
 
   const onMetricsInputChange = (value: string, index: number) => {
     setNewInitiativeState((prevState) => {

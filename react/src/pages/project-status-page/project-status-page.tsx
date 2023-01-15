@@ -2,6 +2,7 @@
 import { useEffect } from 'react';
 import BasicFunctions from '../../components/basic-functions/basic-functions';
 import Graphics from '../../components/graphics/graphics';
+import InitialFiles from '../../components/initial-files/initial-files';
 import ProjectName from '../../components/project-name/project-name';
 import ProjectSelector from '../../components/project-selector/project-selector';
 import ProjectTimeline from '../../components/project-timeline/project-timeline';
@@ -37,6 +38,7 @@ export default function ProjectStatusPage() {
         <>
           <ProjectName />
           <BasicFunctions />
+          <InitialFiles />
           <div
             className={`${styles.effectsWrapper}`}
           >

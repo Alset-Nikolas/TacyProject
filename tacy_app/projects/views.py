@@ -24,6 +24,7 @@ from .serializers import (
     UpdateCommunityProjectSerializer,
     UserProjectIdSerializer,
     ProjectFilesSerializer,
+    ProjectFilesIdSerializer,
 )
 from components.models import SettingsComponents
 from users.serializers import UserSerializer
@@ -165,8 +166,6 @@ class CreateProjectView(views.APIView):
             project,
             validated_data["properties"],
         )
-        print(validated_data)
-        print(validated_data["roles"])
         RolesProject.create_or_update(
             project,
             validated_data["roles"],
@@ -471,9 +470,18 @@ class DeleteProjectView(views.APIView):
 class FileProjectView(views.APIView):
     def post(self, request):
         project = get_object_or_404(Project, id=self.request.GET.get("id"))
-        file = self.request.FILES.get("file")
-        ProjectFiles.add_file(project, file)
-        return Response({"msg": "Файл добавлен"}, status=status.HTTP_200_OK)
+        total_files = self.request.data.get("total")
+        if total_files:
+            for number in range(int(total_files)):
+                file_key = "file" + str(number)
+                file = self.request.FILES.get(file_key)
+                ProjectFiles.add_file(project, file)
+            s = ProjectFilesSerializer(instance=project.files.all(), many=True)
+            return Response(s.data, status=status.HTTP_201_CREATED)
+        return Response(
+            {"msg": "не передали файл для сохранения"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
 
     def get(self, request):
         project = get_object_or_404(Project, id=self.request.GET.get("id"))
@@ -481,6 +489,12 @@ class FileProjectView(views.APIView):
         return Response(s.data, status=status.HTTP_200_OK)
 
     def delete(self, request):
-        file = get_object_or_404(ProjectFiles, id=self.request.GET.get("id"))
-        file.delete()
-        return Response({"msg": "Файл удален"}, status=status.HTTP_200_OK)
+        project = get_object_or_404(Project, id=self.request.GET.get("id"))
+        s = ProjectFilesIdSerializer(
+            data=self.request.data, many=True, context={"project": project}
+        )
+        s.is_valid(raise_exception=True)
+        ProjectFiles.objects.filter(
+            id__in=[x.get("id") for x in s.data]
+        ).delete()
+        return Response({"msg": "Файлы удалены"}, status=status.HTTP_200_OK)

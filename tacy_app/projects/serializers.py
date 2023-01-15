@@ -675,3 +675,18 @@ class ProjectFilesSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProjectFiles
         fields = "__all__"
+
+
+class ProjectFilesIdSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+
+    def validate_id(self, id):
+        project = self.context.get("project")
+        file = ProjectFiles.objects.filter(id=id).first()
+        if not file:
+            raise serializers.ValidationError({"id file not exist"})
+        if file.project != project:
+            raise serializers.ValidationError(
+                {"file.project != get param project"}
+            )
+        return id

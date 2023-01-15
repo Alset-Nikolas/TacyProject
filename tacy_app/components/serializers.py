@@ -21,6 +21,8 @@ from .models import (
     SettingsStatusInitiative,
     RolesUserInInitiative,
     RolesProject,
+    SettingsFilesInitiative,
+    InitiativesFiles,
 )
 from projects.models import (
     PropertiesProject,
@@ -86,7 +88,6 @@ class PropertiesProjectActiveSerializer(serializers.ModelSerializer):
     def validate_id(self, id):
         project = self.context.get("project")
         property_ = PropertiesProject.get_property_by_id(id)
-        print("PropertiesProjectActiveSerializer", property_, id)
         if not property_:
             raise serializers.ValidationError(
                 {
@@ -108,7 +109,6 @@ class PropertiesProjectActiveSerializerInfo(serializers.ModelSerializer):
     def validate_id(self, id):
         project = self.context.get("project")
         property_ = PropertiesProject.get_property_by_id(id)
-        print("PropertiesProjectActiveSerializer", property_, id)
         if not property_:
             raise serializers.ValidationError(
                 {
@@ -310,7 +310,6 @@ class MetricProjectSerializer(serializers.ModelSerializer):
         ]
 
     def validate_id(self, id):
-        print("validate_id", id)
         if not MetricsProject.get_metric_by_id(id):
             raise serializers.ValidationError(
                 {
@@ -348,24 +347,24 @@ class InitiativesMetricsFieldsSerializer(serializers.ModelSerializer):
 class InitiativesPropertiesFieldsSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
     title = InitiativesPropertiesFieldsTitleSettingsSerializer()
-    value = InitiativesPropertiesFieldsValueSettingsSerializer()
+    values = InitiativesPropertiesFieldsValueSettingsSerializer(many=True)
 
     class Meta:
         model = InitiativesPropertiesFields
-        fields = ["id", "title", "value"]
+        fields = ["id", "title", "values"]
 
     def validate(self, attrs):
-
-        p_v = PropertiesItemsProject.get_property_item_by_id(
-            attrs["value"]["id"]
-        )
-        if p_v.propertie.id != attrs["title"]["id"]:
-            raise serializers.ValidationError(
-                {
-                    "title-value": "no compbination",
-                    "msg": "title.id == value.propertie",
-                }
+        for value_item in attrs.get("values"):
+            p_v = PropertiesItemsProject.get_property_item_by_id(
+                value_item["id"]
             )
+            if p_v.propertie.id != attrs["title"]["id"]:
+                raise serializers.ValidationError(
+                    {
+                        "title-value": "no compbination",
+                        "msg": "title.id == value.propertie",
+                    }
+                )
         return super().validate(attrs)
 
     def validate_id(self, id):
@@ -689,10 +688,13 @@ class ListInitiativeSerializer(serializers.Serializer):
             headers = []
             for properties_fields_item in properties_fields:
                 title_obj = properties_fields_item.get("title")
-                value_obj = properties_fields_item.get("value")
+                value_objs = properties_fields_item.get("values")
                 if title_obj.get("initiative_activate"):
                     headers.append({"header": title_obj.get("title")})
-                    ans.append(value_obj.get("value"))
+                    ans_v = ""
+                    for v in value_objs:
+                        ans_v = ans_v + v.get("value") + ","
+                    ans.append(ans_v)
             line += ans
             header += headers
 
@@ -762,7 +764,6 @@ class ListInitiativeSerializer(serializers.Serializer):
         table_data = []
         header = []
         line = []
-        print(data)
         for i, line_table in enumerate(
             data.get("project_initiatives"), start=2
         ):
@@ -976,8 +977,6 @@ class EventSerializer(serializers.Serializer):
     addfields = AddFieldEventSerializer(many=True)
 
     def validate(self, attrs):
-        print("EventSerializer", attrs)
-
         return super().validate(attrs)
 
     def validate_metric_fields(self, metric_fields):
@@ -1001,17 +1000,7 @@ class EventSerializer(serializers.Serializer):
 
     def validate_addfields(self, addfields):
         initiative = self.context.get("initiative")
-        print("initiative", initiative)
         project = initiative.project
-        print(
-            list(
-                x.id
-                for x in SettingsAddFeldsEvent.get_by_settings_project(
-                    project.settings_initiatives.first()
-                )
-            )
-        )
-        print(set(x["id"] for x in addfields))
         correct_value = set(
             str(x.id)
             for x in SettingsAddFeldsEvent.get_by_settings_project(
@@ -1078,3 +1067,39 @@ class DeleteRiskSerializer(serializers.Serializer):
             return id
 
         serializers.ValidationError({"id": "not enough rights"})
+
+
+class SettingsFilesInitiativeSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+
+    class Meta:
+        model = SettingsFilesInitiative
+        fields = [
+            "id",
+            "settings_project",
+            "title",
+            "status",
+        ]
+        read_only_fields = ["settings_project"]
+
+    def create(self, validated_data):
+        id = validated_data.pop("id")
+        validated_data["settings_project"] = self.context.get(
+            "settings_project"
+        )
+        if id < 0:
+            return SettingsFilesInitiative.objects.create(**validated_data)
+        instance = SettingsFilesInitiative.objects.filter(id=id).first()
+        return self.update(instance, validated_data)
+
+
+class SettingsFilesInitiativeReadSerializer(serializers.Serializer):
+    status = StatusInitiativeSerializer()
+    settings_file = SettingsFilesInitiativeSerializer(many=True)
+
+
+class InitiativesFilesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InitiativesFiles
+        fields = '__all__'
+        read_only_fields = ["settings_project"]

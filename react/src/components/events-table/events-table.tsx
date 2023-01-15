@@ -13,7 +13,7 @@ import moment from "moment";
 // styles
 import sectionStyles from '../../styles/sections.module.scss';
 import styles from './events-table.module.scss';
-import { useGetEventsListQuery } from "../../redux/events/events-api";
+import { useGetEventsListQuery } from "../../redux/state/state-api";
 
 
 export default function EventsTable() {
@@ -55,8 +55,8 @@ export default function EventsTable() {
   ]);
  
   useEffect(() => {
-    if (initiative) dispatch(getEventsListThunk(initiative.initiative.id))
-  }, [initiative]);
+    if (currentInitiativeId) dispatch(getEventsListThunk(currentInitiativeId))
+  }, [currentInitiativeId]);
 
   return (
     <div
@@ -162,7 +162,11 @@ export default function EventsTable() {
                   <td
                     className={`${styles.titleCol}`}
                   >
-                    {event.event.name}
+                    <Link
+                      to={`/${paths.events}/info/${event.event.id}`}
+                    >
+                      {event.event.name}
+                    </Link>
                   </td>
                   <td
                     className={`${statusStyles.get(event.event_status)} ${styles.statusCol}`}

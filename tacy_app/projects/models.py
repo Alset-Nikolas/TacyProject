@@ -124,11 +124,15 @@ class ProjectFiles(models.Model):
         related_name="files",
         verbose_name="Проект",
     )
-    file = models.FileField(upload_to=directory_path, null=True)
+    file = models.FileField(upload_to=directory_path, null=False)
+    file_name = models.CharField(max_length=250)
 
     @classmethod
     def add_file(cls, project: Project, file):
-        cls.objects.create(project=project, file=file)
+        print("file", file)
+        return cls.objects.create(
+            project=project, file=file, file_name=str(file)
+        )
 
 
 class IntermediateDateProject(models.Model):

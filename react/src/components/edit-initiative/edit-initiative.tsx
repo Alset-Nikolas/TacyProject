@@ -2,8 +2,10 @@ import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { paths } from "../../consts";
 import { addInitiativeThunk, setInitiativesState } from "../../redux/initiatives-slice";
+import { useAddInitiativeMutation, useGetInitiativeByIdQuery, useGetProjectInfoQuery } from "../../redux/state/state-api";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import CustomizedButton from "../button/button";
+import SelectUnits from "../select-units/select-units";
 import CustomizedSelect from "../select/Select";
 
 //Styles
@@ -15,7 +17,19 @@ export default function EditInitiative() {
   // const currentProjectId = useAppSelector((store) => store.state.project.currentId);
   // const project = useAppSelector((store) => store.state.project.value);
   const components = useAppSelector((store) => store.components.value);
-  const { addInitiativeRequestSuccess, initiative } = useAppSelector((store) => store.initiatives)
+  // const { addInitiativeRequestSuccess/*, initiative*/ } = useAppSelector((store) => store.initiatives)
+  const { currentId } = useAppSelector((store) => store.state.project);
+  const { data: project } = useGetProjectInfoQuery(currentId ? currentId : -1);
+  const {
+    currentInitiativeId
+  } = useAppSelector((store) => store.initiatives);
+  const {
+    data: initiative,
+    // isSuccess: isFetchingInitiative,
+  } = useGetInitiativeByIdQuery(currentInitiativeId ? currentInitiativeId : -1, {
+    skip: !currentInitiativeId,
+  });
+  const [ addInitiative, { isSuccess: addInitiativeRequestSuccess } ] = useAddInitiativeMutation();
 
   if (!initiative) return null;
 
@@ -37,7 +51,19 @@ export default function EditInitiative() {
 
   const onSubmitHandler = (e: FormEvent) => {
     e.preventDefault();
-    dispatch(addInitiativeThunk(newInitiativeState));
+    // dispatch(addInitiativeThunk(newInitiativeState));
+    const tempInitiativeState = {...newInitiativeState};
+    const metrics = [...tempInitiativeState.metric_fields];
+    const convertedMetrics = metrics.map((item) => {
+      return {
+        ...item,
+        value: Number.parseFloat(item.value as string),
+      };
+    })
+    tempInitiativeState.metric_fields = convertedMetrics
+    // dispatch(addEventThunk(newEventState));
+    addInitiative(tempInitiativeState);
+    // addInitiative(newInitiativeState);
   }
 
   const onInitiativeInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -66,23 +92,35 @@ export default function EditInitiative() {
     });
   };
 
-  const onPropertieInputChange = (value: string, index: number) => {
+  const onPropertieInputChange = (value: string | Array<string>, index: number) => {
     setNewInitiativeState((prevState) => {
       const propertiesArray = [ ...prevState.properties_fields ];
       const currentPropertie = { ...propertiesArray[index] };
-      if (!currentPropertie.value) {
-        currentPropertie.value = { propertie: prevState.properties_fields[index].id } as {
-          id: number;
-          value: string;
-          propertie: number;
-        }
+
+      // if (currentPropertie.values.length) {
+      //   currentPropertie.values.push({ propertie: prevState.properties_fields[index].id } as {
+      //     id: number;
+      //     value: string;
+      //     propertie: number;
+      //   });
+      // }
+      if (value instanceof Array && typeof index !== 'undefined') {
+        currentPropertie.values = value.map((item) => {
+          const foundPropertie = project?.properties.find((el) => el.id === currentPropertie.id);
+          const valueId = foundPropertie?.items.find((el) => el.value === item)?.id;
+          return {
+            id: valueId ? valueId : -1,
+            value: item,
+            propertie: currentPropertie.id,
+          };
+        });
       }
-      currentPropertie.value = {
-        ...currentPropertie.value,
-        value: value,
-      };
-      const currentPropertieValueId = components?.table_registry.properties[index].items.find((item) => item.value === value)?.id;
-      currentPropertie.value.id = currentPropertieValueId ? currentPropertieValueId : -1;
+      // currentPropertie.value = {
+      //   ...currentPropertie.value,
+      //   value: value,
+      // };
+      // const currentPropertieValueId = components?.table_registry.properties[index].items.find((item) => item.value === value)?.id;
+      // currentPropertie.value.id = currentPropertieValueId ? currentPropertieValueId : -1;
       propertiesArray[index] = currentPropertie;
       return {
         ...prevState,
@@ -95,13 +133,15 @@ export default function EditInitiative() {
     setNewInitiativeState((prevState) => {
       const metricsArray = [ ...prevState.metric_fields ];
       const currentMetric = { ...metricsArray[index] };
-      const valueMatch = value.match(/\d+/);
-      const valueNumber: any = valueMatch ? Number.parseFloat(valueMatch[0]) : '';
+      const valueMatch = value.match(/-?[0-9]*[.,]?[0-9]*/);
+      const valueNumber = valueMatch ? valueMatch[0] : '';
+
+      // const valueNumber: any = valueMatch ? Number.parseFloat(valueMatch[0]) : '';
       currentMetric.value = valueNumber;// Number.parseFloat(value);
       metricsArray[index] = currentMetric;
       return {
         ...prevState,
-        metrics_fields: metricsArray,
+        metric_fields: metricsArray,
       };
     });
   };
@@ -247,8 +287,13 @@ export default function EditInitiative() {
                         value={field.value.value}
                         onChange={(e) => onPropertieInputChange(e.target.value, index)}
                       /> */}
-                      <CustomizedSelect
+                      {/* <CustomizedSelect
                         value={field.value ? field.value.value : ''}
+                        items={components?.table_registry.properties[index].items.map((item) => item.value)}
+                        onChange={(e) => onPropertieInputChange(e.target.value, index)}
+                      /> */}
+                      <SelectUnits
+                        value={field.values.map((item) => item.value)}
                         items={components?.table_registry.properties[index].items.map((item) => item.value)}
                         onChange={(e) => onPropertieInputChange(e.target.value, index)}
                       />

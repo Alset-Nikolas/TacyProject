@@ -7,7 +7,7 @@ import { setEventsState } from "../../redux/evens-slice";
 import InitiativeManagement from "../../components/initiative-management/initiative-management";
 import DateInput from "../../components/date-input/date-input";
 import { useGetInitiativeByIdQuery } from "../../redux/state/state-api";
-import { useAddEventMutation, useGetEventsListQuery } from "../../redux/events/events-api";
+import { useAddEventMutation, useGetEventsListQuery } from "../../redux/state/state-api";
 
 //Styles
 import styles from './add-event-page.module.scss';
@@ -48,7 +48,7 @@ export default function AddEventPage() {
     metric_fields: initiative.metric_fields.map((field) => {
       return {
         metric: field.metric,
-        value: 0,
+        value: '' as number | string,
       }
     }),
     addfields: components && components.settings ?
@@ -68,8 +68,17 @@ export default function AddEventPage() {
 
   const onSubmitHandler = (e: FormEvent) => {
     e.preventDefault();
+    const tempEventState = {...newEventState};
+    const metrics = [...tempEventState.metric_fields];
+    const convertedMetrics = metrics.map((item) => {
+      return {
+        ...item,
+        value: Number.parseFloat(item.value as string),
+      };
+    })
+    tempEventState.metric_fields = convertedMetrics
     // dispatch(addEventThunk(newEventState));
-    addEvent(newEventState);
+    addEvent(tempEventState);
   }
 
   const onInitiativeInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -102,8 +111,8 @@ export default function AddEventPage() {
     setNewEventState((prevState) => {
       const metricsArray = [ ...prevState.metric_fields ];
       const currentMetric = { ...metricsArray[index] };
-      const valueMatch = value.match(/\d+/);
-      const valueNumber = valueMatch ? Number.parseFloat(valueMatch[0]) : 0;
+      const valueMatch = value.match(/-?[0-9]*[.,]?[0-9]*/);
+      const valueNumber = valueMatch ? valueMatch[0] : '';
       currentMetric.value = valueNumber;// Number.parseFloat(value);
       metricsArray[index] = currentMetric;
       return {

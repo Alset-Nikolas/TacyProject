@@ -49,19 +49,19 @@ export default function BasicSettingsPage() {
   //   if (!project.value) dispatch(getProjectInfoThunk(project.currentId));
   // }, [project.currentId]);
 
-  useEffect(() => {
-    if (isCreateSuccess && currentId) {
-      // dispatch(getProjectInfoThunk(currentId));
-      setIsEdit(false);
-      dispatch(clearProjectForEdit());
-      refetchProjectInfo();
-    }
-  }, [isCreateSuccess]);
+  // useEffect(() => {
+  //   if (isCreateSuccess && currentId) {
+  //     // dispatch(getProjectInfoThunk(currentId));
+  //     setIsEdit(false);
+  //     dispatch(clearProjectForEdit());
+  //     refetchProjectInfo();
+  //   }
+  // }, [isCreateSuccess]);
 
   if (isEdit) {
     return (
       <BasicSettingsEdit
-        onSaveClick={onSaveClick}
+        setIsEdit={setIsEdit}
         onCancelClick={onCancelClick}
       />
     )

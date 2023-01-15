@@ -134,10 +134,6 @@ class Initiatives(models.Model):
         ] = RolesProject.get_roles_by_project(self.project)
         ans = [{"role": x, "community": []} for x in roles_in_project]
         for user_in_init in community_in_init:
-            print(user_in_init)
-            print("user_in_init.user", user_in_init.user)
-            print("user_in_init.user.id", user_in_init.user.id)
-            print("project", self.project)
             for item in ans:
                 if item.get("role") == user_in_init.role:
                     elemant = dict()
@@ -160,7 +156,6 @@ class Initiatives(models.Model):
                         status = coordination_init.activate
                     elemant["status"] = status
                     item["community"].append(elemant)
-                    print(elemant)
                     break
         return ans
 
@@ -221,7 +216,7 @@ class Initiatives(models.Model):
                 .first()
             ):
                 InitiativesPropertiesFields.objects.create(
-                    initiative=self, title=p, value=None
+                    initiative=self, title=p
                 )
 
     def update_addfields(self):
@@ -314,7 +309,6 @@ class Initiatives(models.Model):
         if user.is_superuser:
             is_approve = True
             is_update = True
-        print(flags)
         flags["is_approve"] = is_approve or role.is_approve
         flags["is_update"] = is_update or role.is_update
         return flags
@@ -378,40 +372,38 @@ class InitiativesPropertiesFields(models.Model):
         blank=True,
         null=True,
     )
-    value = models.ForeignKey(
-        PropertiesItemsProject,
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True,
-    )
+    values = models.ManyToManyField(PropertiesItemsProject)
 
     class Meta:
         db_table = "initiatives_properties_fields"
-        constraints = [
-            models.UniqueConstraint(
-                fields=["initiative", "title"],
-                name="unique field properties title",
-            )
-        ]
+        # constraints = [
+        #     models.UniqueConstraint(
+        #         fields=["initiative", "title"],
+        #         name="unique field properties title",
+        #     )
+        # ]
 
     @classmethod
     def create_or_update(cls, initiative_id, info):
         ids_not_del = []
         for prop_info in info:
+            title_id = prop_info["title"]["id"]
             prop = (
                 cls.objects.filter(initiative_id=initiative_id)
-                .filter(title_id=prop_info["title"]["id"])
+                .filter(title_id=title_id)
                 .first()
             )
             if not prop:
                 prop = cls.objects.create(
                     initiative_id=initiative_id,
-                    title_id=prop_info["title"]["id"],
-                    value_id=prop_info["value"]["id"],
+                    title_id=title_id,
                 )
-            else:
-                prop.value_id = prop_info["value"]["id"]
-                prop.save()
+            prop.values.clear()
+            for value in prop_info["values"]:
+                value = PropertiesItemsProject.get_property_item_by_id(
+                    value.get("id")
+                )
+                prop.values.add(value)
             ids_not_del.append(prop.id)
         cls.objects.filter(initiative_id=initiative_id).exclude(
             id__in=ids_not_del
@@ -474,6 +466,33 @@ class InitiativesMetricsFields(models.Model):
         el.value += float(delta)
         el.save()
         MetricsProject.add_delta_value(metric_id, delta)
+
+
+def directory_path(instance, filename):
+    return f"files/initiative/{instance.id}/{instance.title.id}/{filename}"
+
+
+class InitiativesFiles(models.Model):
+    id = models.AutoField(primary_key=True)
+    initiative = models.ForeignKey(
+        Initiatives,
+        on_delete=models.CASCADE,
+        related_name="files",
+    )
+    title = models.ForeignKey(
+        "SettingsFilesInitiative",
+        on_delete=models.CASCADE,
+    )
+    file = models.FileField(upload_to=directory_path, null=False)
+
+    class Meta:
+        db_table = "initiatives_files"
+        constraints = [
+            models.UniqueConstraint(
+                fields=["initiative", "title"],
+                name="unique field initiative title",
+            )
+        ]
 
 
 # +++++++++++++++++++++++++++Events+++++++++++++++++++++++++++
@@ -566,7 +585,6 @@ class Events(models.Model):
         for new_field in SettingsAddFeldsEvent.objects.filter(
             settings_project=settings_initiatives
         ).all():
-            print("new_field", new_field)
             if (
                 not EventsAddFields.objects.filter(event=self)
                 .filter(title=new_field)
@@ -755,7 +773,6 @@ class Risks(models.Model):
 
     @classmethod
     def create_or_update(cls, info):
-        print("info", info)
         id = info.pop("id")
         if "initiative" in info:
             info["initiative_id"] = info.pop("initiative")
@@ -1169,6 +1186,37 @@ class SettingsAddFeldsRisks(models.Model):
         return cls.objects.filter(
             settings_project_id=settings_project_id
         ).all()
+
+
+class SettingsFilesInitiative(models.Model):
+    """
+    Настройки:
+        Файлов в инициативу
+    """
+
+    id = models.AutoField(primary_key=True)
+    settings_project = models.ForeignKey(
+        SettingsComponents,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="settings_files",
+    )
+
+    title = models.CharField(
+        max_length=200,
+        verbose_name="Название файла",
+        help_text="Введите название файла",
+    )
+
+    status = models.ForeignKey(
+        SettingsStatusInitiative,
+        related_name="settings_files",
+        on_delete=models.CASCADE,
+    )
+
+    class Meta:
+        db_table = "project_settings_files"
 
 
 # -------------------------------------------------------------------

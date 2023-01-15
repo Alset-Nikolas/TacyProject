@@ -249,8 +249,8 @@ export const coordinateThunk = (
     text: string,
     initiative: number,
   }) => (dispatch: AppDispatch, getState: () => RootState) => {
-  const initiative = getState().initiatives.initiative;
-  const project = getState().state.project.value;
+  const currentInitiativeId = getState().initiatives.currentInitiativeId;
+  // const currentProjectId = getState().state.project.currentId;
 
   dispatch(postCommentRequest());
   postRequest(
@@ -259,12 +259,12 @@ export const coordinateThunk = (
     (res: AxiosResponse) => {
       try {
         console.log(res.data);
-        if (!initiative || !project) {
+        if (!currentInitiativeId /*|| !project*/) {
           throw new Error('Project or initiative is missing')
         }
-        dispatch(getChatThunk(initiative.initiative.id));
-        dispatch(getUserRightsThunk(initiative.initiative.id));
-        dispatch(getInitiativesListThunk(project.id))
+        dispatch(getChatThunk(currentInitiativeId));
+        dispatch(getUserRightsThunk(currentInitiativeId));
+        // dispatch(getInitiativesListThunk(project.id))
         dispatch(postCommentRequestSuccess());
       } catch (error) {
         console.log(error);

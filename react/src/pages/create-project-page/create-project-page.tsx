@@ -12,12 +12,14 @@ import { closeModal, createProjectThunk, emptyProjectForEdit, getProjectInfoThun
 import { addPropertie, handleInputChange } from '../../utils';
 import Modal from '../../components/modal/modal';
 import { TMetrica, TIntermediateDate } from '../../types';
+import fileSrc from '../../images/icons/file.svg';
 
 // Styles
 import styles from './create-project-page.module.scss';
-import { useGetProjectsListQuery, usePostProjectMutation } from '../../redux/state/state-api';
+import { useGetProjectsListQuery, usePostFilesMutation, usePostProjectMutation } from '../../redux/state/state-api';
 import ProjectsElements from '../../components/projects-elements/projects-elements';
 import Properties from '../../components/properties/properties';
+import FileUpload from '../../components/file-upload/file-upoad';
 
 export default function CreateProjectPage() {
   const { refetch } = useGetProjectsListQuery();
@@ -25,8 +27,8 @@ export default function CreateProjectPage() {
   const dispatch = useAppDispatch();
   const projectForEdit = useAppSelector((store) => store.state.projectForEdit);
   const [file, setFile] = useState<Blob | null>(null);
-  // const isCreateSuccess = useAppSelector((store) => store.state.projectCreate.isGetRequestSuccess);
-  const [createProject, { isSuccess: isCreateSuccess }] = usePostProjectMutation();
+  const currentProjectId = useAppSelector((store) => store.state.project.currentId);
+  const [createProject, { isSuccess: isCreateSuccess, data: createResponse }] = usePostProjectMutation();
   const modal = useAppSelector((store) => store.state.app.modal);
   const [validationError, setValidationError] = useState({
     name: false,
@@ -42,6 +44,8 @@ export default function CreateProjectPage() {
     roles: [],
     rights: [],
   });
+  const [files, setFiles] = useState<Array<any>>([null]);
+  const [postFiles] = usePostFilesMutation();
 
   const validateEmptyInputs = () => {
     let isValid = true;
@@ -82,14 +86,18 @@ export default function CreateProjectPage() {
   const onSaveClick = () => {
     const isValid = validateEmptyInputs(); 
     if (projectForEdit && isValid) {
-      const formData = new FormData();
       const projectEntries = Object.entries(projectForEdit);
 
-      projectEntries.forEach((el) => {
-        formData.append(el[0], el[1] instanceof Array || typeof el[1] === 'number' ? JSON.stringify(el[1]) : el[1]);
-      });
-      formData.append('file', file ? file : '');
+      // projectEntries.forEach((el) => {
+      //   formData.append(el[0], el[1] instanceof Array || typeof el[1] === 'number' ? JSON.stringify(el[1]) : el[1]);
+      // });
+      // files.forEach((el, index) => {
+      //   if (el) formData.append(`file${index}`, el);
+      // });
 
+      // formData.append(`total`, (files.length - 1).toString());
+
+      // if (currentProjectId) postFiles({ projectId: currentProjectId, body: formData });
       createProject(projectForEdit);
       refetch();
     }
@@ -112,7 +120,17 @@ export default function CreateProjectPage() {
   };
 
   useEffect(() => {
-    if (isCreateSuccess) navigate(paths.settings.basic.absolute);
+    const formData = new FormData();
+    if (isCreateSuccess) {
+      files.forEach((el, index) => {
+        if (el) formData.append(`file${index}`, el);
+      });
+
+      formData.append(`total`, (files.length - 1).toString());
+
+      if (createResponse) postFiles({ projectId: createResponse.id, body: formData });
+      navigate(paths.settings.basic.absolute);
+    }
     return () => {
       dispatch(setState({
         projectCreate: {
@@ -131,16 +149,28 @@ export default function CreateProjectPage() {
   if (!projectForEdit) return null;
   return (
     <div className={`${styles.wrapper}`}>
-      <ProjectName
-        create
-        error={validationError}
-      />
-      <div>
-        <input
-          type="file"
-          name="file"
-          onChange={onChangeHandler}
+      <div
+        style={{
+          display: 'flex',
+        }}
+      >
+        <ProjectName
+          create
+          error={validationError}
         />
+        <div>
+          <div>
+            Установочные документы
+          </div>
+          {files.map((item, index) => (
+            <FileUpload
+              key={`file-${index}`}
+              file={item}
+              fileUploadHandler={setFiles}
+              index={index}
+            />
+          ))}
+        </div>
       </div>
       <ProjectTimeline
         edit

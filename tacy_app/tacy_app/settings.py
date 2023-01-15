@@ -5,8 +5,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = (
     "django-insecure-kaqkqa27i$9yn560@(_fxi0#(d4=i70mlg#w)a5ekfj-dswmyy"
 )
-ALLOWED_HOSTS = ["158.160.19.111", "127.0.0.1", "localhost"]
-
+ALLOWED_HOSTS = ["31.177.78.111", "127.0.0.1", "localhost"]
 DEBUG = True
 
 # CORS_URLS_REGEX = r"^/api/.*$"
@@ -40,6 +39,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework.authtoken",
     "django_rest_passwordreset",
+    "django_cleanup.apps.CleanupConfig",
     "drf_yasg",
     "corsheaders",
     "users",

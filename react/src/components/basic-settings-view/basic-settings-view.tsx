@@ -27,6 +27,7 @@ import styles from './basic-settings-view.module.scss';
 import Properties from '../properties/properties';
 import Modal from '../modal/modal';
 import { useDeleteProjectMutation, useGetProjectInfoQuery } from '../../redux/state/state-api';
+import InitialFiles from '../initial-files/initial-files';
 
 type TBasicSettingsViewProps = {
   onEditClick: MouseEventHandler<HTMLDivElement>;
@@ -71,9 +72,14 @@ export default function BasicSettingsView({ onEditClick }: TBasicSettingsViewPro
       <ProjectName />
       <ProjectTimeline />
       <BasicFunctions />
+      <InitialFiles />
       <section className={`${styles.middleSectionWrapper}`}>
         <Metrics />
-        <div>
+        <div
+          style={{
+            display: 'flex',
+            gap: 40,
+          }}>
           {/* <TargetEffect
             metrics={project?.metrics}
           /> */}

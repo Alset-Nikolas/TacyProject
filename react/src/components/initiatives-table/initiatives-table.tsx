@@ -1,17 +1,18 @@
+import { useEffect, useState } from "react";
+import { Tooltip } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import SectionContent from "../section/section-content/section-content";
 import SectionHeader from "../section/section-header/section-header";
+import { TInitiative } from "../../types";
+import { getInitiativeByIdThunk, setCurrentInitiativeId } from "../../redux/initiatives-slice";
+import { useGetExportUrlQuery, useGetProjectInfoQuery, useLazyGetExportUrlQuery } from "../../redux/state/state-api";
+import Pictogram from "../pictogram/pictogram";
+import { REACT_APP_BACKEND_BASE_URL } from "../../consts";
 
 // Styles
 import styles from './initiatives-table.module.scss';
 import sectionStyles from '../../styles/sections.module.scss';
-import { TInitiative } from "../../types";
-import { getInitiativeByIdThunk, setCurrentInitiativeId } from "../../redux/initiatives-slice";
-import { useGetExportUrlQuery, useGetProjectInfoQuery, useLazyGetExportUrlQuery } from "../../redux/state/state-api";
-import { Tooltip } from "@mui/material";
-import Pictogram from "../pictogram/pictogram";
-import { REACT_APP_BACKEND_BASE_URL } from "../../consts";
-import { useEffect } from "react";
+import { InitiativeTableHoverPopup } from "../initiative-table-hover-popup/initiative-table-hover-popup";
 
 type TInitiativesTableProps = {
   initiativesList: Array<TInitiative>;
@@ -36,6 +37,10 @@ export default function InitiativesTable({ initiativesList }: TInitiativesTableP
   const { currentId } = useAppSelector((store) => store.state.project);
   const { data: project } = useGetProjectInfoQuery(currentId);
   const [ getUrl, { isSuccess: isUrlReady, data: exportData } ] = useLazyGetExportUrlQuery();
+  const [isShowPopup, setIsShowPopup] = useState<Array<Array<boolean>>>(initiativesList ? initiativesList.map((initiative) => {
+    const arrayOfRoleFlags = initiative.roles.map(() => false);
+    return arrayOfRoleFlags;
+  }) : []);
 
   // if (!components) return null;
 
@@ -49,6 +54,22 @@ export default function InitiativesTable({ initiativesList }: TInitiativesTableP
     if (currentId) getUrl(currentId);
     
   };
+
+  const roleMouseEnterHandler = (initiativeIndex: number, roleIndex: number) => {
+    setIsShowPopup((prevState) => {
+      const newState = [...prevState];
+      if (newState.length && newState[initiativeIndex] && newState[initiativeIndex].length) newState[initiativeIndex][roleIndex] = true;
+      return newState;
+    });
+  }
+
+  const roleMouseLeaveHandler = (initiativeIndex: number, roleIndex: number) => {
+    setIsShowPopup((prevState) => {
+      const newState = [...prevState];
+      if (newState.length && newState[initiativeIndex] && newState[initiativeIndex].length) newState[initiativeIndex][roleIndex] = false;
+      return newState;
+    });
+  }
 
   useEffect(() => {
     if (isUrlReady) {
@@ -82,6 +103,13 @@ export default function InitiativesTable({ initiativesList }: TInitiativesTableP
       });
     }
   }, [isUrlReady]);
+
+  useEffect(() => {
+    setIsShowPopup(initiativesList ? initiativesList.map((initiative) => {
+      const arrayOfRoleFlags = initiative.roles.map(() => false);
+      return arrayOfRoleFlags;
+    }) : []);
+  }, [initiativesList])
 
   return (
     <div className={`${sectionStyles.wrapperBorder} ${styles.wrapper}`}>
@@ -191,7 +219,7 @@ export default function InitiativesTable({ initiativesList }: TInitiativesTableP
                           key={`${index}_${propertie.id}`}
                           className={`${styles.tableCol}`}
                         >
-                          {propertie.value === null ? '' : propertie.value.value}
+                          {propertie.values.length === null ? '' : propertie.values.map((item) => item.value).join(', ')}
                         </td>
                       ) : (
                         null
@@ -206,11 +234,28 @@ export default function InitiativesTable({ initiativesList }: TInitiativesTableP
                         null
                       )
                     ))}
-                    {item.roles.map((item) => {
+                    {item.roles.map((item, roleIndex) => {
                       const memberNames = item.community.map((el) => `${el.user_info?.user.last_name} ${el.user_info?.user.first_name[0]}. ${el.user_info?.user.second_name[0]}.`);
                       return (
-                      <td key={item.role.id}>
-                        {memberNames.join('/')}
+                      <td
+                        key={item.role.id}
+                        className={`${styles.userRole}`}
+                        id={`role-${index}-${roleIndex}`}
+                        onMouseEnter={() => roleMouseEnterHandler(index, roleIndex)}
+                        onMouseLeave={() => roleMouseLeaveHandler(index, roleIndex)}
+                      >
+                        {/* <ModalHover onHover={<h3>Hello World</h3>}>
+                          <div> */}
+                            {memberNames.join('/')}
+                          {/* </div>
+                        </ModalHover> */}
+                        {!!isShowPopup.length && !!isShowPopup[index] && !!isShowPopup[index].length && isShowPopup[index][roleIndex] && (
+                          <InitiativeTableHoverPopup
+                            community={item.community}
+                            initiativeIndex={index}
+                            roleIndex={roleIndex}
+                          />
+                        )}
                       </td>
                       );
                     })}

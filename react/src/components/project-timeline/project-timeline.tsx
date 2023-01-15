@@ -10,15 +10,15 @@ import { GanttD3 } from '../../d3/GanttD3/GanttD3';
 import { addPropertie, isStage } from '../../utils';
 import CustomizedButton from '../button/button';
 import { useGetProjectInfoQuery } from '../../redux/state/state-api';
+import IntermediateDates from '../intermediate-dates/intermediate-dates';
+import ProjectStages from '../project-stages/project-stages';
 
 type TProjectTimelineProps = {
   edit?: boolean;
-  create?: boolean;
 }
 
 export default function ProjectTimeline({
   edit,
-  create,
 }: TProjectTimelineProps) {
   const dispatch = useAppDispatch();
   const { currentId } = useAppSelector((store) => store.state.project);
@@ -34,114 +34,11 @@ export default function ProjectTimeline({
       <section className={`${styles.editWrapper}`}>
         <div className={`${styles.table}`}>
           <div className={`${styles.tableCol}`}>
-            <div className={`${styles.tableRow}`}>
-              Промежуточные даты проекта
-            </div>
-            <div className={`${styles.tableRow}`}>
-              <div className={`${styles.tableHeader}`}>
-                Название
-              </div>
-              <div className={`${styles.tableHeader}`}>
-                Дата
-              </div>
-              <div />
-            </div>
-            {!projectForEdit.intermediate_dates.length && (
-              <div>
-                <CustomizedButton
-                  value="Добавить"
-                  onClick={() => addPropertie(projectForEdit, 'intermediate_dates', dispatch)}
-                />
-              </div>
-            )}
-            {projectForEdit.intermediate_dates.map((el: any, index: number) => (
-              <TimelineTableRow
-                item={el}
-                index={index}
-                pictogramType={index === projectForEdit.intermediate_dates.length - 1 ? 'add' : 'delete'}
-                key={index}
-              />
-            ))}
+            <IntermediateDates edit />
           </div>
           <div className={`${styles.tableCol}`}>
-            <div className={`${styles.tableRow}`}>
-              Этапы проекта
-            </div>
-            <div className={`${styles.tableRow} ${styles.stageRow}`}>
-              <div className={`${styles.tableHeader} ${styles.name}`}>
-                Название этапа
-              </div>
-              <div className={`${styles.tableHeader} ${styles.date}`}>
-                Дата начала
-              </div>
-              <div className={`${styles.tableHeader} ${styles.date}`}>
-                Дата окончания
-              </div>
-              <div />
-            </div>
-            {!projectForEdit.stages.length && (
-              <div>
-                <CustomizedButton
-                  value="Добавить"
-                  onClick={() => addPropertie(projectForEdit, 'stages', dispatch)}
-                />
-              </div>
-            )}
-            {projectForEdit.stages?.map((el: any, index: number) => (
-              <TimelineStageRow
-                item={el}
-                index={index}
-                pictogramType={index === projectForEdit.stages.length - 1 ? 'add' : 'delete'}
-                key={index}
-              />
-            ))}
+            <ProjectStages edit />
           </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (create) {
-    if (!projectForEdit) return null;
-
-    return (
-      <section className={`${styles.wrapper} ${styles.create}`}>
-        <div className={`${styles.table}`}>
-          <div className={`${styles.tableRow}`}>
-            Добавить промежуточные даты
-          </div>
-          <div className={`${styles.tableRow}`}>
-            <div className={`${styles.tableHeader}`}>
-              Название
-            </div>
-            <div className={`${styles.tableHeader}`}>
-              Дата
-            </div>
-            <div />
-          </div>
-          {!projectForEdit.intermediate_dates.length && (
-            <div>
-              <CustomizedButton
-                value="Добавить"
-                onClick={() => addPropertie(projectForEdit, 'intermediate_dates', dispatch)}
-              />
-            </div>
-          )}
-          {projectForEdit.intermediate_dates.map((el: any, index: number) => (
-            <div
-              className={`${styles.tableRow}`}
-              key={index}
-            >
-              <div className={`${styles.tableRow}`}>
-                <TimelineTableRow
-                  item={el}
-                  index={index}
-                  pictogramType={index === projectForEdit.intermediate_dates.length - 1 ? 'add' : 'delete'}
-                  key={index}
-                />
-              </div>
-            </div>
-          ))}
         </div>
       </section>
     );

@@ -8,9 +8,10 @@ import CustomizedSelect from "../../components/select/Select";
 
 //Styles
 import styles from './add-event-page.module.scss';
-import { addEventThunk, setEventsState } from "../../redux/evens-slice";
+import { addEventThunk, getEventsListThunk, setEventsState } from "../../redux/evens-slice";
 import InitiativeManagement from "../../components/initiative-management/initiative-management";
 import DateInput from "../../components/date-input/date-input";
+import { useAddEventMutation } from "../../redux/state/state-api";
 
 export default function EventInfoPage() {
   const navigate = useNavigate();
@@ -20,9 +21,13 @@ export default function EventInfoPage() {
   // const project = useAppSelector((store) => store.state.project.value);
   const components = useAppSelector((store) => store.components.value);
   const eventsList = useAppSelector((store) => store.events.list);
+  const {
+    currentInitiativeId
+  } = useAppSelector((store) => store.initiatives);
   const currentEvent = eventId ? eventsList.find((item) => item.event.id === Number.parseInt(eventId)) : null;
   const { addInitiativeRequestSuccess, initiative } = useAppSelector((store) => store.initiatives)
-  const { addEventRequestSuccess } = useAppSelector((store) => store.events)
+  // const { addEventRequestSuccess } = useAppSelector((store) => store.events);
+  const [ addEvent, { isSuccess: addEventRequestSuccess }] = useAddEventMutation();
 
   if (!initiative || !currentEvent) return null;
 
@@ -31,7 +36,7 @@ export default function EventInfoPage() {
     metric_fields: currentEvent.metric_fields.map((field) => {
       return {
         metric: field.metric,
-        value: field.value,
+        value: field.value.toString() as number | string,
       }
     }),
     addfields: currentEvent.addfields.map((field) => {
@@ -48,7 +53,17 @@ export default function EventInfoPage() {
 
   const onSubmitHandler = (e: FormEvent) => {
     e.preventDefault();
-    dispatch(addEventThunk(newEventState));
+    const tempEventState = {...newEventState};
+    const metrics = [...tempEventState.metric_fields];
+    const convertedMetrics = metrics.map((item) => {
+      return {
+        ...item,
+        value: Number.parseFloat(item.value as string),
+      };
+    })
+    tempEventState.metric_fields = convertedMetrics
+    // dispatch(addEventThunk(newEventState));
+    addEvent(tempEventState);
   }
 
   const onInitiativeInputChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -81,8 +96,8 @@ export default function EventInfoPage() {
     setNewEventState((prevState) => {
       const metricsArray = [ ...prevState.metric_fields ];
       const currentMetric = { ...metricsArray[index] };
-      const valueMatch = value.match(/\d+/);
-      const valueNumber = valueMatch ? Number.parseFloat(valueMatch[0]) : 0;
+      const valueMatch = value.match(/-?[0-9]*[.,]?[0-9]*/);
+      const valueNumber = valueMatch ? valueMatch[0] : '';
       currentMetric.value = valueNumber;// Number.parseFloat(value);
       metricsArray[index] = currentMetric;
       return {
@@ -93,7 +108,12 @@ export default function EventInfoPage() {
   };
 
   useEffect(() => {
-    if (addEventRequestSuccess) navigate(`/${paths.events}`);
+    if (addEventRequestSuccess) {
+      // navigate(`/${paths.events}`);
+      navigate(`/${paths.registry}`);
+      if (currentInitiativeId) dispatch(getEventsListThunk(currentInitiativeId))
+
+    }
     return () => {
       dispatch(setEventsState({
         addEventRequest: false,

@@ -1,6 +1,7 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CustomizedButton from "../../components/button/button";
+import SelectUnits from "../../components/select-units/select-units";
 import CustomizedSelect from "../../components/select/Select";
 import { paths } from "../../consts";
 import { addInitiativeThunk, setInitiativesState } from "../../redux/initiatives-slice";
@@ -39,27 +40,29 @@ export default function AddInitiativePage() {
       const returnField = {} as { 
         id: number;
         title: IRegistryPropertie & { project: number };
-        value: {
+        values: Array<{
           id: number;
           value: string;
           propertie: number;
-        }
+        }>;
       };
       returnField.id = propertieField.id;
       returnField.title = { ...propertieField, project: currentProjectId ? currentProjectId : -1 };
-      returnField.value = {
-        id: propertieField.items[0].id,
-        value: propertieField.items[0].value,
-        propertie: propertieField.items[0].propertie,
-      };
+      returnField.values = [];
+
+      // returnField.values = propertieField. {
+      //   id: propertieField.items[0].id,
+      //   value: propertieField.items[0].value,
+      //   propertie: propertieField.items[0].propertie,
+      // };
 
       return returnField;
     }) : [],
     metric_fields: components ? components.table_registry.metrics.map((metricField: any) => {
-      const returnField = {} as TInitiativeMetricsFields & { value: number | string } ;
+      const returnField = {} as (Omit<TInitiativeMetricsFields, 'value'> & { value: number | string }) ;
       const metricUnits = project?.metrics.find((el) => el.title === metricField.title)?.units;
       returnField.metric = { ...metricField, units: metricUnits ? metricUnits : 'бм' };
-      returnField.value = 0;
+      returnField.value = '';
 
       return returnField;
     }) : [],
@@ -117,13 +120,22 @@ export default function AddInitiativePage() {
     });
   };
 
-  const onPropertieInputChange = (value: string, index: number) => {
+  const onPropertieInputChange = (value: string | Array<string>, index: number) => {
     setNewInitiativeState((prevState) => {
       const propertiesArray = [ ...prevState.properties_fields ];
       const currentPropertie = { ...propertiesArray[index] };
-      currentPropertie.value.value = value;
-      const currentPropertieValueId = components?.table_registry.properties[index].items.find((item) => item.value === value)?.id;
-      currentPropertie.value.id = currentPropertieValueId ? currentPropertieValueId : -1;
+
+      if (value instanceof Array && typeof index !== 'undefined') {
+        currentPropertie.values = value.map((item) => {
+          const foundPropertie = project?.properties.find((el) => el.id === currentPropertie.id);
+          const valueId = foundPropertie?.items.find((el) => el.value === item)?.id;
+          return {
+            id: valueId ? valueId : -1,
+            value: item,
+            propertie: currentPropertie.id,
+          };
+        });
+      }
       propertiesArray[index] = currentPropertie;
       return {
         ...prevState,
@@ -136,13 +148,15 @@ export default function AddInitiativePage() {
     setNewInitiativeState((prevState) => {
       const metricsArray = [ ...prevState.metric_fields ];
       const currentMetric = { ...metricsArray[index] };
-      const valueMatch = value.match(/\d+/);
-      const valueNumber: any = valueMatch ? Number.parseFloat(valueMatch[0]) : '';
+      const valueMatch = value.match(/-?[0-9]*[.,]?[0-9]*/);
+      const valueNumber = valueMatch ? valueMatch[0] : '';
+
+      // const valueNumber: any = valueMatch ? Number.parseFloat(valueMatch[0]) : '';
       currentMetric.value = valueNumber;// Number.parseFloat(value);
       metricsArray[index] = currentMetric;
       return {
         ...prevState,
-        metrics_fields: metricsArray,
+        metric_fields: metricsArray,
       };
     });
   };
@@ -290,8 +304,8 @@ export default function AddInitiativePage() {
                       value={field.value.value}
                       onChange={(e) => onPropertieInputChange(e.target.value, index)}
                     /> */}
-                    <CustomizedSelect
-                      value={field.value.value}
+                    <SelectUnits
+                      value={field.values.map((item) => item.value)}
                       items={components?.table_registry.properties[index].items.map((item) => item.value)}
                       onChange={(e) => onPropertieInputChange(e.target.value, index)}
                     />

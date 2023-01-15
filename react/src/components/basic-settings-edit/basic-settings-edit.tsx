@@ -1,4 +1,4 @@
-import { MouseEventHandler, useEffect } from 'react';
+import { Dispatch, MouseEventHandler, SetStateAction, useEffect, useState } from 'react';
 import BasicFunctions from '../basic-functions/basic-functions';
 import CustomizedButton from '../button/button';
 import Metrics from '../metrics/metrics';
@@ -18,19 +18,31 @@ import { addPropertie, isPropertie, isStage, makeProjectFordit } from '../../uti
 import Properties from '../properties/properties';
 import { clearProjectForEdit, closeModal, setProjectForEdit } from '../../redux/state/state-slice';
 import ModalInfo from '../modal-info/modal-info';
-import { useGetProjectInfoQuery } from '../../redux/state/state-api';
+import { useDeleteFilesMutation, useGetProjectInfoQuery, usePostFilesMutation, usePostProjectMutation } from '../../redux/state/state-api';
+import IntermediateDates from '../intermediate-dates/intermediate-dates';
+import InitialFiles from '../initial-files/initial-files';
+import ProjectStages from '../project-stages/project-stages';
 
 type TBasicSettingsEditProps = {
-  onSaveClick: MouseEventHandler<HTMLButtonElement>;
+  // onSaveClick: MouseEventHandler<HTMLButtonElement>;
+  setIsEdit: Dispatch<SetStateAction<boolean>>;
   onCancelClick: MouseEventHandler<HTMLButtonElement>;
 };
 
-export default function BasicSettingsEdit({ onSaveClick, onCancelClick }: TBasicSettingsEditProps) {
+export default function BasicSettingsEdit({ onCancelClick, setIsEdit }: TBasicSettingsEditProps) {
   const dispatch = useAppDispatch();
   // const project = useAppSelector((store) => store.state.project.value);
   const { currentId } = useAppSelector((store) => store.state.project);
-  const { data: project } = useGetProjectInfoQuery(currentId);
+  const { data: project, refetch: refetchProjectInfo } = useGetProjectInfoQuery(currentId);
   const modal = useAppSelector((store) => store.state.app.modal);
+  const [files, setFiles] = useState<Array<any>>([null]);
+  const [ deleteFilesArray, setDeleteFilesArray ] = useState<Array<{ id: number; }>>([]);
+  const {
+    projectForEdit,
+  } = useAppSelector((store) => store.state);
+  const [saveProject, { isSuccess: isCreateSuccess }] = usePostProjectMutation();
+  const [deleteFiles] = useDeleteFilesMutation();
+  const [postFiles] = usePostFilesMutation();
 
   useEffect(() => {
     if (project) dispatch(setProjectForEdit(makeProjectFordit(project)));
@@ -39,6 +51,35 @@ export default function BasicSettingsEdit({ onSaveClick, onCancelClick }: TBasic
       dispatch(closeModal());
     };
   }, []);
+
+  useEffect(() => {
+    if (isCreateSuccess && currentId) {
+      // dispatch(getProjectInfoThunk(currentId));
+      setIsEdit(false);
+      dispatch(clearProjectForEdit());
+      refetchProjectInfo();
+    }
+  }, [isCreateSuccess]);
+
+  const onSaveClick = () => {
+    if (projectForEdit) {
+      // dispatch(createProjectThunk(projectForEdit));
+
+      saveProject(projectForEdit);
+      if (deleteFilesArray.length && currentId) deleteFiles({ projectId: currentId, body: deleteFilesArray});
+
+      if (files[0]) {
+        const formData = new FormData();
+        files.forEach((el, index) => {
+          if (el) formData.append(`file${index}`, el);
+        });
+
+        formData.append(`total`, (files.length - 1).toString());
+
+        if (currentId) postFiles({ projectId: currentId, body: formData });
+      }
+    }
+  };
   
   if (!project) return null;
 
@@ -47,9 +88,22 @@ export default function BasicSettingsEdit({ onSaveClick, onCancelClick }: TBasic
       <ProjectName
         edit
       />
-      <ProjectTimeline
+      {/* <ProjectTimeline
         edit
-      />
+      /> */}
+      <div
+        className={`${styles.middleSectionWrapper}`}
+      >
+        <IntermediateDates edit />
+        <InitialFiles
+          edit
+          filesListForEdit={files}
+          setFiles={setFiles}
+          setDeleteFiles={setDeleteFilesArray}
+        />
+      </div>
+      <ProjectStages edit />
+
       <BasicFunctions
         edit
       />

@@ -32,7 +32,7 @@ export default function RolesAlloction() {
   const { currentId } = useAppSelector((store) => store.state.project);
   const { data: project } = useGetProjectInfoQuery(currentId ? currentId : -1);
   const { data: teamList } = useGetTeamListQuery({ id: currentId ? currentId : -1, project: project ? project : null });
-  const [fullMembersList, setFullMembersList] = useState(teamList ? teamList.map((member) => member.name) : []);
+  const [fullMembersList, setFullMembersList] = useState(teamList ? teamList.map((member) => {return { name: member.name, id: member.id }}) : []);
   const [membersList, setMembersList] = useState(fullMembersList);
   const [
     setRolesMutation,
@@ -146,10 +146,13 @@ export default function RolesAlloction() {
       });
       setMembersList((prevState) => {
         const newState = [...prevState];
-        if (previousMember.user_info) {
-        const memberIndex = prevState.findIndex((member) => member === e.target.value);
-          if (memberIndex > -1) newState.splice(memberIndex, 1);
-          if (previousMember.user_info.user.id > -1) newState.push(`${previousMember.user_info.user.last_name} ${previousMember.user_info.user.first_name} ${previousMember.user_info.user.second_name}`);
+        const memberIndex = prevState.findIndex((member) => member.name === e.target.value);
+        if (memberIndex > -1) newState.splice(memberIndex, 1);
+        if (previousMember.user_info && previousMember.user_info.user.id > -1) {
+          newState.push({
+            name: `${previousMember.user_info.user.last_name} ${previousMember.user_info.user.first_name} ${previousMember.user_info.user.second_name}`,
+            id: previousMember.user_info.user.id
+          });
         }
         return newState;
       });
@@ -193,7 +196,7 @@ export default function RolesAlloction() {
   }, [isSuccessSetRoles]);
 
   useEffect(() => {
-    if (teamList) setFullMembersList(teamList.map((member) => member.name));
+    if (teamList) setFullMembersList(teamList.map((member) => {return { name: member.name, id: member.id }}));
   }, [teamList]);
 
   useEffect(() => {
@@ -203,7 +206,7 @@ export default function RolesAlloction() {
     rolePersonList?.forEach((item, itemIndex) => {
       const memberIndex = newMemberList.findIndex((member) => {
         const fullName = `${item.user.last_name} ${item.user.first_name} ${item.user.second_name}`;
-        return member === fullName;
+        return member.name === fullName;
       });
       console.log(memberIndex);
       if (memberIndex > -1) {
@@ -217,8 +220,21 @@ export default function RolesAlloction() {
   }, [rolePersonList, fullMembersList]);
 
   useEffect(() => {
-  setRoles(initiative ? initiative.roles : []);
+    setRoles(initiative ? initiative.roles : []);
   }, [initiative])
+
+  useEffect(() => {
+    if (teamList) setMembersList(() => {
+      const newMembersList = [...fullMembersList];
+      roles.forEach((item) => {
+        item.community.forEach((member) => {
+          const foundIndex = newMembersList.findIndex((el) => el.id === member.user_info?.user.id);
+          if (foundIndex !== -1) newMembersList.splice(foundIndex, 1);
+        });
+      })
+      return fullMembersList;
+    });
+  }, [currentInitiativeId]);
 
   return (
     <div
@@ -277,6 +293,11 @@ export default function RolesAlloction() {
                       )}
                       {item.community.map((member, userIndex) => {
                         // if (!member.user_info) return null;
+                        let items: Array<string> = [notAllocated];
+                        if (membersList) items = items.concat(membersList.map((el) => el.name));
+                        if (member.user_info && member.user_info.user.id !== -1) items = items.concat([`${member.user_info?.user.last_name} ${member.user_info?.user.first_name} ${member.user_info?.user.second_name}`]);
+                        // const items= membersList ? member.user_info ? [...membersList, notAllocated, `${member.user_info?.user.last_name} ${member.user_info?.user.first_name} ${member.user_info?.user.second_name}`] : [...membersList, notAllocated] : [notAllocated]}
+
                         return (
                           <div
                             key={member.user_info ? member.user_info.user.id : `new_${userIndex}`}
@@ -284,7 +305,7 @@ export default function RolesAlloction() {
                           >
                             <CustomizedSelect
                               style={selectorStyle}
-                              items={membersList ? member.user_info ? [...membersList, notAllocated, `${member.user_info?.user.last_name} ${member.user_info?.user.first_name} ${member.user_info?.user.second_name}`] : [...membersList, notAllocated] : [notAllocated]}
+                              items={items}
                               value={(member.user_info && member.user_info.user.id !== -1) ? `${member.user_info.user.last_name} ${member.user_info.user.first_name} ${member.user_info.user.second_name}` : notAllocated}
                               onChange={(e) => onRolesPersonChange(e, roleIndex, userIndex)}
                             />

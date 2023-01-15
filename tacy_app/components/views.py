@@ -18,6 +18,7 @@ from .serializers import (
     UserPersonStatisticSerializer,
     DeleteRiskSerializer,
     RolesUserInInitiativeSerializer,
+    SettingsFilesInitiativeSerializer,
 )
 from projects.serializers import UserProjectIdSerializer
 from .models import (
@@ -27,6 +28,7 @@ from .models import (
     Events,
     InitiativesMetricsFields,
     EventMetricsFields,
+    SettingsFilesInitiative,
 )
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
@@ -1387,3 +1389,80 @@ class ListEventView(views.APIView):
         }
         s = ListEventSerializer(instance=inst)
         return Response(s.data, 200)
+
+
+from rest_framework import status, viewsets
+from rest_framework.permissions import IsAdminUser, IsAuthenticatedOrReadOnly
+from .permissions import IsAdminOrReadOnlyPermission, IsAuthorPermission
+from .serializers import (
+    SettingsFilesInitiativeReadSerializer,
+    InitiativesFilesSerializer,
+)
+from .models import InitiativesFiles
+from rest_framework import mixins
+
+from rest_framework.decorators import action
+
+
+class InitiativesSettingsFilesViewSet(
+    mixins.CreateModelMixin,
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet,
+):
+    permission_classes = [IsAdminOrReadOnlyPermission]
+    pagination_class = None
+
+    def get_queryset(self):
+        prject = get_object_or_404(Project, id=self.kwargs.get("project_id"))
+        settings_project = prject.settings_initiatives.first()
+        return SettingsFilesInitiative.objects.filter(
+            settings_project=settings_project
+        ).all()
+
+    def get_serializer_class(self):
+        if self.action in ["list"]:
+            return SettingsFilesInitiativeReadSerializer
+        return SettingsFilesInitiativeSerializer
+
+    def list(self, request, project_id):
+        queryset = self.get_queryset()
+        data = {}
+        for item in queryset:
+            if item.status not in data:
+                data[item.status] = []
+            data[item.status].append(item)
+        res = []
+        for key, val in data.items():
+            res.append({"status": key, "settings_file": val})
+        serializer = self.get_serializer(res, many=True)
+        return Response(serializer.data)
+
+    def create(self, request, project_id):
+        prject = get_object_or_404(Project, id=self.kwargs.get("project_id"))
+        settings_project = prject.settings_initiatives.first()
+        serializer = self.get_serializer(
+            data=request.data,
+            many=True,
+            context={"settings_project": settings_project},
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        SettingsFilesInitiative.objects.filter(
+            settings_project=settings_project
+        ).exclude(id__in=[x.id for x in serializer.data]).delete()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+# class InitiativesFilesViewSet(
+#     mixins.CreateModelMixin,
+#     mixins.DestroyModelMixin,
+#     viewsets.GenericViewSet,
+# ):
+#     permission_classes = [IsAuthorPermission]
+#     pagination_class = None
+#     serializer_class = InitiativesFilesSerializer
+
+#     def get_queryset(self):
+#         init = get_object_or_404(Initiatives, id=self.kwargs.get("project_id"))
+#         return InitiativesFiles.objects.filter(initiative=init).all()

@@ -89,7 +89,6 @@ class GraficsProject(models.Model):
                 res[p_id]["enum"] = dict()
 
             for p_value_obj in p_project.items.all():
-                p_item_value_name = p_value_obj.value
                 for m_project in MetricsProject.objects.filter(
                     project=project
                 ).all():
@@ -97,12 +96,11 @@ class GraficsProject(models.Model):
                     if m_id not in res[p_id]:
                         res[p_id][m_id] = {}
                     grafic_info = res[p_id][m_id]
-                    if p_item_value_name not in grafic_info:
-                        grafic_info[p_item_value_name] = 0
+                    if p_value_obj not in grafic_info:
+                        grafic_info[p_value_obj] = 0
                 grafic_info_enum = res[p_id]["enum"]
-                if p_item_value_name not in grafic_info_enum:
-                    grafic_info_enum[p_item_value_name] = 0
-        print("generate_start_statistic res", res)
+                if p_value_obj not in grafic_info_enum:
+                    grafic_info_enum[p_value_obj] = 0
         return res
 
     @classmethod
@@ -118,27 +116,37 @@ class GraficsProject(models.Model):
                 if m_id not in res:
                     res[m_id] = dict()
                 item = res[m_id]
-                if status.name not in item:
-                    item[status.name] = 0
+                if status not in item:
+                    item[status] = 0
         res["enum"] = dict()
         for (
             status
         ) in project.settings_initiatives.first().initiative_status.all():
-            if status.name not in res["enum"]:
-                res["enum"][status.name] = 0
-
+            if status not in res["enum"]:
+                res["enum"][status] = 0
         return res
 
     @classmethod
-    def update_format(cls, res, project):
+    def update_format(cls, res, project, quantity=None):
+        def group_small_values(info):
+            if not quantity or len(new_format) < quantity:
+                return info
+            last_item = {
+                "name": "Другие",
+                "name_short": "Другие",
+                "value": 0,
+            }
+            last_item["value"] = sum(
+                x.get("value") for x in new_format[quantity:]
+            )
+            return new_format[:quantity] + [last_item]
+
         grafics = res["grafics"]
         status_grafic = res["status_grafic"]
         new_format_res = copy.deepcopy(grafics)
         new_format_status_grafic = copy.deepcopy(status_grafic)
         m_id_not_in_stat = set()
         if grafics:
-            # если есть обьемы
-
             for v_id, m_dict in grafics.items():
                 for m_id, grafic_item in m_dict.items():
                     if m_id != "enum" and (
@@ -154,35 +162,53 @@ class GraficsProject(models.Model):
                         new_format = []
                         for x_name, y_value in grafic_item.items():
                             new_format.append(
-                                {"name": x_name, "value": y_value}
+                                {
+                                    "name": x_name.value,
+                                    "name_short": x_name.value_short,
+                                    "value": y_value,
+                                }
                             )
-                        new_format_res[v_id][m_id] = new_format
+                        new_format.sort(
+                            key=lambda x: x.get("value"), reverse=True
+                        )
+                        new_format_res[v_id][m_id] = group_small_values(
+                            new_format
+                        )
+
         for m_id, grafic_item in status_grafic.items():
             if m_id not in m_id_not_in_stat:  # только активные графики
                 new_format = []
                 for x_name, y_value in grafic_item.items():
-                    new_format.append({"name": x_name, "value": y_value})
-                new_format_status_grafic[m_id] = new_format
+                    new_format.append(
+                        {
+                            "name": x_name.name,
+                            "name_short": x_name.name,
+                            "value": y_value,
+                        }
+                    )
+                new_format.sort(key=lambda x: x.get("value"), reverse=True)
+                new_format_status_grafic[m_id] = group_small_values(new_format)
             else:
                 new_format_status_grafic.pop(m_id)
+
         return {
             "grafics": new_format_res,
             "status_grafic": new_format_status_grafic,
         }
 
     @classmethod
-    def get_statistic_metrics_by_project(cls, project, inits=None):
+    def get_statistic_metrics_by_project(
+        cls, project, inits=None, quantity=None
+    ):
         inits = inits or Initiatives.objects.filter(project=project).all()
         res = GraficsProject.generate_start_statistic(project)
         res_status = GraficsProject.generate_start_statistic_status(project)
         for init in inits:
-            status_name = init.status.name
+            status_name = init.status
             res_status["enum"][status_name] += 1
             for init_propertie_field in init.properties_fields.all():
                 propertie_title_id = init_propertie_field.title.id
-                if init_propertie_field.value:
-                    print("res", res)
-                    propertie_value_name = init_propertie_field.value.value
+                for propertie_value_name in init_propertie_field.values.all():
                     grafic_enum = res[propertie_title_id]["enum"]
                     grafic_enum[propertie_value_name] += 1
                     for init_metric_field in init.metric_fields.all():
@@ -197,7 +223,7 @@ class GraficsProject(models.Model):
                 metric_value = init_metric_field.value
                 res_status[metric_id][status_name] += metric_value
         res = {"grafics": res, "status_grafic": res_status}
-        return GraficsProject.update_format(res, project)
+        return GraficsProject.update_format(res, project, quantity)
 
     @classmethod
     def get_statistic_user(cls, user, project):

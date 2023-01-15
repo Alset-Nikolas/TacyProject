@@ -26,7 +26,13 @@ export const initiativesApi = createApi({
           //   dispatch(setCurrentProjectId(parseInt(savedProjectId)));
           // } else if (projectsList.length) {
           //   dispatch(setCurrentProjectId(projectsList[0].id));
-            dispatch(setCurrentInitiativeId(initiativesList[0].initiative.id));
+            const cachedInitiativeId = localStorage.getItem('initiative-id');
+            if (cachedInitiativeId) {
+              dispatch(setCurrentInitiativeId(parseInt(cachedInitiativeId)));
+              localStorage.removeItem('initiative-id');
+            } else {
+              dispatch(setCurrentInitiativeId(initiativesList[0].initiative.id));
+            }
           // }
         } catch (err) {
           // `onError` side-effect

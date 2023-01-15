@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { REACT_APP_BACKEND_URL } from '../../consts';
-import { TInitiative, TProject, TProjectForEdit, TRole, TUser } from '../../types';
+import { TEvent, TInitiative, TProject, TProjectForEdit, TRole, TUser } from '../../types';
 import { setCurrentInitiativeId } from '../initiatives-slice';
 import { setCurrentProjectId } from './state-slice';
 
@@ -13,7 +13,7 @@ export const stateApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ['initiative', 'initiatives-list', 'list', 'project'],
+  tagTypes: ['initiative', 'initiatives-list', 'list', 'project', 'files-list', 'event', 'events-list'],
   endpoints: (builder) => ({
     getProjectInfo: builder.query<TProject, number | null>({
       query: (id) => `/project/info${id ? `/?id=${id}` : ''}`,
@@ -74,6 +74,34 @@ export const stateApi = createApi({
       },
       providesTags: ['list'],
     }),
+    getFiles: builder.query<Array<{id: number, file: string, project: number, file_name: string}>, number>({
+      query: (projectId) => `project/file/?id=${projectId}`,
+      providesTags: ['files-list'],
+    }),
+    postFiles: builder.mutation<any, {projectId: number, body: FormData}>({
+      query({projectId, body}) {
+        const type = (body.get('file0') as File).type;
+        return {
+          url: `project/file/?id=${projectId}`,
+          method: 'POST',
+          headers: {
+            'Content-Type': undefined,
+          },
+          body,
+        };
+      },
+      invalidatesTags: ['files-list'],
+    }),
+    deleteFiles: builder.mutation<any, {projectId: number, body: Array<{id: number}>}>({
+      query({projectId, body}) {
+        return {
+          url: `project/file/?id=${projectId}`,
+          method: 'DELETE',
+          body,
+        };
+      },
+      invalidatesTags: ['files-list'],
+    }),
     getInitiativesList: builder.query<Array<TInitiative>, number>({
       query: (id) => `/components/initiative/info/list/?id=${id}`,
       transformResponse: (response: { project_initiatives: Array<TInitiative> }) => response.project_initiatives,
@@ -86,7 +114,13 @@ export const stateApi = createApi({
           //   dispatch(setCurrentProjectId(parseInt(savedProjectId)));
           // } else if (projectsList.length) {
           //   dispatch(setCurrentProjectId(projectsList[0].id));
+          const cachedInitiativeId = localStorage.getItem('initiative-id');
+          if (cachedInitiativeId) {
+            dispatch(setCurrentInitiativeId(parseInt(cachedInitiativeId)));
+            localStorage.removeItem('initiative-id');
+          } else {
             dispatch(setCurrentInitiativeId(initiativesList[0].initiative.id));
+          }
           // }
         } catch (err) {
           // `onError` side-effect
@@ -127,7 +161,7 @@ export const stateApi = createApi({
       //     console.log(e);
       //   }
       // },
-      invalidatesTags: ['list'],
+      invalidatesTags: ['initiatives-list'],
     }),
     setRoles: builder.mutation<any, { initiativeId: number, body:  Array<{user: TUser & { id: number }, role: TRole}> }>({
       query({initiativeId, body}) {
@@ -135,6 +169,18 @@ export const stateApi = createApi({
           url: `components/initiative/role/?id=${initiativeId}`,
           method: 'POST',
           body,
+        }
+      },
+      async onQueryStarted({ initiativeId }, { dispatch, queryFulfilled, getState }) {
+        try {
+          // const projectId = getState().
+          const { data: updatedInitiative } = await queryFulfilled;
+          // console.log(updatedInitiative);
+          // console.log(initiative);
+          localStorage.setItem('initiative-id', initiativeId.toString());
+          // dispatch(setCurrentInitiativeId(initiativeId));
+        } catch (e) {
+          console.log(e);
         }
       },
       invalidatesTags: ['initiatives-list'],
@@ -145,6 +191,62 @@ export const stateApi = createApi({
     getExportUrl: builder.query<{ url: string }, number>({
       query: (projectId) => `components/initiative/info/list/file/?id=${projectId}`,
     }),
+    getEventsList: builder.query<Array<TEvent>, number>({
+      query: (initiativeId) => `components/event/info/list/?id=${initiativeId}`,
+      transformResponse: (response: { initiative_events: Array<TEvent> }) => response.initiative_events,
+    //   async onQueryStarted(voidArg, { dispatch, queryFulfilled }) {
+    //     try {
+    //       const { data: initiativesList } = await queryFulfilled;
+    //       // `onSuccess` side-effect
+    //       // const savedProjectId = localStorage.getItem('project-id');
+    //       // if (savedProjectId && projectsList.find((item) => item.id === parseInt(savedProjectId))) {
+    //       //   dispatch(setCurrentProjectId(parseInt(savedProjectId)));
+    //       // } else if (projectsList.length) {
+    //       //   dispatch(setCurrentProjectId(projectsList[0].id));
+    //         dispatch(setCurrentInitiativeId(initiativesList[0].initiative.id));
+    //       // }
+    //     } catch (err) {
+    //       // `onError` side-effect
+    //       console.log(err);
+    //     }
+    //   },   
+      providesTags: () => ['events-list'],
+
+    }),
+    // getPersonalInitiativesList: builder.query<Array<TInitiative>, number>({
+    //   query: (id) => `components/initiative/info/list/user/?id=${id}`,
+    //   transformResponse: (response: { project_initiatives: Array<TInitiative> }) => response.project_initiatives,
+    //   providesTags: () => ['list'],
+    // }),
+    getEventById: builder.query<TEvent, number>({
+      query: (eventId) => `components/event/info/?id=${eventId}`,
+      providesTags: () => ['event'],
+    }),
+    addEvent: builder.mutation<TEvent, any>({
+      query(event) {
+        return {
+          url: `components/event/create/`,
+          method: 'POST',
+          body: event,
+        }
+      },
+      // async onQueryStarted(initiative, { dispatch, queryFulfilled, getState }) {
+      //   try {
+      //     // const projectId = getState().
+      //     const { data: updatedInitiative } = await queryFulfilled;
+      //     console.log(updatedInitiative);
+      //     console.log(initiative);
+      //     const patchResult = dispatch(
+      //       initiativesApi.util.updateQueryData('getInitiativesList', initiative.initiative.project, (draft) => {
+      //         draft.push(updatedInitiative);
+      //       })
+      //     )
+      //   } catch (e) {
+      //     console.log(e);
+      //   }
+    //   },
+      invalidatesTags: ['events-list'],
+    })
   }),
 });
 
@@ -153,6 +255,9 @@ export const {
   usePostProjectMutation,
   useDeleteProjectMutation,
   useGetProjectsListQuery,
+  usePostFilesMutation,
+  useGetFilesQuery,
+  useDeleteFilesMutation,
   useGetInitiativesListQuery,
   useGetPersonalInitiativesListQuery,
   useGetInitiativeByIdQuery,
@@ -161,4 +266,7 @@ export const {
   useGetRolesQuery,
   useGetExportUrlQuery,
   useLazyGetExportUrlQuery,
+  useGetEventsListQuery,
+  useGetEventByIdQuery,
+  useAddEventMutation,
 } = stateApi;

@@ -71,8 +71,8 @@ export const eventsApi = createApi({
   }),
 });
 
-export const {
-  useGetEventsListQuery,
-  useGetEventByIdQuery,
-  useAddEventMutation,
-} = eventsApi;
+// export const {
+//   useGetEventsListQuery,
+//   useGetEventByIdQuery,
+//   useAddEventMutation,
+// } = eventsApi;

@@ -17,6 +17,7 @@ from .models import (
     SettingsStatusInitiative,
     SettingsComponents,
     RolesUserInInitiative,
+    SettingsFilesInitiative,
 )
 
 
@@ -27,6 +28,7 @@ admin.site.register(SettingsAddFeldsInitiative)
 admin.site.register(InitiativesMetricsFields)
 admin.site.register(SettingsStatusInitiative)
 admin.site.register(SettingsComponents)
+admin.site.register(SettingsFilesInitiative)
 
 admin.site.register(Risks)
 admin.site.register(RisksAddFields)

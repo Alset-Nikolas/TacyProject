@@ -11,9 +11,9 @@ export default function PersonalInitiativeTable() {
   const { currentId } = useAppSelector((store) => store.state.project);
   const { data: project } = useGetProjectInfoQuery(currentId);
 
-  // useEffect(() => {
-  //   if (project) dispatch(getPersonalInitiativesListThunk(project.id))
-  // }, [project]);
+  useEffect(() => {
+    if (currentId) dispatch(getPersonalInitiativesListThunk(currentId))
+  }, [currentId]);
 
   return (
     <InitiativesTable

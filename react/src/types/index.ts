@@ -240,11 +240,11 @@ export type TInitiativePropertiesFields = {
     title: string;
     initiative_activate: boolean;
   },
-  value: {
+  values: Array<{
     id: number;
     value: string;
     propertie: number;
-  }
+  }>;
 }
 
 export type TInitiativeMetricsFields = {
@@ -254,7 +254,7 @@ export type TInitiativeMetricsFields = {
     units: string;
     initiative_activate: boolean;
   },
-  value: number;
+  value: number | string;
 }
 
 export type TInitiativeAdditionalFields = {
