@@ -25,6 +25,10 @@ export const paths = {
       relative: 'adjustment',
       absolute: `/settings/adjustment`,
     },
+    documents: {
+      relative: 'documents',
+      absolute: `/settings/documents`,
+    },
   },
   create: {
     project: {
@@ -159,8 +163,9 @@ export const rights = {
   create: 'Создавать инициативу',
 };
 
-export const REACT_APP_BACKEND_URL = 'http://31.177.78.111:8000/api';
-export const REACT_APP_BACKEND_BASE_URL = 'http://31.177.78.111:8000';
+export const REACT_APP_BACKEND_URL = 'http://158.160.19.111:8000/api';
+export const REACT_APP_BACKEND_BASE_URL = 'http://158.160.19.111:8000';
+
 
 // export const REACT_APP_BACKEND_URL = 'http://localhost:8000/api';
 // export const REACT_APP_BACKEND_BASE_URL = 'http://localhost:8000';

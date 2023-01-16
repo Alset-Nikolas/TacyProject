@@ -23,6 +23,7 @@ import RootPage from '../../pages/root-page/root-page';
 import TeamPage from '../../pages/team-page/team-page';
 import TeamSettingsPage from '../../pages/team-settings-page/team-settings-page';
 import Logout from '../logout/logout';
+import DocumentsSettingsPage from '../../pages/documents-settings-page/documents-settings-page';
 
 const router = createBrowserRouter([
   {
@@ -56,6 +57,10 @@ const router = createBrowserRouter([
           {
             path: paths.settings.adjustment.relative,
             element: <ComponentsSettingsPage />,
+          },
+          {
+            path: paths.settings.documents.relative,
+            element: <DocumentsSettingsPage />,
           },
         ],
       },

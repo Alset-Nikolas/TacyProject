@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { REACT_APP_BACKEND_URL } from '../../consts';
-import { TEvent, TInitiative, TProject, TProjectForEdit, TRole, TUser } from '../../types';
+import { TEvent, TFilesSettings, TInitiative, TProject, TProjectForEdit, TRole, TUser } from '../../types';
 import { setCurrentInitiativeId } from '../initiatives-slice';
 import { setCurrentProjectId } from './state-slice';
 
@@ -13,7 +13,16 @@ export const stateApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ['initiative', 'initiatives-list', 'list', 'project', 'files-list', 'event', 'events-list'],
+  tagTypes: [
+    'initiative',
+    'initiatives-list',
+    'list',
+    'project',
+    'files-list',
+    'event',
+    'events-list',
+    'project-files-settings',
+  ],
   endpoints: (builder) => ({
     getProjectInfo: builder.query<TProject, number | null>({
       query: (id) => `/project/info${id ? `/?id=${id}` : ''}`,
@@ -108,12 +117,6 @@ export const stateApi = createApi({
       async onQueryStarted(voidArg, { dispatch, queryFulfilled }) {
         try {
           const { data: initiativesList } = await queryFulfilled;
-          // `onSuccess` side-effect
-          // const savedProjectId = localStorage.getItem('project-id');
-          // if (savedProjectId && projectsList.find((item) => item.id === parseInt(savedProjectId))) {
-          //   dispatch(setCurrentProjectId(parseInt(savedProjectId)));
-          // } else if (projectsList.length) {
-          //   dispatch(setCurrentProjectId(projectsList[0].id));
           const cachedInitiativeId = localStorage.getItem('initiative-id');
           if (cachedInitiativeId) {
             dispatch(setCurrentInitiativeId(parseInt(cachedInitiativeId)));
@@ -121,9 +124,7 @@ export const stateApi = createApi({
           } else {
             dispatch(setCurrentInitiativeId(initiativesList[0].initiative.id));
           }
-          // }
         } catch (err) {
-          // `onError` side-effect
           console.log(err);
         }
       },
@@ -146,21 +147,6 @@ export const stateApi = createApi({
           body: initiative,
         }
       },
-      // async onQueryStarted(initiative, { dispatch, queryFulfilled, getState }) {
-      //   try {
-      //     // const projectId = getState().
-      //     const { data: updatedInitiative } = await queryFulfilled;
-      //     console.log(updatedInitiative);
-      //     console.log(initiative);
-      //     const patchResult = dispatch(
-      //       initiativesApi.util.updateQueryData('getInitiativesList', initiative.initiative.project, (draft) => {
-      //         draft.push(updatedInitiative);
-      //       })
-      //     )
-      //   } catch (e) {
-      //     console.log(e);
-      //   }
-      // },
       invalidatesTags: ['initiatives-list'],
     }),
     setRoles: builder.mutation<any, { initiativeId: number, body:  Array<{user: TUser & { id: number }, role: TRole}> }>({
@@ -194,30 +180,8 @@ export const stateApi = createApi({
     getEventsList: builder.query<Array<TEvent>, number>({
       query: (initiativeId) => `components/event/info/list/?id=${initiativeId}`,
       transformResponse: (response: { initiative_events: Array<TEvent> }) => response.initiative_events,
-    //   async onQueryStarted(voidArg, { dispatch, queryFulfilled }) {
-    //     try {
-    //       const { data: initiativesList } = await queryFulfilled;
-    //       // `onSuccess` side-effect
-    //       // const savedProjectId = localStorage.getItem('project-id');
-    //       // if (savedProjectId && projectsList.find((item) => item.id === parseInt(savedProjectId))) {
-    //       //   dispatch(setCurrentProjectId(parseInt(savedProjectId)));
-    //       // } else if (projectsList.length) {
-    //       //   dispatch(setCurrentProjectId(projectsList[0].id));
-    //         dispatch(setCurrentInitiativeId(initiativesList[0].initiative.id));
-    //       // }
-    //     } catch (err) {
-    //       // `onError` side-effect
-    //       console.log(err);
-    //     }
-    //   },   
       providesTags: () => ['events-list'],
-
     }),
-    // getPersonalInitiativesList: builder.query<Array<TInitiative>, number>({
-    //   query: (id) => `components/initiative/info/list/user/?id=${id}`,
-    //   transformResponse: (response: { project_initiatives: Array<TInitiative> }) => response.project_initiatives,
-    //   providesTags: () => ['list'],
-    // }),
     getEventById: builder.query<TEvent, number>({
       query: (eventId) => `components/event/info/?id=${eventId}`,
       providesTags: () => ['event'],
@@ -230,23 +194,22 @@ export const stateApi = createApi({
           body: event,
         }
       },
-      // async onQueryStarted(initiative, { dispatch, queryFulfilled, getState }) {
-      //   try {
-      //     // const projectId = getState().
-      //     const { data: updatedInitiative } = await queryFulfilled;
-      //     console.log(updatedInitiative);
-      //     console.log(initiative);
-      //     const patchResult = dispatch(
-      //       initiativesApi.util.updateQueryData('getInitiativesList', initiative.initiative.project, (draft) => {
-      //         draft.push(updatedInitiative);
-      //       })
-      //     )
-      //   } catch (e) {
-      //     console.log(e);
-      //   }
-    //   },
       invalidatesTags: ['events-list'],
-    })
+    }),
+    getFilesSettings: builder.query<Array<TFilesSettings>, number>({
+      query: (projectId) => `components/settings/file/${projectId}`,
+      providesTags: () => ['project-files-settings'],
+    }),
+    postFilesSettings: builder.mutation<any, {projectId: number, body: Array<{id: number, title: string, status: number}>}>({
+      query({ projectId, body }) {
+        return {
+          url: `components/settings/file/${projectId}/`,
+          method: 'POST',
+          body,
+        };
+      },
+      invalidatesTags: ['project-files-settings'],
+    }),
   }),
 });
 
@@ -269,4 +232,6 @@ export const {
   useGetEventsListQuery,
   useGetEventByIdQuery,
   useAddEventMutation,
+  useGetFilesSettingsQuery,
+  usePostFilesSettingsMutation,
 } = stateApi;

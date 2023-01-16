@@ -538,3 +538,18 @@ export type TPersonalStats = {
     value: number;
   }>;
 }
+
+export type TFilesSettings = {
+  status: {
+    id: number;
+    value: number;
+    name: string;
+    settings_project: number;
+  },
+  settings_file: Array<{
+    id: number;
+    settings_project: number;
+    title: string;
+    status: number;
+  }>;
+};

@@ -95,10 +95,7 @@ export default function Metrics({
               className={`${styles.metricWrapper}`}
             >
               <div
-                style={{
-                  display: 'flex',
-                  width: '100%',
-                }}
+                className={`${styles.metricParameters}`}
               >
                 <div
                   className={`${styles.metricLeftPart} ${styles.metricCell}`}
@@ -114,6 +111,12 @@ export default function Metrics({
                     </div>
                     <div>
                       Агрегируемый
+                    </div>
+                    {/* <div>
+                      Сатус проекта
+                    </div> */}
+                    <div>
+                      %
                     </div>
                   {/* </div> */}
                   {/* <div
@@ -156,11 +159,31 @@ export default function Metrics({
                         />
                       </div>
                     </div>
+                    <div
+                      className={`${styles.checkboxInput}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={el.active}
+                        name="is_percent"
+                        onChange={(e) => handleCheckboxChange(e, index)}
+                      />
+                    </div>
+                    {/* <div
+                      className={`${styles.checkboxInput}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={el.active}
+                        name="active"
+                        onChange={(e) => handleCheckboxChange(e, index)}
+                      />
+                    </div> */}
                   {/* </div> */}
                 </div>
                 <div
                   style={{
-                    flex: '2 1',
+                    flex: '1 1',
                     display: 'flex',
                     alignItems: 'flex-end',
                   }}
@@ -173,7 +196,7 @@ export default function Metrics({
                 </div>
                 <div
                   style={{
-                    flex: '4 1',
+                    flex: '2 1',
                     display: 'flex',
                     alignItems: 'flex-end',
                   }}

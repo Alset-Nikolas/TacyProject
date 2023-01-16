@@ -1,5 +1,5 @@
 .wrapper {
-  width: fit-content;
+  // width: fit-content;
   display: flex;
   flex-direction: column;
   background: #FFFFFF;
@@ -19,7 +19,7 @@
 .contentWrapper {
   display: flex;
   flex-flow: row wrap;
-  justify-content: flex-start;
+  justify-content: space-between;
   gap: 33px;
 }
 

@@ -212,6 +212,7 @@ class MetricsProject(models.Model):
     is_aggregate = models.BooleanField(
         help_text="Метрика является агрегированной"
     )
+    is_percent = models.BooleanField(help_text="Вывод в процентах")
     initiative_activate = models.BooleanField(default=True)
 
     class Meta:
@@ -244,6 +245,7 @@ class MetricsProject(models.Model):
                 metric_old.units = metric_info["units"]
                 metric_old.description = metric_info["description"]
                 metric_old.is_aggregate = metric_info["is_aggregate"]
+                metric_old.is_percent = metric_info["is_percent"]
                 metric_old.save()
             else:
                 metric_old = cls.objects.create(
@@ -254,6 +256,7 @@ class MetricsProject(models.Model):
                     units=metric_info["units"],
                     description=metric_info.get("description"),
                     is_aggregate=metric_info.get("is_aggregate"),
+                    is_percent=metric_info.get("is_percent"),
                 )
             metric_info["id"] = metric_old.id
             ids_not_delete.append(metric_old.id)

@@ -19,6 +19,7 @@ from .serializers import (
     DeleteRiskSerializer,
     RolesUserInInitiativeSerializer,
     SettingsFilesInitiativeSerializer,
+    InfoInitiativesFilesSerializer,
 )
 from projects.serializers import UserProjectIdSerializer
 from .models import (
@@ -29,6 +30,7 @@ from .models import (
     InitiativesMetricsFields,
     EventMetricsFields,
     SettingsFilesInitiative,
+    SettingsStatusInitiative,
 )
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
@@ -1426,12 +1428,21 @@ class InitiativesSettingsFilesViewSet(
         return SettingsFilesInitiativeSerializer
 
     def list(self, request, project_id):
-        queryset = self.get_queryset()
+        prject = get_object_or_404(Project, id=self.kwargs.get("project_id"))
+        settings_project = prject.settings_initiatives.first()
         data = {}
+        for settings_status in SettingsStatusInitiative.objects.filter(
+            settings_project=settings_project
+        ).all():
+            data[settings_status] = []
+
+        queryset = self.get_queryset()
+
         for item in queryset:
             if item.status not in data:
                 data[item.status] = []
             data[item.status].append(item)
+
         res = []
         for key, val in data.items():
             res.append({"status": key, "settings_file": val})
@@ -1450,19 +1461,35 @@ class InitiativesSettingsFilesViewSet(
         serializer.save()
         SettingsFilesInitiative.objects.filter(
             settings_project=settings_project
-        ).exclude(id__in=[x.id for x in serializer.data]).delete()
+        ).exclude(id__in=[x.get("id") for x in serializer.data]).delete()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-# class InitiativesFilesViewSet(
-#     mixins.CreateModelMixin,
-#     mixins.DestroyModelMixin,
-#     viewsets.GenericViewSet,
-# ):
-#     permission_classes = [IsAuthorPermission]
-#     pagination_class = None
-#     serializer_class = InitiativesFilesSerializer
+class InitiativeFile(views.APIView):
+    def get(self, request):
+        id_init = request.GET.get("id", None)
+        if not id_init or not id_init.isdigit():
+            return Response("get id id_init", 404)
+        init = get_object_or_404(Initiatives, id=id_init)
+        s = InfoInitiativesFilesSerializer(
+            instance=init.get_files(), many=True
+        )
+        return Response(s.data, 200)
 
-#     def get_queryset(self):
-#         init = get_object_or_404(Initiatives, id=self.kwargs.get("project_id"))
-#         return InitiativesFiles.objects.filter(initiative=init).all()
+    def delete(self, request):
+        id_file = request.GET.get("id", None)
+        if not id_file or not id_file.isdigit():
+            return Response("get id file", 404)
+        file = get_object_or_404(InitiativesFiles, id=id_file)
+        file.delete()
+        return Response("Файл удален", 200)
+
+    def post(self, request):
+        id_init = request.GET.get("id", None)
+        if not id_init or not id_init.isdigit():
+            return Response("get id file", 404)
+        init_file = get_object_or_404(InitiativesFiles, id=id_init)
+        init_file.file = self.request.FILES.get("file")
+        file = init_file.save()
+        file_obj = InitiativesFiles(instance=file)
+        return Response(file_obj.data, 200)

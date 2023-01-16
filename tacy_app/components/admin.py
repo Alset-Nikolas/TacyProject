@@ -18,11 +18,13 @@ from .models import (
     SettingsComponents,
     RolesUserInInitiative,
     SettingsFilesInitiative,
+    InitiativesFiles,
 )
 
 
 admin.site.register(Initiatives)
 admin.site.register(InitiativesAddFields)
+admin.site.register(InitiativesFiles)
 admin.site.register(InitiativesPropertiesFields)
 admin.site.register(SettingsAddFeldsInitiative)
 admin.site.register(InitiativesMetricsFields)

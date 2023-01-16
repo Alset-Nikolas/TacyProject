@@ -160,6 +160,7 @@ class MetrcsProjectSerializer(serializers.ModelSerializer):
             "active",
             "description",
             "is_aggregate",
+            "is_percent",
         )
 
     def validate_id(self, id):

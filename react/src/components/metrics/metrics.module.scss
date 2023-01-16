@@ -1,5 +1,5 @@
 .wrapper {
-  width: 385px;
+  // width: 385px;
   display: flex;
   flex-direction: column;
   background: #FFFFFF;
@@ -77,10 +77,20 @@
   gap: 10px;
 }
 
+.metricParameters {
+  display: flex;
+  width: 100%;
+
+  div:first-child {
+    flex: 6 0;
+  }
+}
+
 .metricLeftPart {
   display: grid;
-  grid-template-columns: 2fr 1fr 3fr;
+  grid-template-columns: 2fr 1fr 3fr 3fr;
   gap: 8px;
+  flex: 2 1;
 }
 
 .description {
@@ -90,6 +100,16 @@
 .headerRow {
   display: flex;
   width: 100%;
+  
+  div:first-child {
+    flex: 6 0;
+  }
+  div:nth-child(2) {
+    flex: 1 0;
+  }
+  div:last-child {
+    flex: 2 0;
+  }
 }
 
 .metricCell {

@@ -313,6 +313,39 @@ class Initiatives(models.Model):
         flags["is_update"] = is_update or role.is_update
         return flags
 
+    def get_files(self):
+        def get_settings_init_files():
+            init_status = self.status
+            project = self.project
+            settings = project.settings_initiatives.first()
+            files = (
+                SettingsFilesInitiative.objects.filter(
+                    settings_project=settings
+                )
+                .order_by("title")
+                .all()
+            )
+            if init_status.value < 0:
+                return files
+            res = []
+            for file in files:
+                print(0, file.status.value, init_status.value)
+                if 0 <= file.status.value <= init_status.value:
+                    res.append(file)
+            return res
+
+        res = []
+        for title_setting in get_settings_init_files():
+            file = (
+                InitiativesFiles.objects.filter(title=title_setting)
+                .filter(initiative=self)
+                .first()
+            )
+            if not file:
+                file = InitiativesFiles.objects.create(title=title_setting,initiative=self, file=None)
+            res.append({"title": title_setting, "file": file})
+        return res
+
 
 class InitiativesAddFields(models.Model):
     """
@@ -483,7 +516,7 @@ class InitiativesFiles(models.Model):
         "SettingsFilesInitiative",
         on_delete=models.CASCADE,
     )
-    file = models.FileField(upload_to=directory_path, null=False)
+    file = models.FileField(upload_to=directory_path, null=True)
 
     class Meta:
         db_table = "initiatives_files"

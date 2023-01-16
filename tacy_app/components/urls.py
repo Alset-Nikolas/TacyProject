@@ -11,14 +11,11 @@ v1_router.register(
     views.InitiativesSettingsFilesViewSet,
     basename="settings_files",
 )
-# v1_router.register(
-#     r"initiative/file/(?P<project_id>\d+)",
-#     views.InitiativesFilesViewSet,
-#     basename="init_files",
-# )
+
 urlpatterns = [
     path("settings/", views.UpdateSettingsInitiativeView.as_view()),
     path("initiative/create/", views.CreateInitiativeView.as_view()),
+    path("initiative/file/", views.InitiativeFile.as_view()),
     path("initiative/delete/", views.DeleteInitiativeView.as_view()),
     path("initiative/info/", views.InfoInitiativeView.as_view()),
     path("initiative/info/list/", views.ListInitiativesView.as_view()),

@@ -1101,5 +1101,8 @@ class SettingsFilesInitiativeReadSerializer(serializers.Serializer):
 class InitiativesFilesSerializer(serializers.ModelSerializer):
     class Meta:
         model = InitiativesFiles
-        fields = '__all__'
-        read_only_fields = ["settings_project"]
+        fields = "__all__"
+
+class InfoInitiativesFilesSerializer(serializers.Serializer):
+    title = SettingsFilesInitiativeSerializer()
+    file = InitiativesFilesSerializer()

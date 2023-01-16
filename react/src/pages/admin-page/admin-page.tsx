@@ -28,28 +28,33 @@ export default function AdminPage() {
     components: false,
     team: false,
     adjustment: false,
+    documents: false,
   });
   // const [selectorValue, setSelectorValue] = useState(project.value.name);
 
   if (location.pathname.match(paths.settings.basic.relative) && !flag.basic) {
     setFlag({ basic: true, graphics: false, components: false, team: false,
-      adjustment: false, })
+      adjustment: false, documents: false })
   }
   if (location.pathname.match(paths.settings.graphics.relative) && !flag.graphics) {
     setFlag({ basic: false, graphics: true, components: false, team: false,
-      adjustment: false, })
+      adjustment: false, documents: false })
   }
   if (location.pathname.match(paths.settings.components.relative) && !flag.components) {
     setFlag({ basic: false, graphics: false, components: true, team: false,
-      adjustment: false, })
+      adjustment: false, documents: false })
   }
   if (location.pathname.match(paths.settings.team.relative) && !flag.team) {
     setFlag({ basic: false, graphics: false, components: false, team: true,
-      adjustment: false, })
+      adjustment: false, documents: false })
   }
   if (location.pathname.match(paths.settings.adjustment.relative) && !flag.adjustment) {
     setFlag({ basic: false, graphics: false, components: false, team: false,
-      adjustment: true, })
+      adjustment: true, documents: false })
+  }
+  if (location.pathname.match(paths.settings.documents.relative) && !flag.documents) {
+    setFlag({ basic: false, graphics: false, components: false, team: false,
+      adjustment: false, documents: true })
   }
 
   const onCreateButtonClick = () => {
@@ -88,6 +93,9 @@ export default function AdminPage() {
           {/* <li className={`${flag.adjustment ? styles.active : ''}`}>
             <Link to={paths.settings.adjustment.relative}>Настройки этапов согласования</Link>
           </li> */}
+          <li className={`${flag.documents ? styles.active : ''}`}>
+            <Link to={paths.settings.documents.relative}>Настройки документов</Link>
+          </li>
           <li className={`${flag.graphics ? styles.active : ''}`}>
             <Link to={paths.settings.graphics.relative}>Настройки графиков</Link>
           </li>
