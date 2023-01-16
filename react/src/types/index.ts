@@ -29,6 +29,7 @@ export type TMetrica = {
   active: boolean;
   description: string;
   is_aggregate: boolean;
+  is_percent: boolean;
   units: string;
 };
 

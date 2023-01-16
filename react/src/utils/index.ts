@@ -116,6 +116,7 @@ export const addPropertie = (
         units: 'бм',
         description: '',
         is_aggregate: false,
+        is_percent: false,
         active: false,
       };
       break;
