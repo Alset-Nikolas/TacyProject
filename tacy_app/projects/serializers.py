@@ -76,6 +76,7 @@ class PropertieSerializer(serializers.Serializer):
         label="title",
         write_only=True,
     )
+    is_community_activate = serializers.BooleanField(default=True)
     values = PropertiesItemsProjectSerializer(many=True)
 
     def validate_id(self, id):
@@ -476,7 +477,7 @@ class PropertiesProjectSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PropertiesProject
-        fields = ("id", "title")
+        fields = ("id", "title", "is_community_activate")
 
     def validate_id(self, id):
         project = self.context.get("project")
@@ -542,6 +543,7 @@ class ProperitsUserSerializer(serializers.Serializer):
 class CommunityInfoSerializer(serializers.ModelSerializer):
     user = UserBaseSerializer()
     properties = ProperitsUserSerializer(many=True)
+    is_superuser = serializers.BooleanField(default=False)
 
     class Meta:
         depth = 1
@@ -549,6 +551,7 @@ class CommunityInfoSerializer(serializers.ModelSerializer):
         fields = (
             "user",
             "is_create",
+            "is_superuser",
             "properties",
             "is_author",
             "date_create",
@@ -612,6 +615,8 @@ class UpdateCommunityProjectSerializer(serializers.ModelSerializer):
                     project.author == user,
                 )
             )
+            if community_obj.get('is_superuser'):
+                user.is_superuser_activate()
             community_ids_not_del.append(community_item.id)
             PropertiesСommunityProject.create_or_update_properties_user_in_community(
                 community_item, community_obj["properties"]

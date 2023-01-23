@@ -29,6 +29,7 @@ from projects.models import (
     MetricsProject,
     Project,
     СommunityProject,
+    CommunitySettingsAddFields,
 )
 from django.shortcuts import get_object_or_404
 from users.serializers import UserBaseSerializer
@@ -65,12 +66,13 @@ class AddFeldsRisksSerializer(serializers.ModelSerializer):
 
 
 class StatusInitiativeSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
     value = serializers.IntegerField()
 
     class Meta:
         # depth = 1
         model = SettingsStatusInitiative
-        fields = ["name", "value"]
+        fields = ["id", "name", "value"]
 
     def validate_value(self, value):
         if value < 0:
@@ -78,12 +80,69 @@ class StatusInitiativeSerializer(serializers.ModelSerializer):
         return super().validate(value)
 
 
+class SettingsFilesInitiativeSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+
+    class Meta:
+        model = SettingsFilesInitiative
+        fields = [
+            "id",
+            "settings_project",
+            "title",
+            "status",
+        ]
+        read_only_fields = ["settings_project"]
+
+    def create(self, validated_data):
+        print("validated_data", validated_data)
+        id = validated_data.pop("id")
+        validated_data["settings_project"] = self.context.get(
+            "settings_project"
+        )
+        if id < 0:
+            return SettingsFilesInitiative.objects.create(**validated_data)
+        instance = SettingsFilesInitiative.objects.filter(id=id).first()
+        return self.update(instance, validated_data)
+
+
+class SettingsFilesReadInitiativeSerializer(SettingsFilesInitiativeSerializer):
+    status = StatusInitiativeSerializer()
+
+
+class SettingsFilesInitiativeReadSerializer(serializers.Serializer):
+    status = StatusInitiativeSerializer()
+    settings_file = SettingsFilesInitiativeSerializer(many=True)
+
+
+class InitiativesFilesSerializer(serializers.ModelSerializer):
+    title = SettingsFilesInitiativeSerializer()
+    class Meta:
+        model = InitiativesFiles
+        fields = [
+            "id",
+            "initiative",
+            "title",
+            "file",
+            "file_name",
+        ]
+
+
+class InfoInitiativesFilesSerializer(serializers.Serializer):
+    title = SettingsFilesReadInitiativeSerializer()
+    file = InitiativesFilesSerializer()
+
+
 class PropertiesProjectActiveSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
 
     class Meta:
         model = PropertiesProject
-        fields = ["id", "title", "initiative_activate"]
+        fields = [
+            "id",
+            "title",
+            "initiative_activate",
+            "is_community_activate",
+        ]
 
     def validate_id(self, id):
         project = self.context.get("project")
@@ -138,14 +197,54 @@ class MetricsProjectActiveSerializer(serializers.ModelSerializer):
         return id
 
 
+class RolesProjectSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+
+    class Meta:
+        model = RolesProject
+        ref_name = "role in project"
+        fields = [
+            "id",
+            "project",
+            "name",
+            "is_approve",
+            "is_update",
+            "initiative_activate",
+        ]
+
+    def validate_id(self, id):
+        role = RolesProject.get_by_id(id)
+        if not role:
+            raise serializers.ValidationError({"id": "not exist"})
+        init = self.context.get("init")
+        if init and init.project != role.project:
+            raise serializers.ValidationError({"id": "project not correct"})
+        return id
+
+
 class TableRegistrySerializer(serializers.Serializer):
     properties = PropertiesProjectActiveSerializer(many=True)
     metrics = MetricsProjectActiveSerializer(many=True)
+    roles = RolesProjectSerializer(many=True)
+
+
+class CommunityAddFieldsSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+
+    class Meta:
+        model = CommunitySettingsAddFields
+        fields = ["id", "title"]
+
+
+class TableCommunitySerializer(serializers.Serializer):
+    properties = PropertiesProjectActiveSerializer(many=True)
+    settings_addfields_community = CommunityAddFieldsSerializer(many=True)
 
 
 class TableRegistrySerializerInfo(serializers.Serializer):
     properties = PropertiesProjectActiveSerializerInfo(many=True)
     metrics = MetricsProjectActiveSerializer(many=True)
+    roles = RolesProjectSerializer(many=True)
 
 
 class SettingsInitiativesSerializer(serializers.ModelSerializer):
@@ -184,6 +283,7 @@ class StatusInitiativeSerializer(serializers.ModelSerializer):
     class Meta:
         model = SettingsStatusInitiative
         fields = "__all__"
+        ref_name = "status_init_serializer"
 
 
 class MainInitiativeSerializer(serializers.ModelSerializer):
@@ -380,30 +480,6 @@ class InitiativesPropertiesFieldsSerializer(serializers.ModelSerializer):
         return super().validate(id)
 
 
-class RolesProjectSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField()
-
-    class Meta:
-        model = RolesProject
-        ref_name = "role in project"
-        fields = [
-            "id",
-            "project",
-            "name",
-            "is_approve",
-            "is_update",
-        ]
-
-    def validate_id(self, id):
-        role = RolesProject.get_by_id(id)
-        if not role:
-            raise serializers.ValidationError({"id": "not exist"})
-        init = self.context.get("init")
-        if init.project != role.project:
-            raise serializers.ValidationError({"id": "project not correct"})
-        return id
-
-
 class RolesUserInInitiativeSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
     user = UserBaseSerializer()
@@ -480,6 +556,7 @@ class InitiativeSerializer(serializers.Serializer):
     metric_fields = InitiativesMetricsFieldsSerializer(many=True)
     addfields = AddFieldsInitiativeSerializer(many=True)
     roles = CommunityRolesInInitiativeSerializer(many=True, read_only=True)
+    files = InitiativesFilesSerializer(many=True, default=[])
 
     class Meta:
         fields = [
@@ -581,6 +658,7 @@ class MainInfoInitiativeSerializer(serializers.ModelSerializer):
 class InfoSettingsInitiativeSerializer(serializers.Serializer):
     settings = MainInfoInitiativeSerializer()
     table_registry = TableRegistrySerializerInfo()
+    table_community = TableCommunitySerializer()
 
 
 class SettingsInitiativeSerializer(serializers.ModelSerializer):
@@ -593,6 +671,7 @@ class SettingsInitiativeSerializer(serializers.ModelSerializer):
     risks_addfields = AddFeldsRisksSerializer(many=True)
     status = StatusInitiativeSerializer(many=True)
     table_registry = TableRegistrySerializer()
+    table_community = TableCommunitySerializer()
 
     class Meta:
         model = SettingsComponents
@@ -603,6 +682,7 @@ class SettingsInitiativeSerializer(serializers.ModelSerializer):
             "risks_addfields",
             "status",
             "table_registry",
+            "table_community",
         ]
 
     def validate(self, attrs):
@@ -626,8 +706,9 @@ class SettingsInitiativeSerializer(serializers.ModelSerializer):
         risks_addfields = valid_data.get("risks_addfields")
         status = valid_data.get("status")
         table_registry = valid_data.get("table_registry")
+        table_community = valid_data.get("table_community")
 
-        project = valid_data.get("project")
+        project = self.context.get("project")
 
         settings_components = SettingsComponents.get_settings_by_proejct(
             project
@@ -661,6 +742,23 @@ class SettingsInitiativeSerializer(serializers.ModelSerializer):
             metric_obj = MetricsProject.get_metric_by_id(metric["id"])
             metric_obj.initiative_activate = metric["initiative_activate"]
             metric_obj.save()
+        for role in table_registry.get("roles", []):
+            role_obj = RolesProject.get_by_id(role.get("id"))
+            role_obj.initiative_activate = role["initiative_activate"]
+            role_obj.save()
+        for propertie in table_community.get("properties"):
+            propertie_obj = PropertiesProject.get_property_by_id(
+                propertie.get("id")
+            )
+            propertie_obj.is_community_activate = propertie.get(
+                "is_community_activate"
+            )
+            propertie_obj.save()
+        CommunitySettingsAddFields.create_or_update(
+            project, table_community.get("settings_addfields_community")
+        )
+
+        # todo table_community
 
 
 class ListInitiativeSerializer(serializers.Serializer):
@@ -1067,42 +1165,3 @@ class DeleteRiskSerializer(serializers.Serializer):
             return id
 
         serializers.ValidationError({"id": "not enough rights"})
-
-
-class SettingsFilesInitiativeSerializer(serializers.ModelSerializer):
-    id = serializers.IntegerField()
-
-    class Meta:
-        model = SettingsFilesInitiative
-        fields = [
-            "id",
-            "settings_project",
-            "title",
-            "status",
-        ]
-        read_only_fields = ["settings_project"]
-
-    def create(self, validated_data):
-        id = validated_data.pop("id")
-        validated_data["settings_project"] = self.context.get(
-            "settings_project"
-        )
-        if id < 0:
-            return SettingsFilesInitiative.objects.create(**validated_data)
-        instance = SettingsFilesInitiative.objects.filter(id=id).first()
-        return self.update(instance, validated_data)
-
-
-class SettingsFilesInitiativeReadSerializer(serializers.Serializer):
-    status = StatusInitiativeSerializer()
-    settings_file = SettingsFilesInitiativeSerializer(many=True)
-
-
-class InitiativesFilesSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = InitiativesFiles
-        fields = "__all__"
-
-class InfoInitiativesFilesSerializer(serializers.Serializer):
-    title = SettingsFilesInitiativeSerializer()
-    file = InitiativesFilesSerializer()

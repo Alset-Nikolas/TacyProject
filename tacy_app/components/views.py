@@ -215,7 +215,10 @@ class UpdateSettingsInitiativeView(views.APIView):
         request_body=SettingsInitiativeSerializer,
     )
     def post(self, request):
-        serializer = SettingsInitiativeSerializer(data=request.data)
+        project: Project = get_project_by_id_or_active(request)
+        serializer = SettingsInitiativeSerializer(
+            data=request.data, context={"project": project}
+        )
         serializer.is_valid(raise_exception=True)
         serializer.create_or_update(request.data)
         return Response(
@@ -242,6 +245,11 @@ class UpdateSettingsInitiativeView(views.APIView):
             "table_registry": {
                 "properties": project.properties,
                 "metrics": project.metrics,
+                "roles": project.roles,
+            },
+            "table_community": {
+                "properties": project.properties,
+                "settings_addfields_community": project.community_settings,
             },
         }
         serializer = InfoSettingsInitiativeSerializer(instance=instance_)
@@ -411,8 +419,11 @@ class InfoInitiativeView(views.APIView):
                 "properties_fields": init.properties_fields.all(),
                 "metric_fields": init.metric_fields.all(),
                 "roles": init.get_community_roles(),
+                "files": init.files.all(),
             }
         )
+
+        print("InfoInitiativeView", init.get_community_roles())
         return Response(s.data, 200)
 
 
@@ -583,8 +594,14 @@ class ListInitiativesView(views.APIView):
     )
     def get(self, request):
         project = get_project_by_id_or_active(request)
-        list_inits = project.initiatives.all()
+
+        list_inits = project.get_list_inits_after_filters_and_sorted(
+            request.GET
+        )
+        print(list_inits)
+        print(len(list_inits))
         [x.check_updates() for x in list_inits]
+
         inst = {
             "project_initiatives": [
                 {
@@ -593,6 +610,7 @@ class ListInitiativesView(views.APIView):
                     "properties_fields": initiative.properties_fields.all(),
                     "metric_fields": initiative.metric_fields.all(),
                     "roles": initiative.get_community_roles(),
+                    "files": initiative.files.all(),
                 }
                 for initiative in list_inits
             ]
@@ -614,6 +632,7 @@ class ListInitiativesFileView(ListInitiativesView):
                     "properties_fields": initiative.properties_fields.all(),
                     "metric_fields": initiative.metric_fields.all(),
                     "roles": initiative.get_community_roles(),
+                    "files": [],
                 }
                 for initiative in list_inits
             ]
@@ -643,6 +662,7 @@ class UserStatisticsInitiativesView(views.APIView):
                     "properties_fields": initiative.properties_fields.all(),
                     "metric_fields": initiative.metric_fields.all(),
                     "roles": initiative.get_community_roles(),
+                    "files": initiative.files.all(),
                 }
             )
             for m_obj in initiative.metric_fields.all():
@@ -810,8 +830,11 @@ class UserStatisticsInitiativesView(views.APIView):
         project = get_project_by_id_or_active(request)
         user = request.user
         list_inits = []
-        list_inits = Initiatives.get_user_initiatievs(user, project)
+        user_inits = Initiatives.get_user_initiatievs(user, project)
 
+        list_inits = project.get_list_inits_after_filters_and_sorted(
+            request.GET, user_inits
+        )
         [x.check_updates() for x in list_inits]
 
         s = UserPersonStatisticSerializer(
@@ -1234,8 +1257,8 @@ class DeleteEventView(views.APIView):
         id_event = request.GET.get("id", None)
         if not id_event or not id_event.isdigit():
             return Response("get id event", 404)
-        Events = get_object_or_404(Events, id=id_event)
-        Events.delete_node(id_event)
+        ev = get_object_or_404(Events, id=id_event)
+        ev.delete_node(id_event)
         return Response({"msg": "Мероприятие удалено"}, 204)
 
 
@@ -1471,6 +1494,7 @@ class InitiativeFile(views.APIView):
         if not id_init or not id_init.isdigit():
             return Response("get id id_init", 404)
         init = get_object_or_404(Initiatives, id=id_init)
+        print(init.get_files())
         s = InfoInitiativesFilesSerializer(
             instance=init.get_files(), many=True
         )
@@ -1488,8 +1512,12 @@ class InitiativeFile(views.APIView):
         id_init = request.GET.get("id", None)
         if not id_init or not id_init.isdigit():
             return Response("get id file", 404)
+        file = self.request.FILES.get("file")
+        if not file:
+            return Response("get file", 404)
         init_file = get_object_or_404(InitiativesFiles, id=id_init)
-        init_file.file = self.request.FILES.get("file")
+        init_file.file = file
+        init_file.file_name = str(file)
         file = init_file.save()
-        file_obj = InitiativesFiles(instance=file)
+        file_obj = InitiativesFilesSerializer(instance=file)
         return Response(file_obj.data, 200)

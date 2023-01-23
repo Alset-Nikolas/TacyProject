@@ -3,6 +3,9 @@ import typing
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.utils import timezone
+from django.db.models import Q
+from functools import reduce
+import operator
 
 
 User = get_user_model()
@@ -113,6 +116,85 @@ class Project(models.Model):
         # добавить права из инициативы
         return {"is_create": is_create}
 
+    def inits_sorted(self, data, inits):
+        metrics_sorted = data.get("metrics")
+        print("metrics_sorted", metrics_sorted)
+        if metrics_sorted:
+            metrics_sorted = metrics_sorted.split(",")
+            return sorted(
+                inits.all(),
+                key=lambda x: x.metric_fields.filter(metric=metrics_sorted[0])
+                .first()
+                .value,
+                reverse=not bool(metrics_sorted[1]),
+            )
+        return inits.all()
+
+    def get_list_inits_after_filters_and_sorted(self, data, inits=None):
+        name_filter = data.get("name", "")
+        status_filter = data.get("status")
+        roles_filter = data.get("roles")
+        properties_filter = data.get("properties")
+        files_filter = data.get("files")
+        inits = inits or self.initiatives
+        if name_filter:
+            inits = inits.filter(name__icontains=name_filter)
+        if status_filter:
+            status_filter = status_filter.split(",")
+            inits = inits.filter(status_id__in=status_filter)
+        if roles_filter:
+            roles_filter = [
+                item.split(",") for item in roles_filter.split(";")
+            ]
+            query_role = reduce(
+                operator.or_,
+                (
+                    operator.and_(
+                        (Q(user_roles__user=item[0])),
+                        (Q(user_roles__role=item[1])),
+                    )
+                    for item in roles_filter
+                    if len(item) == 2
+                ),
+            )
+            inits = inits.filter(query_role)
+        if properties_filter:
+            properties_filter = [
+                item.split(",") for item in properties_filter.split(";")
+            ]
+            query_properties = reduce(
+                operator.or_,
+                (
+                    operator.and_(
+                        (Q(properties_fields__title=item[0])),
+                        (Q(properties_fields__values=item[1])),
+                    )
+                    for item in properties_filter
+                    if len(item) == 2
+                ),
+            )
+            inits = inits.filter(query_properties)
+        if files_filter:
+            files_filter = files_filter.split(",")
+            query_files = reduce(
+                operator.or_,
+                (
+                    operator.and_(
+                        (Q(files__title=item)),
+                        (~Q(files__file__in=["", None])),
+                    )
+                    for item in files_filter
+                    if item != ""
+                ),
+            )
+            from django.db.models import Count
+
+            inits = inits.filter(query_files)
+            inits = inits.annotate(total=Count("id")).filter(
+                total=len(files_filter)
+            )
+        return self.inits_sorted(data, inits)
+
 
 class ProjectFiles(models.Model):
     id = models.AutoField(primary_key=True)
@@ -213,7 +295,10 @@ class MetricsProject(models.Model):
         help_text="Метрика является агрегированной"
     )
     is_percent = models.BooleanField(help_text="Вывод в процентах")
-    initiative_activate = models.BooleanField(default=True)
+    initiative_activate = models.BooleanField(
+        default=True,
+        help_text="Нужно ли выводить метрику в реестре инициатив",
+    )
 
     class Meta:
         db_table = "project_metrics"
@@ -353,6 +438,10 @@ class PropertiesProject(models.Model):
         help_text="Введите название свойства",
     )
     initiative_activate = models.BooleanField(default=True)
+    is_community_activate = models.BooleanField(
+        help_text="В сообществе емкость актуальна, например подразделения",
+        default=True,
+    )
 
     class Meta:
         db_table = "project_properties"
@@ -419,6 +508,7 @@ class СommunityProject(models.Model):
         default=False,
         help_text="Флаг автора",
     )
+
     date_create = models.DateField(
         verbose_name="Дата создания проекта",
         default=timezone.now,
@@ -446,6 +536,52 @@ class СommunityProject(models.Model):
             project=project, user=user, defaults=defaults
         )
         return obj
+
+
+class CommunitySettingsAddFields(models.Model):
+    project = models.ForeignKey(
+        "Project",
+        on_delete=models.CASCADE,
+        related_name="community_settings",
+    )
+    title = models.CharField(
+        max_length=200,
+        verbose_name="Название доп поля",
+        help_text="Введите навзание доп поля",
+    )
+
+    @classmethod
+    def create_or_update(cls, project, data):
+        ids_not_delete = []
+        for item in data:
+            id = item.get("id")
+            if id > 0:
+                item_obj, _ = cls.objects.update_or_create(
+                    id=item.get("id"), defaults=item
+                )
+            else:
+                id = item.pop("id")
+                item_obj = cls.objects.create(**item, project=project)
+            ids_not_delete.append(item_obj.id)
+            item["id"] = item_obj.id
+        cls.objects.filter(project=project).exclude(
+            id__in=ids_not_delete
+        ).delete()
+
+
+class CommunityAddFields(models.Model):
+    community = models.ForeignKey(
+        СommunityProject,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="addfields",
+    )
+    title = models.ForeignKey(
+        CommunitySettingsAddFields,
+        on_delete=models.CASCADE,
+    )
+    value = models.CharField(max_length=500)
 
 
 class PropertiesСommunityProject(models.Model):
@@ -482,7 +618,6 @@ class PropertiesСommunityProject(models.Model):
         for prop in properties:
             title_obj = prop.get("title")
             values = prop.get("values")
-
             item = (
                 cls.objects.filter(community=community)
                 .filter(title_id=title_obj.get("id"))
@@ -533,6 +668,10 @@ class RolesProject(models.Model):
         verbose_name="Проект",
     )
     name = models.CharField(max_length=200)
+    initiative_activate = models.BooleanField(
+        default=True,
+        help_text="Нужно ли выводить метрику в реестре инициатив",
+    )
     is_approve = models.BooleanField(default=False)
     is_update = models.BooleanField(default=False)
 
@@ -560,10 +699,8 @@ class RolesProject(models.Model):
             else:
                 id = item.pop("id")
                 item_obj = cls.objects.create(**item, project=project)
-                print("item_obj", item_obj)
             ids_not_delete.append(item_obj.id)
             item["id"] = item_obj.id
-        print("ids_not_delete", ids_not_delete)
         cls.objects.filter(project=project).exclude(
             id__in=ids_not_delete
         ).delete()

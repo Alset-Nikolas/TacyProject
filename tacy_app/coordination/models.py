@@ -1,6 +1,10 @@
 from django.db import models
 from projects.models import Project
-from components.models import Initiatives, SettingsStatusInitiative
+from components.models import (
+    Initiatives,
+    SettingsStatusInitiative,
+    RolesUserInInitiative,
+)
 
 from django.utils import timezone
 from django.contrib.auth import get_user_model
@@ -177,9 +181,8 @@ class StagesCoordinationInitiative(models.Model):
 
     @classmethod
     def delete_user_in_project(cls, project, user):
+        RolesUserInInitiative.delete_user_in_project(user, project)
         for init in project.initiatives.all():
-            print(init)
-            print(cls.user_is_coordinator(init.id, user))
             if cls.user_is_coordinator(init.id, user):
                 StagesCoordinationInitiative.delete_now_stage_null_coordinator(
                     init, user

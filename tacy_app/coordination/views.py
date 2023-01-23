@@ -142,6 +142,7 @@ class InfoInitiativeRole(views.APIView):
             {
                 "init_activate": initiative.activate,
                 "init_failure": initiative.failure,
+                "init_file_ready": initiative.get_file_status(),
                 "user_is_author": user == initiative.author,
                 "user_is_superuser": user.is_superuser,
                 "user_now_apprwed": flag,

@@ -14,6 +14,10 @@ User = get_user_model()
 from notifications.email import EmailManage
 from notifications.models import NotificationsUser
 
+from django.db.models import Q
+from functools import reduce
+import operator
+
 
 class SettingsComponents(models.Model):
     """
@@ -134,6 +138,7 @@ class Initiatives(models.Model):
         ] = RolesProject.get_roles_by_project(self.project)
         ans = [{"role": x, "community": []} for x in roles_in_project]
         for user_in_init in community_in_init:
+            print("user_in_init", user_in_init)
             for item in ans:
                 if item.get("role") == user_in_init.role:
                     elemant = dict()
@@ -153,6 +158,11 @@ class Initiatives(models.Model):
                     if not coordination_init:
                         status = None
                     else:
+                        print(
+                            "!!!!!!!!!!coordination_init",
+                            coordination_init,
+                            coordination_init.properties,
+                        )
                         status = coordination_init.activate
                     elemant["status"] = status
                     item["community"].append(elemant)
@@ -243,24 +253,41 @@ class Initiatives(models.Model):
     def get_user_initiatievs(cls, user, project):
         list_inits = []
         ids = set()
-        for init in (
-            cls.objects.filter(project=project).filter(failure=False).all()
-        ):
 
-            if init.author == user:
-                if init.id not in ids:
-                    ids.add(init.id)
-                    list_inits.append(init)
-            elif any(
-                list(
-                    info_coordination.coordinator_stage == user
-                    and info_coordination.activate
-                    for info_coordination in init.stages_coordination.all()
-                )
-            ):
-                if init.id not in ids:
-                    ids.add(init.id)
-                    list_inits.append(init)
+        query_role = reduce(
+            operator.or_,
+            (
+                Q(author=user),
+                operator.and_(
+                    Q(stages_coordination__coordinator_stage=user),
+                    Q(stages_coordination__activate=True),
+                ),
+            ),
+        )
+        
+        list_inits = (
+            cls.objects.filter(project=project)
+            .filter(failure=False)
+            .filter(query_role)
+        )
+        # for init in (
+        #     cls.objects.filter(project=project).filter(failure=False).all()
+        # ):
+
+        #     if init.author == user:
+        #         if init.id not in ids:
+        #             ids.add(init.id)
+        #             list_inits.append(init)
+        #     elif any(
+        #         list(
+        #             info_coordination.coordinator_stage == user
+        #             and info_coordination.activate
+        #             for info_coordination in init.stages_coordination.all()
+        #         )
+        #     ):
+        #         if init.id not in ids:
+        #             ids.add(init.id)
+        #             list_inits.append(init)
         return list_inits
 
     def delete_node(self):
@@ -342,9 +369,17 @@ class Initiatives(models.Model):
                 .first()
             )
             if not file:
-                file = InitiativesFiles.objects.create(title=title_setting,initiative=self, file=None)
+                file = InitiativesFiles.objects.create(
+                    title=title_setting,
+                    initiative=self,
+                    file=None,
+                    file_name="",
+                )
             res.append({"title": title_setting, "file": file})
         return res
+
+    def get_file_status(self):
+        return all(bool(x.get("file").file) for x in self.get_files())
 
 
 class InitiativesAddFields(models.Model):
@@ -458,6 +493,7 @@ class InitiativesMetricsFields(models.Model):
         null=True,
     )
     value = models.FloatField(max_length=200)
+    # TODO is_agregate = False
 
     class Meta:
         db_table = "initiatives_metric_fields"
@@ -517,6 +553,7 @@ class InitiativesFiles(models.Model):
         on_delete=models.CASCADE,
     )
     file = models.FileField(upload_to=directory_path, null=True)
+    file_name = models.CharField(max_length=300)
 
     class Meta:
         db_table = "initiatives_files"
@@ -1269,6 +1306,12 @@ class RolesUserInInitiative(models.Model):
         RolesProject,
         on_delete=models.CASCADE,
     )
+
+    @classmethod
+    def delete_user_in_project(cls, user, project):
+        cls.objects.filter(user=user).filter(
+            initiative__project=project
+        ).delete()
 
     @classmethod
     def get_user_role(cls, user, initiative):

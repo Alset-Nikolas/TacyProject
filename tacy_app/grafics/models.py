@@ -128,18 +128,19 @@ class GraficsProject(models.Model):
 
     @classmethod
     def update_format(cls, res, project, quantity=None):
-        def group_small_values(info):
-            if not quantity or len(new_format) < quantity:
+        def group_small_values(info, quantity):
+            if not quantity or len(new_format) <= quantity:
                 return info
             last_item = {
                 "name": "Другие",
                 "name_short": "Другие",
                 "value": 0,
             }
+            quantity = int(quantity)
             last_item["value"] = sum(
-                x.get("value") for x in new_format[quantity:]
+                x.get("value") for x in new_format[quantity + 1 :]
             )
-            return new_format[:quantity] + [last_item]
+            return new_format[: quantity + 1] + [last_item]
 
         grafics = res["grafics"]
         status_grafic = res["status_grafic"]
@@ -160,6 +161,7 @@ class GraficsProject(models.Model):
                         m_id_not_in_stat.add(m_id)
                     else:
                         new_format = []
+                        total_sum_value = 0
                         for x_name, y_value in grafic_item.items():
                             new_format.append(
                                 {
@@ -168,16 +170,25 @@ class GraficsProject(models.Model):
                                     "value": y_value,
                                 }
                             )
+                            total_sum_value += y_value
                         new_format.sort(
                             key=lambda x: x.get("value"), reverse=True
                         )
+                        new_format.append(
+                            {
+                                "name": "Сумма",
+                                "name_short": "Сумма",
+                                "value": total_sum_value,
+                            }
+                        )
                         new_format_res[v_id][m_id] = group_small_values(
-                            new_format
+                            new_format, quantity
                         )
 
         for m_id, grafic_item in status_grafic.items():
             if m_id not in m_id_not_in_stat:  # только активные графики
                 new_format = []
+                total_sum_value = 0
                 for x_name, y_value in grafic_item.items():
                     new_format.append(
                         {
@@ -186,8 +197,18 @@ class GraficsProject(models.Model):
                             "value": y_value,
                         }
                     )
+                    total_sum_value += y_value
                 new_format.sort(key=lambda x: x.get("value"), reverse=True)
-                new_format_status_grafic[m_id] = group_small_values(new_format)
+                new_format.append(
+                    {
+                        "name": "Сумма",
+                        "name_short": "Сумма",
+                        "value": total_sum_value,
+                    }
+                )
+                new_format_status_grafic[m_id] = group_small_values(
+                    new_format, quantity
+                )
             else:
                 new_format_status_grafic.pop(m_id)
 

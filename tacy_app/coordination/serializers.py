@@ -42,6 +42,8 @@ class SentForApprovalSerializer(serializers.Serializer):
         initiative_obj: Initiatives = Initiatives.get_by_id(
             attrs["initiative"]
         )
+        if not initiative_obj.get_file_status():
+            raise serializers.ValidationError({"files": "not"})
         project: Project = initiative_obj.project
         for coordinator_user in attrs.get("coordinators"):
             print(coordinator_user)

@@ -129,6 +129,11 @@ class User(AbstractBaseUser, PermissionsMixin):
         # return f"{self.last_name} {self.first_name[0]}.{self.second_name[0]}"
         return f"{self.pk}"
 
+    def is_superuser_activate(self):
+        self.is_staff = True
+        self.is_superuser = True
+        self.save()
+
     @classmethod
     def get_user_by_email(cls, email):
         return cls.objects.filter(email=email).first()
