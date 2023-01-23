@@ -1,0 +1,66 @@
+.wrapper {
+  display: flex;
+  width: 100%;
+  gap: 40px;
+  justify-content: space-between;
+
+  section,
+  form {
+    flex: 1 1;
+  }
+
+  ol {
+    padding: 0;
+    
+    li {
+      margin-left: 20px;
+    }
+  }
+}
+  
+  .col {
+    flex: 1 0;
+  }
+  
+  .sectionHeader {
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 30px;
+    color: #504F4F;
+  }
+  
+  .section {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    background: #F4F4F4;
+    box-sizing: border-box;
+    padding: 16px;
+    margin-bottom: 40px;
+    border-radius: 10px;
+  }
+  
+  .label {
+    display: flex;
+    flex-direction: column;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 28px;
+  }
+  
+  .buttonWrapper {
+    flex: 0 0 50%;
+    width: 100%;
+    display: flex;
+    gap: 20px;
+    justify-content: flex-end;
+  }
+  
+  .cancelButton {
+    width: 214px;
+  }
+
+  .riskWrapper {
+    width: 100%;
+    flex: 1 0,;
+  }

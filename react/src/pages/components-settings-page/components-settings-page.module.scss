@@ -1,0 +1,66 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  box-sizing: border-box;
+}
+
+.sectionHeaderText {
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 30px;
+  color: #17598C;
+}
+
+.headerSection {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  padding-bottom: 40px;
+  gap: 20px;
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 30px;
+}
+
+.selectorWrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+}
+
+.middleSectionWrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  width: 100%;
+  margin: 0 0 48px 0;
+}
+
+.bottomSectionWrapper {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  gap: 19px;
+  margin: 0 0 48px 0;
+}
+
+.initativeSectionWrapper {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 40px;
+  margin-bottom: 40px;
+
+  div,
+  section {
+    flex: 1 1;
+  }
+}
+
+.tableSectionWrapper {
+  width: 100%;
+  margin: 0 0 48px 0;
+}

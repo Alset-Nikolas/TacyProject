@@ -1,0 +1,20 @@
+.propertieGraphic {
+    height: 32px;
+    width: 220px;
+    padding: 0 15px;
+    background: #FFFFFF;
+    border: 1px solid #8DB040;
+    border-radius: 2px;
+    text-align: center;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 28px;
+    cursor: pointer;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  
+    &.active {
+      background: #8DB040;
+    }
+  }

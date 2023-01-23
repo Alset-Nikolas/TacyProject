@@ -1,0 +1,114 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  background: #FFFFFF;
+  margin: 0 0 48px 0;
+  // padding-bottom: 20px;
+  box-shadow: 0px 2px 22px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
+  width: 100%;
+  overflow: hidden;
+
+  .table {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &.edit {
+    padding-left: 20px;
+    box-shadow: none;
+    overflow: visible;
+  
+    .table {
+      display: flex;
+      flex-direction: row;
+      gap: 8px;
+    }
+  }
+
+  &.create {
+    padding-left: 20px;
+    box-shadow: none;
+    overflow: unset;
+  
+    .table {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+  }
+}
+
+.editWrapper {
+  display: flex;
+  flex-direction: column;
+  width: 608px;
+  display: flex;
+  background: #FFFFFF;
+  // margin: 0 0 48px 0;
+  // padding-left: 20px;
+  width: 100%;
+
+  .table {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+  }
+}
+
+.header {
+  padding-left: 0;
+}
+
+.table {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.tableHeader {
+  color: #504F4F;
+}
+
+.tableRow {
+  display: flex;
+  gap: 20px;
+
+  .name {
+    flex: 2 1;
+  }
+
+  .date {
+    flex: 1 1;
+    white-space: nowrap;
+    overflow: visible;
+    width: 102px;
+  }
+
+  div {
+    flex-basis: 102px;
+  }
+
+  div:last-child {
+    flex-basis: 30px;
+    display: flex;
+    align-items: center;
+  }
+
+  &.stageRow {
+    width: 500px;
+  }
+}
+
+.tableCol {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 300px;
+  flex: 1 1;
+}
+
+.input {
+  width: 102px;
+}
