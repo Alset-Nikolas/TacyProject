@@ -184,7 +184,7 @@ export default function TeamTableManagement({ edit, editButton, components }: TR
             <div
               className={`${sectionStyles.addfieldsHeader}`}
             >
-              Ёмкости
+              Атрибуты инициатив
             </div>
             <div
               style={{
@@ -279,7 +279,7 @@ export default function TeamTableManagement({ edit, editButton, components }: TR
             <div
               className={`${sectionStyles.sectionHeader}`}
             >
-              Ёмкости
+              Атрибуты инициатив
             </div>
             <ol
               className={`${sectionStyles.sectionList}`}

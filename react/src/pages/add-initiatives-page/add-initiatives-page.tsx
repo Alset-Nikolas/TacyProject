@@ -63,7 +63,7 @@ export default function AddInitiativePage() {
       const returnField = {} as (Omit<TInitiativeMetricsFields, 'value'> & { value: number | string }) ;
       const metricUnits = project?.metrics.find((el) => el.title === metricField.title)?.units;
       returnField.metric = { ...metricField, units: metricUnits ? metricUnits : 'бм' };
-      returnField.value = '';
+      returnField.value = '0';
 
       return returnField;
     }) : [],
@@ -290,12 +290,12 @@ export default function AddInitiativePage() {
               <div
                 className={`${styles.sectionHeader}`}
               >
-                Аналитика
+                Атрибуты инициатив
               </div>
               <div
                 className={`${styles.section}`}
               >
-                {!newInitiativeState.properties_fields.length && 'Данные для аналитики отсутствуют'}
+                {!newInitiativeState.properties_fields.length && 'Атрибуты инициатив отсутствуют'}
                 {newInitiativeState.properties_fields.map((field, index) => (
                   <label
                     className={`${styles.label}`}
@@ -314,7 +314,7 @@ export default function AddInitiativePage() {
                   </label>
                 ))}
               </div>
-              <div
+              {/* <div
                 className={`${styles.sectionHeader}`}
               >
                 Метрики
@@ -335,7 +335,7 @@ export default function AddInitiativePage() {
                     />
                   </label>
                 ))}
-              </div>
+              </div> */}
             </div>
           </div>
         </ol>

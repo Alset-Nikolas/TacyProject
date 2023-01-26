@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { REACT_APP_BACKEND_URL } from '../../consts';
-import { TComponentsSettings, TEvent, TFilesSettings, TInitiative, TInitiativeFiles, TProject, TProjectForEdit, TRequestTeamListItem, TRisk, TRole, TTeamMember, TUpdateComponents, TUser, TUserRequest } from '../../types';
+import { TComponentsSettings, TCoordinationHistoryItem, TEvent, TFilesSettings, TInitiative, TInitiativeFiles, TProject, TProjectForEdit, TRequestTeamListItem, TRisk, TRole, TTeamMember, TUpdateComponents, TUser, TUserRequest, TUserRights } from '../../types';
 import { setCurrentInitiativeId } from '../initiatives-slice';
 import { openErrorModal, openMessageModal, setCurrentProjectId } from './state-slice';
 
@@ -9,7 +9,7 @@ export const stateApi = createApi({
   baseQuery: fetchBaseQuery({
     baseUrl: REACT_APP_BACKEND_URL,
     prepareHeaders: (headers) => {
-      headers.set('Authorization', `Token ${localStorage.getItem('token')}`);
+      if (localStorage.getItem('token')) headers.set('Authorization', `Token ${localStorage.getItem('token')}`);
       return headers;
     },
   }),
@@ -27,12 +27,14 @@ export const stateApi = createApi({
     'team-list',
     'risks-list',
     'diagrams',
-    'personal-diagrams'
+    'personal-diagrams',
+    'user-rights',
+    'coordination-history',
   ],
   endpoints: (builder) => ({
     getProjectInfo: builder.query<TProject, number | null>({
       query: (id) => `/project/info${id ? `/?id=${id}` : ''}`,
-      providesTags: ['project'],
+      providesTags: ['project', 'initiative'],
     }),
     postProject: builder.mutation<TProject, TProject | TProjectForEdit>({
       query(project) {
@@ -153,7 +155,7 @@ export const stateApi = createApi({
           body: initiative,
         }
       },
-      invalidatesTags: ['initiatives-list'],
+      invalidatesTags: ['initiatives-list', 'initiative'],
     }),
     deleteInitiative: builder.mutation<TInitiative, number>({
       query(initiativeId) {
@@ -184,7 +186,7 @@ export const stateApi = createApi({
           console.log(e);
         }
       },
-      invalidatesTags: ['initiatives-list'],
+      invalidatesTags: ['initiatives-list', 'initiative'],
     }),
     getRoles: builder.query<Array<{user: TUser & { id: number }, role: TRole & { project: number }}>, number>({
       query: (initiativeId) => `components/initiative/role/?id=${initiativeId}`,
@@ -356,7 +358,7 @@ export const stateApi = createApi({
           dispatch(openErrorModal('При сохранении произошла ошибка'));
         }
       },
-    invalidatesTags: ['components', 'initiatives-list', 'team-list'],
+    invalidatesTags: ['components', 'initiatives-list', 'initiative', 'team-list'],
     }),
     getTeamList: builder.query<Array<TTeamMember>, { id: number, project: TProject | null }>({
       query: ({ id }) => `/project/community/?id=${id}`,
@@ -401,7 +403,7 @@ export const stateApi = createApi({
           body: { community_info: body },
         }
       },
-      invalidatesTags: ['team-list'],
+      invalidatesTags: ['team-list', 'user-rights'],
       async onQueryStarted({ projectId }, { dispatch, queryFulfilled, getState }) {
         // const { data: project } = stateApi.useGetProjectInfoQuery(projectId);
         const state = getState();
@@ -544,6 +546,77 @@ export const stateApi = createApi({
       },
       providesTags: () => ['personal-diagrams'],
     }),
+    getUserRights: builder.query<TUserRights, number>({
+      query: (initiativeId) => `coordination/initiative/info-user-role/?id=${initiativeId}`,
+      providesTags: () => ['user-rights'],
+    }),
+    switchInitiativeState: builder.mutation<any, { failure: boolean, initiative: number }>({
+      query(body) {
+        return {
+          url: `coordination/initiative/switch/`,
+          method: "POST",
+          body,
+        };
+      },
+      invalidatesTags: ['initiative', 'initiatives-list', 'coordination-history'],
+    }),
+    authUser: builder.mutation<any, { email: string, password: string }>({
+      query(credentials) {
+        return {
+          url: `/auth/login/`,
+          method: 'POST',
+          body: credentials,
+        };
+      },
+      invalidatesTags: ['user-rights'],
+    }),
+    getChat: builder.query<Array<TCoordinationHistoryItem>, number>({
+      query: (initiativeId) => `coordination/initiative/chat/?id=${initiativeId}`,
+      transformResponse: (response: { history_coordination: Array<TCoordinationHistoryItem> }) => {
+        return response.history_coordination;
+      },
+      providesTags: () => ['coordination-history'],
+    }),
+    postComment: builder.mutation<any, { text: string, initiative: number }>({
+      query(body) {
+        return {
+          url: `coordination/initiative/add-comment/`,
+          method: 'POST',
+          body,
+        };
+      },
+      invalidatesTags: ['coordination-history'],
+    }),
+    coordinate: builder.mutation<any, { text: string, initiative: number }>({
+      query(body) {
+        return {
+          url: `coordination/initiative/approval/`,
+          method: 'POST',
+          body,
+        };
+      },
+      invalidatesTags: ['coordination-history', 'user-rights'],
+    }),
+    sendForApproval: builder.mutation<any, { text: string, initiative: number, coordinators: Array<TUser & {id: number}> }>({
+      query(body) {
+        return {
+          url: `coordination/initiative/sent-for-approval/`,
+          method: 'POST',
+          body,
+        };
+      },
+      invalidatesTags: ['coordination-history', 'user-rights', 'initiatives-list'],
+    }),
+    closeInitiative: builder.mutation<any, { failure: boolean, initiative: number }>({
+      query(body) {
+        return {
+          url: `coordination/initiative/switch/`,
+          method: 'POST',
+          body,
+        };
+      },
+      invalidatesTags: ['coordination-history', 'user-rights', 'initiatives-list'],
+    }),
   }),
 });
 
@@ -585,4 +658,12 @@ export const {
   useGetDiagramsListQuery,
   useLazyGetDiagramsListQuery,
   useLazyGetPersonalDiagramsListQuery,
+  useGetUserRightsQuery,
+  useSwitchInitiativeStateMutation,
+  useAuthUserMutation,
+  useGetChatQuery,
+  useCloseInitiativeMutation,
+  useCoordinateMutation,
+  useSendForApprovalMutation,
+  usePostCommentMutation,
 } = stateApi;

@@ -116,6 +116,7 @@ class SettingsFilesInitiativeReadSerializer(serializers.Serializer):
 
 class InitiativesFilesSerializer(serializers.ModelSerializer):
     title = SettingsFilesInitiativeSerializer()
+
     class Meta:
         model = InitiativesFiles
         fields = [
@@ -1124,6 +1125,10 @@ class EventSerializer(serializers.Serializer):
     def create_or_update(self, data):
         initiative: Initiatives = self.context.get("initiative")
         event = data.get("event")
+        event["author_id"] = self.context.get("user").id
+        event["initiative"] = initiative
+        print("event", event)
+        print("initiative", initiative.id)
         event_id = Events.create_or_update(event)
         EventsAddFields.create(event_id, data.get("addfields"))
         metrics_delta = EventMetricsFields.create_or_update(

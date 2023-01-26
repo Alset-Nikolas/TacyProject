@@ -6,7 +6,7 @@ import CustomizedButton from "../../components/button/button";
 import { setEventsState } from "../../redux/evens-slice";
 import InitiativeManagement from "../../components/initiative-management/initiative-management";
 import DateInput from "../../components/date-input/date-input";
-import { useGetComponentsQuery, useGetInitiativeByIdQuery } from "../../redux/state/state-api";
+import { useGetComponentsQuery, useGetInitiativeByIdQuery, useGetProjectInfoQuery } from "../../redux/state/state-api";
 import { useAddEventMutation, useGetEventsListQuery } from "../../redux/state/state-api";
 
 //Styles
@@ -19,6 +19,9 @@ export default function AddEventPage() {
   const location = useLocation();
   const { currentId } = useAppSelector((store) => store.state.project);
   const { data: components } = useGetComponentsQuery(currentId ? currentId : -1);
+  const { data: project } = useGetProjectInfoQuery(currentId ? currentId : -1, {
+    skip: !currentId, 
+  });
   const {
     currentInitiativeId
   } = useAppSelector((store) => store.initiatives);
@@ -50,9 +53,11 @@ export default function AddEventPage() {
       date_end: '',
     },
     metric_fields: initiative.metric_fields.map((field) => {
+      const foundMetric = project?.metrics.find((metric) => metric.id === field.metric.id);
+
       return {
         metric: field.metric,
-        value: '' as number | string,
+        value: foundMetric?.is_aggregate ? ('' as number | string) : 0,
       }
     }),
     addfields: components && components.settings ?
@@ -87,12 +92,16 @@ export default function AddEventPage() {
 
   const onInitiativeInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    const formatDate = (dateString: string) => {
+      const dateParts = dateString.split('.');
+      return `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+    }
     setNewEventState((prevState) => {
       return {
         ...prevState,
         event: {
           ...prevState.event,
-          [name]: name.match('date') ? value.replaceAll('.', '-') : value,
+          [name]: value,
         }
       };
     })
@@ -234,18 +243,22 @@ export default function AddEventPage() {
                   className={`${styles.section}`}
                 >
                   {!newEventState.metric_fields.length && 'Список метрик пуст'}
-                  {newEventState.metric_fields.map((field, index) => (
-                    <label
-                      key={field.metric.id}
-                      className={`${styles.label}`}
-                    >
-                      <li>{field.metric.title}</li>
-                      <input
-                        value={field.value}
-                        onChange={(e) => onMetricsInputChange(e.target.value, index)}
-                      />
-                    </label>
-                  ))}
+                  {newEventState.metric_fields.map((field, index) => {
+                    const foundMetric = project?.metrics.find((metric) => metric.id === field.metric.id);
+                    return (
+                      <label
+                        key={field.metric.id}
+                        className={`${styles.label}`}
+                      >
+                        <li>{field.metric.title}</li>
+                        <input
+                          value={field.value}
+                          disabled={!foundMetric?.is_aggregate}
+                          onChange={(e) => onMetricsInputChange(e.target.value, index)}
+                        />
+                      </label>
+                    );
+                  })}
                 </ol>
               </div>
             </div>

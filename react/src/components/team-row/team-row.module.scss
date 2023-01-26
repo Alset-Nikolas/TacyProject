@@ -5,7 +5,7 @@
   box-sizing: border-box;
   align-items: center;
   height: fit-content;
-  background-color: #F4F4F4;
+  // background-color: #F4F4F4;
   width: 100px;
 
   td,
@@ -17,7 +17,7 @@
   }
 
   td {
-    border-left: 0.5px solid #504F4F;
+    // border-left: 0.5px solid #504F4F;
 
     &.delete {
       border-left: none;
@@ -55,15 +55,24 @@
 
 };
 
+.oddRow {
+  background-color: #FFF;
+}
+
+.evenRow {
+  background-color: #F4F4F4;
+}
+
 .cell {
-  background: #FFFFFF;
-  border: 1px solid #504F4F;
+  // background: #FFFFFF;
+  // border: 1px solid #504F4F;
+  width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: normal;
   box-sizing: border-box;
-  max-width: 190px;
+  // max-width: 190px;
   // max-width: 210px;
   padding: 0 8px;
   min-height: 22px;
@@ -94,7 +103,6 @@
 
 .delete {
   width: 26px;
-  background-color: #F4F4F4;
 }
 
 .modalWrapper {
@@ -113,4 +121,11 @@
 
 .modalButton {
   width: 102px;
+}
+
+.input {
+  background: #FFFFFF;
+  border: 1px solid #504F4F;
+  border-radius: 3px;
+  height: 23px;
 }

@@ -58,7 +58,7 @@ export default function EditInitiative() {
     }),
     metric_fields: initiative.metric_fields,
     addfields: initiative.addfields,
-    files: initiative.files,
+    files: [],
   });
 
   const onCancelClickHandler = () => {
@@ -306,12 +306,12 @@ export default function EditInitiative() {
                 <div
                   className={`${styles.sectionHeader}`}
                 >
-                  Аналитика
+                  Атрибуты инициатив
                 </div>
                 <div
                   className={`${styles.section}`}
                 >
-                  {!newInitiativeState.properties_fields.length && 'Данные для аналитики отсутствуют'}
+                  {!newInitiativeState.properties_fields.length && 'Атрибуты инициатив отсутствуют'}
                   {newInitiativeState.properties_fields.map((field, index) => (
                     <label
                       className={`${styles.label}`}
@@ -363,11 +363,6 @@ export default function EditInitiative() {
           <div
             className={`${styles.buttonWrapper}`}
           >
-            <CustomizedButton
-              value="Удалить"
-              color="transparent"
-              onClick={onDeleteClickHandler}
-            />
             <CustomizedButton
               className={`${styles.cancelButton}`}
               value="Отменить"

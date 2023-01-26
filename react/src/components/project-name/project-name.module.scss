@@ -3,16 +3,14 @@
   flex-direction: row;
   align-items: flex-start;
   background: #FFFFFF;
-  box-shadow: 0px 2px 22px 4px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
   margin: 0 0 48px 0;
   padding: 10px 20px 8px;
   width: 100%;
   gap: 20px;
 
   div {
-    font-size: 20px;
-    line-height: 30px;
+    font-size: 16px;
+    line-height: 28px;
   }
 }
 
@@ -32,9 +30,9 @@
   .nameWrapper {
     display: flex;
     flex-direction: row;
-    font-weight: 600;
-    font-size: 20px;
-    line-height: 30px;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 28px;
     color: #504F4F;
     gap: 16px;
 
@@ -79,9 +77,9 @@
 
 .projectName {
   flex: 1 1 300px;
-  font-weight: 600;
-  font-size: 20px;
-  line-height: 30px;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
   color: #17598C;
 }
 
@@ -94,9 +92,9 @@
 }
 
 .contentBoldText {
-  font-weight: 600;
-  font-size: 20px;
-  line-height: 30px;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 28px;
 }
 
 .input {

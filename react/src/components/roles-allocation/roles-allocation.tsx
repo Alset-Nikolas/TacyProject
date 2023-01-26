@@ -10,7 +10,8 @@ import {
   useGetInitiativeByIdQuery,
   useGetRolesQuery,
   useSetRolesMutation,
-  useGetTeamListQuery
+  useGetTeamListQuery,
+  useGetUserRightsQuery
 } from "../../redux/state/state-api";
 import { Checkbox, SelectChangeEvent } from "@mui/material";
 
@@ -61,6 +62,9 @@ export default function RolesAlloction() {
       }>;
     }>
   }>>([]);
+  const { data: userRights } = useGetUserRightsQuery(currentInitiativeId ? currentInitiativeId : -1, {
+    skip: !currentInitiativeId,
+  });
 
   const addPersonToRole = (role: TRole & {project: number}, index: number) => {
     setModalMemberList(() => {
@@ -179,9 +183,8 @@ export default function RolesAlloction() {
   }, [isSuccessSetRoles]);
 
   useEffect(() => {
-    if (!rolePersonList?.length || !teamList) return;
+    if (!teamList) return;
     const newMemberList = [...teamList];
-    console.log(rolePersonList);
     rolePersonList?.forEach((item, itemIndex) => {
       const memberIndex = newMemberList.findIndex((member) => {
         const fullName = `${item.user.last_name} ${item.user.first_name} ${item.user.second_name}`;
@@ -196,7 +199,7 @@ export default function RolesAlloction() {
 
     setMembersList(newMemberList);
 
-  }, [rolePersonList, teamList]);
+  }, [rolePersonList, teamList, initiative]);
 
   useEffect(() => {
     setRoles(initiative ? initiative.roles : []);
@@ -242,143 +245,142 @@ export default function RolesAlloction() {
             <div
               className={`${styles.contentWrapper}`}
             >
-              {/* <div
-                className={`${styles.titlesColumn}`}
-              >
-                {roles.map((item) => (
-                  <div
-                    key={`title_${item.role.id}`}
-                    className={`${styles.cell}`}
-                  >
-                      {item.role.name}
-                  </div>
-                ))}
-              </div> */}
-              <div
-                className={`${styles.valuesColumn}`}
-              >
+              {!roles.length && (
+                <div>Отсутствуют роли для распределения</div>
+              )}
+              {!!roles.length && (
                 <div
-                  className={`${styles.roleGroup}`}
+                  className={`${styles.valuesColumn}`}
                 >
-                  <div 
-                    className={`${styles.roleCell}`}
-                  />
                   <div
-                    className={`${styles.userWrapper}`}
+                    className={`${styles.roleGroup}`}
                   >
+                    <div 
+                      className={`${styles.roleCell}`}
+                    />
                     <div
-                      className={`${styles.nameCell} ${styles.header}`}
+                      className={`${styles.userWrapper}`}
                     >
-                      ФИО
+                      <div
+                        className={`${styles.nameCell} ${styles.header}`}
+                      >
+                        ФИО
+                      </div>
+                      {project?.properties.map((property) => (
+                        <div
+                          key={`${property.id}`}
+                          className={`${styles.propertyCell} ${styles.header}`}
+                        >
+                          {property.title}
+                        </div>
+                      ))}
                     </div>
-                    {project?.properties.map((property) => (
-                      <div
-                        key={`${property.id}`}
-                        className={`${styles.propertyCell} ${styles.header}`}
-                      >
-                        {property.title}
-                      </div>
-                    ))}
                   </div>
-                </div>
-                {
-                  roles.map((item, roleIndex) => (
-                    <div
-                      key={item.role.id}
-                      className={`${styles.roleGroup}`}
-                    >
-                      <div
-                        className={`${styles.roleCell}`}
-                      >
+                  {
+                    roles.map((item, roleIndex) => {
+                      return (
                         <div
-                          className={`${styles.cell}`}
+                          key={item.role.id}
+                          className={`${styles.roleGroup}`}
                         >
-                            {item.role.name}
-                        </div>
-                        <div
-                          className={`${styles.addMemberIcon}`}
-                        >
-                          <Pictogram
-                            type="add-filled"
-                            cursor="pointer"
-                            onClick={() => addPersonToRole(item.role, roleIndex)}
-                          />
-                        </div>
-                      </div>
-                      <div
-                        className={`${styles.membersWrapper}`}
-                      >
-                        {item.community.map((member, userIndex) => {
-                          // if (!member.user_info) return null;
-                          let items: Array<string> = [notAllocated];
-                          if (membersList) items = items.concat(membersList.map((el) => el.name));
-                          if (member.user_info && member.user_info.user.id !== -1) items = items.concat([`${member.user_info?.user.last_name} ${member.user_info?.user.first_name} ${member.user_info?.user.second_name}`]);
-                          // const items= membersList ? member.user_info ? [...membersList, notAllocated, `${member.user_info?.user.last_name} ${member.user_info?.user.first_name} ${member.user_info?.user.second_name}`] : [...membersList, notAllocated] : [notAllocated]}
-
-                          return (
+                          <div
+                            className={`${styles.roleCell}`}
+                          >
                             <div
-                              key={member.user_info ? member.user_info.user.id : `new_${userIndex}`}
-                              className={`${styles.userWrapper}`}
+                              className={`${styles.cell}`}
                             >
+                                {item.role.name}
+                            </div>
+                            {(userRights?.user_is_author || userRights?.user_is_superuser) && (
                               <div
-                                className={`${styles.nameCell}`}
+                                className={`${styles.addMemberIcon}`}
                               >
+                                <Pictogram
+                                  type="add-filled"
+                                  cursor="pointer"
+                                  onClick={() => addPersonToRole(item.role, roleIndex)}
+                                />
+                              </div>
+                            )}
+                          </div>
+                          <div
+                            className={`${styles.membersWrapper}`}
+                          >
+                            {item.community.map((member, userIndex) => {
+                              // if (!member.user_info) return null;
+                              let items: Array<string> = [notAllocated];
+                              if (membersList) items = items.concat(membersList.map((el) => el.name));
+                              if (member.user_info && member.user_info.user.id !== -1) items = items.concat([`${member.user_info?.user.last_name} ${member.user_info?.user.first_name} ${member.user_info?.user.second_name}`]);
+                              // const items= membersList ? member.user_info ? [...membersList, notAllocated, `${member.user_info?.user.last_name} ${member.user_info?.user.first_name} ${member.user_info?.user.second_name}`] : [...membersList, notAllocated] : [notAllocated]}
+
+                              return (
                                 <div
-                                  className={`${styles.removeMemberIcon}`}
+                                  key={member.user_info ? member.user_info.user.id : `new_${userIndex}`}
+                                  className={`${styles.userWrapper}`}
                                 >
+                                  <div
+                                    className={`${styles.nameCell}`}
+                                  >
+                                    {(userRights?.user_is_author || userRights?.user_is_superuser) && (
+                                      <div
+                                        className={`${styles.removeMemberIcon}`}
+                                      >
+                                        <Pictogram
+                                          type="delete-filled"
+                                          cursor="pointer"
+                                          onClick={() => deletePersonFromRole(roleIndex, userIndex)}
+                                        />
+                                      </div>
+                                    )}
+                                    <div
+                                      style={{
+                                        border: '0.5px solid #504F4F',
+                                        backgroundColor: '#FFFFFF',
+                                        width: '100%',
+                                      }}
+                                    >
+                                      {`${member.user_info?.user.last_name} ${member.user_info?.user.first_name[0]}. ${member.user_info?.user.second_name[0]}.`}
+                                    </div>
+                                  </div>
+                                  {member.user_info?.properties.map((propertie) => {
+                                    return (
+                                      <div
+                                        key={`${member.user_info?.user.id}-${propertie.title.id}`}
+                                        className={`${styles.propertyCell}`}
+                                      >
+                                        {propertie.values.map((value) => value.value).join(', ')}
+                                      </div>
+                                    );
+                                  })}
+                                  {/* <CustomizedSelect
+                                    style={selectorStyle}
+                                    items={items}
+                                    value={(member.user_info && member.user_info.user.id !== -1) ? `${member.user_info.user.last_name} ${member.user_info.user.first_name} ${member.user_info.user.second_name}` : notAllocated}
+                                    onChange={(e) => onRolesPersonChange(e, roleIndex, userIndex)}
+                                  />
                                   <Pictogram
-                                    type="delete-filled"
+                                    type="delete"
                                     cursor="pointer"
                                     onClick={() => deletePersonFromRole(roleIndex, userIndex)}
                                   />
+                                  {(userIndex === item.community.length - 1) && (
+                                    <Pictogram
+                                    type="add-filled"
+                                    cursor="pointer"
+                                    onClick={() => addPersonToRole(roleIndex)}
+                                  />
+                                  )} */}
                                 </div>
-                                <div
-                                  style={{
-                                    border: '0.5px solid #504F4F',
-                                    backgroundColor: '#FFFFFF',
-                                    width: '100%',
-                                  }}
-                                >
-                                  {`${member.user_info?.user.last_name} ${member.user_info?.user.first_name[0]}. ${member.user_info?.user.second_name[0]}.`}
-                                </div>
-                              </div>
-                              {member.user_info?.properties.map((propertie) => {
-                                return (
-                                  <div
-                                    key={`${member.user_info?.user.id}-${propertie.title.id}`}
-                                    className={`${styles.propertyCell}`}
-                                  >
-                                    {propertie.values.map((value) => value.value).join(', ')}
-                                  </div>
-                                );
-                              })}
-                              {/* <CustomizedSelect
-                                style={selectorStyle}
-                                items={items}
-                                value={(member.user_info && member.user_info.user.id !== -1) ? `${member.user_info.user.last_name} ${member.user_info.user.first_name} ${member.user_info.user.second_name}` : notAllocated}
-                                onChange={(e) => onRolesPersonChange(e, roleIndex, userIndex)}
-                              />
-                              <Pictogram
-                                type="delete"
-                                cursor="pointer"
-                                onClick={() => deletePersonFromRole(roleIndex, userIndex)}
-                              />
-                              {(userIndex === item.community.length - 1) && (
-                                <Pictogram
-                                type="add-filled"
-                                cursor="pointer"
-                                onClick={() => addPersonToRole(roleIndex)}
-                              />
-                              )} */}
-                            </div>
-                          );
-                        })}
-                      </div>
-                      
-                    </div>
-                  ))
-                }
-              </div>
+                              );
+                            })}
+                          </div>
+                          
+                        </div>
+                      );
+                    })
+                  }
+                </div>
+              )}
             </div>
           </SectionContent>
           <div

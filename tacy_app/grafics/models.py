@@ -129,18 +129,20 @@ class GraficsProject(models.Model):
     @classmethod
     def update_format(cls, res, project, quantity=None):
         def group_small_values(info, quantity):
-            if not quantity or len(new_format) <= quantity:
+            if not quantity or len(new_format) - 1 <= quantity:
                 return info
-            last_item = {
+            group_small_item = {
                 "name": "Другие",
                 "name_short": "Другие",
                 "value": 0,
             }
             quantity = int(quantity)
-            last_item["value"] = sum(
-                x.get("value") for x in new_format[quantity + 1 :]
+            group_small_item["value"] = sum(
+                x.get("value") for x in new_format[quantity:-1]
             )
-            return new_format[: quantity + 1] + [last_item]
+            return (
+                new_format[:quantity] + [group_small_item] + [new_format[-1]]
+            )
 
         grafics = res["grafics"]
         status_grafic = res["status_grafic"]
@@ -211,6 +213,7 @@ class GraficsProject(models.Model):
                 )
             else:
                 new_format_status_grafic.pop(m_id)
+        print(new_format_res)
 
         return {
             "grafics": new_format_res,
@@ -247,10 +250,11 @@ class GraficsProject(models.Model):
         return GraficsProject.update_format(res, project, quantity)
 
     @classmethod
-    def get_statistic_user(cls, user, project):
+    def get_statistic_user(cls, user, project, quantity=None):
         return GraficsProject.get_statistic_metrics_by_project(
             project=project,
             inits=Initiatives.get_user_initiatievs(user, project),
+            quantity=quantity,
         )
 
     @classmethod

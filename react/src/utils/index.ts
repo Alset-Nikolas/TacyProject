@@ -25,10 +25,14 @@ export const handleInputChange = (
   dispatch: AppDispatch,
 ) => {
   // const
+  const formatDate = (dateString: string) => {
+    const dateParts = dateString.split('.');
+    return `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+  }
   if (Object.prototype.hasOwnProperty.call(project, e.target.name)) {
     if (e.target.type !== 'file') {
       dispatch(updateProjectForEdit({
-        [e.target.name]: e.target.name.match('date') ? e.target.value.replaceAll('.', '-') : e.target.value,
+        [e.target.name]: e.target.value,
       }));
     } else {
       const files = (e.target as HTMLInputElement).files;
@@ -57,7 +61,7 @@ export const handlePropertieInutChange = (
 
     const propsArrayElement = {...propsArray[index]};
 
-    propsArrayElement[key] = (key as string).match('date') ? value.replaceAll('.', '-') : value;
+    propsArrayElement[key] = value;
     propsArray[index] = propsArrayElement;
 
     dispatch(updateProjectForEdit({
@@ -266,6 +270,12 @@ export function isMetric(item: TCommonProject): item is TMetrica {
 export function makeProjectFordit(project: TProject): TProjectForEdit {
   const projectForEdit: { [prop: string]: any } = {};
 
+  const convertDate = (date: string) => {
+    const splitedDate = date.split('-');
+    const returnDate = `${splitedDate[2]}.${splitedDate[1]}.${splitedDate[0]}`;
+    return returnDate
+  }
+
   for (const [key, value] of Object.entries(project)) {
     if (key === 'properties' && value instanceof Array) {
       projectForEdit[key] = [];
@@ -296,11 +306,12 @@ export function makeProjectFordit(project: TProject): TProjectForEdit {
         // });
       } else { 
         value.forEach((el) => {
+          
           if (isStage(el)) {
             projectForEdit[key].push({
               name_stage: el.name_stage,
-              date_start: el.date_start,
-              date_end: el.date_end,
+              date_start: convertDate(el.date_start),
+              date_end: convertDate(el.date_end),
             });
           }
         });
@@ -317,7 +328,7 @@ export function makeProjectFordit(project: TProject): TProjectForEdit {
           if (isIntermediateDate(el)) {
             projectForEdit[key].push({
               title: el.title,
-              date: el.date,
+              date: convertDate(el.date),
             });
           }
         });
@@ -349,6 +360,8 @@ export function makeProjectFordit(project: TProject): TProjectForEdit {
           }
         });
       }
+    } else if (key === 'date_start' || key === 'date_end') {
+      projectForEdit[key] = convertDate(value as string);
     } else {
       projectForEdit[key] = value;
     }

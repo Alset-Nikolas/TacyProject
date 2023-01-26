@@ -105,6 +105,7 @@ export default function CustomizedButton({
           disableRipple
           onClick={onClick}
           type={type}
+          disabled={disabled}
         >
           {value}
         </TransparentButton>

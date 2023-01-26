@@ -52,6 +52,7 @@
 .filterRow {
   display: flex;
   gap: 20px;
+  justify-content: flex-start;
 }
 
 .singleFilter {
@@ -76,19 +77,7 @@
     thead {
       position: sticky;
       top: 0;
-      background-color: #F4F4F4;
       box-sizing: border-box;
-    }
-
-    th:after {
-      content: '';
-      position: absolute;
-      left: 0;
-      width: 100%;
-    }
-    th:after {
-      bottom: -0.5px;
-      border-bottom: 0.5px solid #504F4F;
     }
 
     td,
@@ -101,15 +90,19 @@
     th {
       padding-bottom: 0;
     }
-
-    td {
-      border-right: 0.5px solid #504F4F;
-    }
-
-    td:last-child {
-      border-right: none;
-    }
   }
+}
+
+.tableHead {
+  background-color: #F4F4F4;
+}
+
+.oddRow {
+  background-color: #F4F4F4;
+}
+
+.evenRow {
+  background-color: #FFF;
 }
 
 .userRole:hover {
@@ -126,35 +119,24 @@
 }
 
 .tableWrapper::-webkit-scrollbar-thumb {
-  /*border-radius: 100px;*/
   background-color: #17598C;
-  // height: 100%;
   border-radius: 1.5px;
 }
 
 .tableRow{
   box-sizing: border-box;
-  border: 1px solid rgba(80, 79, 79, 0);
   margin: 3px;
   cursor: pointer;
 }
 
 .tableRow:hover {
-  border: 1px solid #504F4F;
-
-  td {
-    border-top: 1px solid #504F4F;
-  }
+  background: rgba(23, 89, 140, 0.5);
+  color: white;
 }
 
 .activeRow {
-  // border: 1px solid #504F4F;
-  background: #17598C;
+  background: rgba(23, 89, 140);
   color: white;
-
-  td {
-    border-top: 1px solid #504F4F;
-  }
 }
 
 .number {

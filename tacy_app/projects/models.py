@@ -6,7 +6,9 @@ from django.utils import timezone
 from django.db.models import Q
 from functools import reduce
 import operator
-
+from django.db.models import Count
+from django.core.exceptions import ValidationError
+from django.conf import settings
 
 User = get_user_model()
 
@@ -118,7 +120,6 @@ class Project(models.Model):
 
     def inits_sorted(self, data, inits):
         metrics_sorted = data.get("metrics")
-        print("metrics_sorted", metrics_sorted)
         if metrics_sorted:
             metrics_sorted = metrics_sorted.split(",")
             return sorted(
@@ -146,33 +147,48 @@ class Project(models.Model):
             roles_filter = [
                 item.split(",") for item in roles_filter.split(";")
             ]
-            query_role = reduce(
-                operator.or_,
-                (
-                    operator.and_(
-                        (Q(user_roles__user=item[0])),
-                        (Q(user_roles__role=item[1])),
-                    )
-                    for item in roles_filter
-                    if len(item) == 2
-                ),
-            )
-            inits = inits.filter(query_role)
+            res = {}
+            for item in roles_filter:
+                if len(item) == 2:
+                    title, val = item
+                    if title not in res:
+                        res[title] = []
+                    res[title].append(val)
+            for title, values in res.items():
+                query_role = reduce(
+                    operator.or_,
+                    (
+                        operator.and_(
+                            (Q(user_roles__user=title)),
+                            (Q(user_roles__role=value)),
+                        )
+                        for value in values
+                    ),
+                )
+                inits = inits.filter(query_role)
         if properties_filter:
             properties_filter = [
                 item.split(",") for item in properties_filter.split(";")
             ]
-            query_properties = reduce(
-                operator.or_,
-                (
-                    operator.and_(
-                        (Q(properties_fields__title=item[0])),
-                        (Q(properties_fields__values=item[1])),
-                    )
-                    for item in properties_filter
-                    if len(item) == 2
-                ),
-            )
+            res = {}
+            for item in properties_filter:
+                if len(item) == 2:
+                    title, val = item
+                    if title not in res:
+                        res[title] = []
+                    res[title].append(val)
+            for title, values in res.items():
+                query_properties = reduce(
+                    operator.or_,
+                    (
+                        operator.and_(
+                            (Q(properties_fields__title=title)),
+                            (Q(properties_fields__values=value)),
+                        )
+                        for value in values
+                    ),
+                )
+                inits = inits.filter(query_properties)
             inits = inits.filter(query_properties)
         if files_filter:
             files_filter = files_filter.split(",")
@@ -187,12 +203,12 @@ class Project(models.Model):
                     if item != ""
                 ),
             )
-            from django.db.models import Count
 
             inits = inits.filter(query_files)
             inits = inits.annotate(total=Count("id")).filter(
                 total=len(files_filter)
             )
+        # inits = inits.distinct("pk")
         return self.inits_sorted(data, inits)
 
 

@@ -176,12 +176,12 @@ export default function EventsTable() {
                   <td
                     className={`${styles.dateCol}`}
                   >
-                    {moment(event.event.date_start).format('MM.DD.YYYY')}
+                    {moment(event.event.date_start).format('DD.MM.YYYY')}
                   </td>
                   <td
                     className={`${styles.dateCol}`}
                   >
-                    {moment(event.event.date_end).format('MM.DD.YYYY')}
+                    {moment(event.event.date_end).format('DD.MM.YYYY')}
                   </td>
                   {event.addfields.map((addfield) => (
                   <td

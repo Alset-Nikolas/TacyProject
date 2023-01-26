@@ -8,6 +8,7 @@ import { useGetProjectInfoQuery } from '../../redux/state/state-api';
 
 // Styles
 import styles from './project-name.module.scss';
+import sectionStyles from '../../styles/sections.module.scss';
 
 type TProjectNameProps = {
   edit?: boolean;
@@ -145,7 +146,7 @@ export default function ProjectName({
   const dateEnd = new Date(project.date_end);
 
   return (
-    <div className={`${styles.wrapper}`}>
+    <div className={`${sectionStyles.wrapperBorder} ${styles.wrapper}`}>
       {/* <div className={`${textStyles.sectionHeaderText} ${sectionsStyles.header}`}>
         name
         <Pictogram type='edit' />

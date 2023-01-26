@@ -41,7 +41,7 @@ export default function TeamRow({ index, member, edit, header, removeMember, set
     width: '186px',
     height: '24px',
     border: '1px solid #504F4F',
-    borderRadius: 0,
+    borderRadius: '3px',
     paddingBottom: 0,
     background: '#FFF',
   };
@@ -204,10 +204,11 @@ export default function TeamRow({ index, member, edit, header, removeMember, set
     
   return (
     <>
-      <tr className={`${styles.wrapper}`}>
+      <tr className={`${styles.wrapper} ${index % 2 ? styles.oddRow : styles.evenRow}`}>
         <td className={`${styles.name}`}>
           {edit ? (
             <input
+              className={`${styles.input}`}
               value={name}
               name="name"
               onChange={handleInputChange}
@@ -253,6 +254,7 @@ export default function TeamRow({ index, member, edit, header, removeMember, set
         <td className={`${styles.email}`}>
           {edit ? (
             <input
+              className={`${styles.input}`}
               value={email}
               name="email"
               onChange={handleInputChange}
@@ -267,6 +269,7 @@ export default function TeamRow({ index, member, edit, header, removeMember, set
         <td className={`${styles.phone}`}>
           {edit ? (
             <input
+              className={`${styles.input}`}
               value={phone}
               name="phone"
               onChange={handleInputChange}
@@ -290,7 +293,7 @@ export default function TeamRow({ index, member, edit, header, removeMember, set
           if (!components?.table_community.properties[propIndex].is_community_activate) return null;
           return (
             <td
-              className={`${styles.cellWrapper} ${propIndex === properties.length - 1 ? styles.last : ''}`}
+              className={`${styles.cell} ${propIndex === properties.length - 1 ? styles.last : ''}`}
               key={`${outputPropertie.id}_${outputPropertie.title}`}
             >
               {edit ? (
@@ -309,7 +312,7 @@ export default function TeamRow({ index, member, edit, header, removeMember, set
           )
         })}
         {edit && (
-          <td className={`${styles.delete}`}>
+          <td className={`${styles.delete} ${index % 2 ? styles.oddRow : styles.evenRow}`}>
             <Pictogram
               type="delete"
               cursor="pointer"

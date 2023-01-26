@@ -3,6 +3,7 @@ import SectionContent from '../section/section-content/section-content';
 
 // Styles
 import styles from './project-timeline.module.scss';
+import sectionStyles from '../../styles/sections.module.scss';
 import TimelineTableRow from '../timeline-table-row/timeline-table-row';
 import TimelineStageRow from '../timeline-stage-row/timeline-stage-row';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
@@ -56,7 +57,7 @@ export default function ProjectTimeline({
   });
 
   return (
-    <div className={`${styles.wrapper}`}>
+    <div className={`${styles.wrapper} ${sectionStyles.wrapperBorder}`}>
       <SectionHeader>
         Этапы проекта
       </SectionHeader>

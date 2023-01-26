@@ -138,6 +138,7 @@ class InfoInitiativeRole(views.APIView):
         )
         if stage_user_info and not stage_user_info.activate:
             flag = True
+        print("initiative.get_file_status()", initiative.get_file_status())
         return Response(
             {
                 "init_activate": initiative.activate,

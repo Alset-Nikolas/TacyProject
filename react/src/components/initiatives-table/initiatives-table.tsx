@@ -462,7 +462,8 @@ export default function InitiativesTable({ externalInitiativesList }: TInitiativ
                       const value = rolesFilter.find((filterItem) => filterItem.role === item.id);
                       return (
                         <div
-                            key={item.id}
+                          key={item.id}
+                          className={`${styles.singleFilter}`}
                         >
                           {item.name}
                           <SelectRoles
@@ -478,7 +479,9 @@ export default function InitiativesTable({ externalInitiativesList }: TInitiativ
                       className={`${styles.filterRow}`}
                     >
 
-                        <div>
+                        <div
+                          className={`${styles.singleFilter}`}
+                        >
                           Документы
                           <SelectFiles
                             value={filesFilter.map((el) => JSON.stringify(el))}
@@ -520,7 +523,9 @@ export default function InitiativesTable({ externalInitiativesList }: TInitiativ
         <div className={styles.tableWrapper}>
           <table>
             <thead>
-              <tr>
+              <tr
+                className={styles.tableHead}
+              >
                 <th
                   className={`${styles.number}`}
                 >
@@ -591,7 +596,7 @@ export default function InitiativesTable({ externalInitiativesList }: TInitiativ
                 return (
                   <tr
                     key={item.initiative.id}
-                    className={`${styles.tableRow} ${isActive ? styles.activeRow : ''}`}
+                    className={`${styles.tableRow} ${(index % 2) ? styles.oddRow : styles.evenRow} ${isActive ? styles.activeRow : ''}`}
                     onClick={() => onInitiativeClickHandler(item)}
                   >
                     <td

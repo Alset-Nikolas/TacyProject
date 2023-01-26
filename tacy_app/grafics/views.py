@@ -78,7 +78,7 @@ class StatisticMetricsView(views.APIView):
             return Response({"msg": "id project not valid"}, 400)
         if quantity and quantity.isdigit():
             quantity = int(quantity)
-
+        print("quantity", quantity)
         project = get_object_or_404(Project, id=id)
         stat = GraficsProject.get_statistic_metrics_by_project(
             project, quantity=quantity
@@ -100,9 +100,14 @@ class StatisticMetricsUserView(views.APIView):
     )
     def get(self, request, format=None):
         id = request.GET.get("id", None)
+        quantity = request.GET.get("quantity", None)
         if not id or not id.isdigit():
             return Response({"msg": "id project not valid"}, 400)
+        if quantity and quantity.isdigit():
+            quantity = int(quantity)
         project = get_object_or_404(Project, id=id)
         user = request.user
-        stat = GraficsProject.get_statistic_user(user, project)
+        stat = GraficsProject.get_statistic_user(
+            user, project, quantity=quantity
+        )
         return Response(stat, 200)

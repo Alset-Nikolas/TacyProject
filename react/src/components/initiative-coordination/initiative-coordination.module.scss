@@ -16,16 +16,20 @@
 .content {
   display: flex;
   background: #F4F4F4;
+  gap: 20px;
 
   & .col:first-child {
+    position: relative;
     display: flex;
     flex-direction: column;
-    padding: 0;
+    padding: 20px 0 20px 20px;
   }
 
   & .col:last-child {
     display: flex;
     flex-direction: column;
+    padding: 20px 20px 20px 0;
+    box-sizing: border-box;
   }
 }
 
@@ -35,10 +39,12 @@
 }
 
 .buttonWrapper {
-  // position: absolute;
-  margin: 0 20px 10px 0;
-  bottom: 8px;
-  right: 10px;
+  position: absolute;
+  bottom: 20px;
+  right: 0;
+  // margin: 0 20px 10px 0;
+  // bottom: 8px;
+  // right: 10px;
   display: flex;
   // flex-direction: column;
   justify-content: flex-end;
@@ -50,6 +56,7 @@
   display: flex;
   justify-content: flex-end;
   gap:20px;
+  align-self: flex-end;
 }
 
 .button {
@@ -58,13 +65,23 @@
 
 .chat {
   position: relative;
+  display: flex;
+  flex-direction: column-reverse;
   overflow-y: auto;
   height: 488px;
   padding: 20px 20px 0px 20px;
   background-color: #FFF;
-  justify-content: flex-end;
   box-sizing: border-box;
-  border-top: 0.5px solid #504F4F;
+  border-radius: 10px 10px 0 0;
+}
+
+.messagesWrapper {
+  // position: absolute;
+  // bottom: 0;
+  // left: 0;
+  // right: 0;
+  display: flex;
+  flex-direction: column;
 }
 
 .chat::-webkit-scrollbar,
@@ -117,7 +134,7 @@
 // }
 
 .infoBlock {
-  margin: 20px;
+  margin-bottom: 20px;
   // height: 50%;
   border-radius: 10px;
   // overflow: hidden;

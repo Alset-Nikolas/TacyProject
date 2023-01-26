@@ -163,7 +163,7 @@ export default function InitiativeSettingsManagement({ edit, editButton, compone
   }
 
   return (
-    <section className={`${styles.wrapper}`}>
+    <section className={`${styles.wrapper} ${sectionStyles.wrapperBorder}`}>
       <SectionHeader>
         Управление инициативой
       </SectionHeader>

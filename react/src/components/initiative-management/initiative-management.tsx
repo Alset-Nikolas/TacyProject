@@ -10,9 +10,11 @@ import { paths } from "../../consts";
 
 // Styles
 import styles from './initiative-management.module.scss';
+import sectionStyles from '../../styles/sections.module.scss';
 import { setInitiativeEdit } from "../../redux/state/state-slice";
 import CustomizedButton from "../button/button";
 import { useGetComponentsQuery, useGetInitiativeByIdQuery, useGetInitiativesListQuery } from "../../redux/state/state-api";
+import moment from "moment";
 
 type TInitiativeManagementProps = {
   edit?: boolean;
@@ -159,9 +161,8 @@ export default function InitiativeManagement({ edit, editButton }: TInitiativeMa
       </section>
     );
   }
-
   return (
-    <section className={`${styles.wrapper}`}>
+    <section className={`${styles.wrapper} ${sectionStyles.wrapperBorder}`}>
       <SectionHeader>
         Управление инициативой
       </SectionHeader>
@@ -187,7 +188,8 @@ export default function InitiativeManagement({ edit, editButton }: TInitiativeMa
                   Дата регистрации:
                 </div>
                 <div>
-                  {currentInitiative.initiative.date_registration}
+                  {/* {currentInitiative.initiative.date_registration} */}
+                  {moment(new Date(currentInitiative.initiative.date_registration)).format('DD.MM.YYYY')}
                 </div>
               </div>
             </li>
@@ -212,13 +214,19 @@ export default function InitiativeManagement({ edit, editButton }: TInitiativeMa
             <li>
               <div>
                 <div>Дата начала:</div>
-                <div>{currentInitiative.initiative.date_start}</div>
+                <div>
+                  {/* {currentInitiative.initiative.date_start} */}
+                  {moment(new Date(currentInitiative.initiative.date_start)).format('DD.MM.YYYY')}
+                </div>
               </div>
             </li>
             <li>
               <div>
                 <div>Дата окончания:</div>
-                <div>{currentInitiative.initiative.date_end}</div>
+                <div>
+                  {/* {currentInitiative.initiative.date_end} */}
+                  {moment(new Date(currentInitiative.initiative.date_end)).format('DD.MM.YYYY')}
+                </div>
               </div>
             </li>
             {/* <li>

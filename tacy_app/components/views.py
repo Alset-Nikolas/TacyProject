@@ -36,6 +36,7 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from .permissions import IsAuthorPermission
+from django.conf import settings
 
 
 def get_project_by_id_or_active(request) -> tp.Optional[Project]:
@@ -1236,8 +1237,9 @@ class CreateEventView(views.APIView):
             data=data, context={"initiative": initiative, "user": request.user}
         )
         s.is_valid(raise_exception=True)
-        data["event"]["author"] = request.user
-        s.create_or_update(data)
+        data = s.data
+        print(s.data)
+        s.create_or_update(s.data)
         return Response(s.data, 201)
 
 

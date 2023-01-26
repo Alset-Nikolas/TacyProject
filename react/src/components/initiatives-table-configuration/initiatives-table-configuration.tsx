@@ -92,7 +92,7 @@ export default function InitiativesTableConfiguration({ edit, components }: TIni
             <div
               className={`${sectionStyles.addfieldsHeader}`}
             >
-              Аналитика
+              Атрибуты инициатив
             </div>
             <div
               className={`${styles.listWrapper}`}
@@ -228,7 +228,7 @@ export default function InitiativesTableConfiguration({ edit, components }: TIni
             <div
               className={`${sectionStyles.sectionHeader}`}
             >
-              Аналитика
+              Атрибуты инициатив
             </div>
             <ol
               className={`${sectionStyles.sectionList}`}

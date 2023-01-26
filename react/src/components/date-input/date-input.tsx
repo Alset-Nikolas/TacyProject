@@ -15,8 +15,8 @@ export default function DateInput({ className, value, id, name, onChange }: TDat
       className={`${className}`}
       id={id}
       name={name}
-      mask="9999.99.99"
-      placeholder="ГГГГ.ММ.ДД"
+      mask="99.99.9999"
+      placeholder="ДД.ММ.ГГГГ"
       value={value}
       maskPlaceholder="_"
       onChange={onChange}

@@ -175,7 +175,7 @@ export default function RiskManagement({ edit, editButton, isSettings, component
   );
 
   return (
-    <section className={`${styles.wrapper}`}>
+    <section className={`${styles.wrapper} ${sectionStyles.wrapperBorder}`}>
       <SectionHeader>
         Риски
       </SectionHeader>

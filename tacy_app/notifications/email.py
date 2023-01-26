@@ -6,6 +6,7 @@ from django.core.mail import EmailMultiAlternatives
 class EmailManage:
     @staticmethod
     def send_invitation_new_account(user, context):
+        print("email send_invitation_new_account")
         msg = EmailMultiAlternatives(
             subject=f"Вас приглашают присоединиться в приложени {settings.SITE_FULL_NAME}",
             body=f"Перейдите по ссылке {settings.SITE_DOMAIN}/reset-password и смените свой пароль.",
@@ -16,6 +17,7 @@ class EmailManage:
 
     @staticmethod
     def send_invitation_new_project(user, context):
+        print("email send_invitation_new_project")
         msg = EmailMultiAlternatives(
             subject=f"Вас пригласили учавствовать в новом проекте приложения {settings.SITE_FULL_NAME}",
             body=f"Перейдите по ссылке {settings.SITE_DOMAIN}.",
@@ -26,6 +28,7 @@ class EmailManage:
 
     @staticmethod
     def send_removed_in_project(user, context):
+        print("email send_removed_in_project")
         project = context.get("project")
         msg = EmailMultiAlternatives(
             subject=f"Вас убрали с проекта {project.name} '{settings.SITE_FULL_NAME}'",

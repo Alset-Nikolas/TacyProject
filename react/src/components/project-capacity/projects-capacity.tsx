@@ -40,7 +40,7 @@ export default function ProjectCapacity({ edit }: TProjectCapacityProps) {
   return (
     <div className={`${styles.wrapper}`}>
       <SectionHeader>
-        Аналитика проекта
+        Атрибуты инициатив
       </SectionHeader>
       <div className={`${styles.contentWrapper}`}>
         {project.properties.map((propertie) => (

@@ -3,6 +3,7 @@ import SectionHeader from '../section/section-header/section-header';
 // Styles
 import styles from './basic-functions.module.scss';
 import textStyles from '../../styles/text.module.scss';
+import sectionStyles from '../../styles/sections.module.scss';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import { handleInputChange } from '../../utils';
 import { useGetProjectInfoQuery } from '../../redux/state/state-api';
@@ -163,7 +164,7 @@ export default function BasicFunctions({
   if (!project) return null;
 
   return (
-    <div className={`${styles.wrapper}`}>
+    <div className={`${sectionStyles.wrapperBorder} ${styles.wrapper}`}>
       <SectionHeader>
         Основные функции
       </SectionHeader>

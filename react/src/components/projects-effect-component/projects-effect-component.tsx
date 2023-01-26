@@ -5,6 +5,8 @@ import SectionHeader from '../section/section-header/section-header';
 
 // Styles
 import styles from './projects-effect.module.scss';
+import sectionStyles from '../../styles/sections.module.scss';
+
 import { TMetrica } from '../../types';
 import MetricView from '../ui/metric-view/metric-view';
 
@@ -16,7 +18,7 @@ type TProjectsEffectComponentProps = {
 export default function ProjectsEffectComponent({ title, metrics }: TProjectsEffectComponentProps) {
 
   return (
-    <section className={`${styles.wrapper}`}>
+    <section className={`${styles.wrapper} ${sectionStyles.wrapperBorder}`}>
       <SectionHeader>
         {title || ''}
       </SectionHeader>

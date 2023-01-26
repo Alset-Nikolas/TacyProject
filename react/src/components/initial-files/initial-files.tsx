@@ -1,8 +1,11 @@
 import { ChangeEvent, Dispatch, SetStateAction, useEffect, useState } from 'react';
 import SectionHeader from '../section/section-header/section-header';
+
 // Styles
 import styles from './initial-files.module.scss';
 import textStyles from '../../styles/text.module.scss';
+import sectionStyles from '../../styles/sections.module.scss';
+
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import { handleInputChange } from '../../utils';
 import { useGetFilesQuery, useGetProjectInfoQuery, useGetProjectsListQuery } from '../../redux/state/state-api';
@@ -122,7 +125,7 @@ export default function InitialFiles({
   if (!project) return null;
 
   return (
-    <div className={`${styles.wrapper}`}>
+    <div className={`${styles.wrapper} ${sectionStyles.wrapperBorder}`}>
       <SectionHeader>
         Установочные файлы
       </SectionHeader>

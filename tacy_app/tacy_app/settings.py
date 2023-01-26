@@ -93,10 +93,12 @@ DATABASES = {
     }
     # "default": {
     #     "ENGINE": "django.db.backends.postgresql",
-    #     "NAME": "tacy_project_db",
+    #     # "NAME": "tacy_project_db",
+    #     "NAME": "teisy",
     #     "USER": "postgres",
     #     "PASSWORD": "qwerty",
-    #     "HOST": "tacy_backend_postgres_container",
+    #     # "HOST": "tacy_backend_postgres_container",
+    #     "HOST": "localhost",
     #     "PORT": "5432",
     # }
 }
@@ -114,18 +116,18 @@ SWAGGER_SETTINGS = {
 }
 
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
-    },
-    {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
-    },
+    # {
+    #     "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+    # },
+    # {
+    #     "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+    # },
+    # {
+    #     "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+    # },
+    # {
+    #     "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+    # },
 ]
 
 LANGUAGE_CODE = "ru"
@@ -142,6 +144,10 @@ STATIC_URL = "/static/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+
+USE_L10N = False
+DATE_INPUT_FORMATS = ("%d.%m.%Y", "%Y-%m-%d")
+# DATE_INPUT_FORMATS = ("%d.%m.%Y",)
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework.authentication.TokenAuthentication",
@@ -151,8 +157,9 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
     "PAGE_SIZE": 5,
+    "DATE_INPUT_FORMATS": DATE_INPUT_FORMATS,
+    "DATETIME_FORMAT": "%Y-%m-%dT%H:%M:%S.%fZ",
 }
-
 
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 MEDIA_URL = "/media/"
@@ -167,10 +174,13 @@ EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-SITE_DOMAIN = "http://158.160.19.111"
+SITE_DOMAIN = "http://31.177.78.111"
+SITE_DOMAIN = "http://127.0.0.1:3000"
 SITE_FULL_NAME = "Site name"
 
-if DEBUG:
-    SITE_DOMAIN = "http://127.0.0.1:3000"
-    EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
-    EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
+# if DEBUG:
+#     SITE_DOMAIN = "http://127.0.0.1:3000"
+#     EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
+#     EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
+EMAIL_HOST_USER = "Alset.Nikolas@gmail.com"
+EMAIL_HOST_PASSWORD = "mehwrdpkfcfrybgi"

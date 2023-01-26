@@ -16,17 +16,24 @@ import {
 } from "../../redux/auth-slice";
 import { useGetAuthInfoByIdQuery } from "../../redux/auth/auth-api";
 import {
+  // useCloseInitiativeMutation,
+  useCoordinateMutation,
+  useGetChatQuery,
   useGetFilesSettingsQuery,
   useGetInitiativeByIdQuery,
   useGetInitiativeFilesQuery,
   useGetProjectInfoQuery,
   useGetRolesQuery,
   useGetTeamListQuery,
+  useGetUserRightsQuery,
+  usePostCommentMutation,
+  useSendForApprovalMutation,
+  useSwitchInitiativeStateMutation,
 } from "../../redux/state/state-api";
 import Pictogram from "../pictogram/pictogram";
 import { MessageSeparator } from "../message-separator/message-separator";
 import Modal from "../modal/modal";
-import { openCoordinationModal, closeModal } from "../../redux/state/state-slice";
+import { openCoordinationModal, closeModal, openErrorModal } from "../../redux/state/state-slice";
 import { TUser } from "../../types";
 import InitiativeFileUpload from "../initiative-file-upload/initiative-file-upload";
 
@@ -56,8 +63,17 @@ export default function InitiativeCoordination() {
   const { data: project } = useGetProjectInfoQuery(currentId);
   // const project = useAppSelector((store) => store.state.project.value);
   // const teamList = useAppSelector((store) => store.team.list);
-  const { coordinationHistory, bosses } = useAppSelector((store) => store.coordination);
-  const { userRights } = useAppSelector((store) => store.auth);
+  const { /* coordinationHistory, */ bosses } = useAppSelector((store) => store.coordination);
+  const [
+    switchInitiativeState,
+    {
+      isError: closeInitiativeRequestFailed,
+    }
+  ] = useSwitchInitiativeStateMutation();
+  // const { userRights } = useAppSelector((store) => store.auth);
+  const { data: userRights } = useGetUserRightsQuery(currentInitiativeId ? currentInitiativeId : -1, {
+    skip: !currentInitiativeId,
+  });
   const { data: user } = useGetAuthInfoByIdQuery(currentId ? currentId : -1, {
     skip: !currentId,
   });
@@ -114,6 +130,15 @@ export default function InitiativeCoordination() {
     status: number;
     file: File | null;
   }>>(currentStatusFilesList ? currentStatusFilesList.map((el) => {return{...el, file: null}}) : []);
+  const { data: coordinationHistory, refetch: refetchHistory } = useGetChatQuery(currentInitiativeId ? currentInitiativeId : -1, {
+    skip: !currentInitiativeId,
+  });
+  // const [ closeInitiative, {
+  //   isError: closeInitiativeRequestFailed,
+  // } ] = useCloseInitiativeMutation();
+  const [ coordinate ] = useCoordinateMutation();
+  const [ sendForApproval ] = useSendForApprovalMutation();
+  const [ postComment ] = usePostCommentMutation();
 
   const inputChangeHandler = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -138,7 +163,8 @@ export default function InitiativeCoordination() {
   const postCommentHandler = () => {
     if (userRights?.user_add_comment) {
       if (chatInputRef.current) chatInputRef.current.style.height = `32px`;
-      dispatch(postCommentThunk(commentState));
+      // dispatch(postCommentThunk(commentState));
+      postComment(commentState);
       setCommentState((prevState) => {
         return {
           ...prevState,
@@ -154,7 +180,8 @@ export default function InitiativeCoordination() {
       dispatch(openCoordinationModal())
       // dispatch(sendForApprovalThunk({ ...commentState, coordinator: coordinatorId }))
     } else {
-      dispatch(coordinateThunk({...commentState, text: '1'}));
+      // dispatch(coordinateThunk({...commentState, text: '1'}));
+      coordinate({...commentState, text: '1'});
     }
     setCommentState((prevState) => {
       return {
@@ -199,7 +226,7 @@ export default function InitiativeCoordination() {
   useEffect(() => {
     if (currentInitiativeId) {
       dispatch(getChatThunk(currentInitiativeId));
-      dispatch(getUserRightsThunk(currentInitiativeId));
+      // dispatch(getUserRightsThunk(currentInitiativeId));
       setCommentState((prevState) => {
         return {
           ...prevState,
@@ -218,6 +245,10 @@ export default function InitiativeCoordination() {
       chatRef.current.scrollTop = topPos;
     }
   }, [coordinationHistory]);
+
+  useEffect(() => {
+    if (closeInitiativeRequestFailed) dispatch(openErrorModal('Ошибка при отзыве инициативы'));
+  }, [closeInitiativeRequestFailed])
 
   useEffect(() => {
     const currentStatusFilesList = filesSettings?.find((item) => item.status.id === initiative?.initiative.status?.id)?.settings_file;
@@ -369,10 +400,17 @@ export default function InitiativeCoordination() {
                 className={`${styles.button}`}
                 value={`${userRights?.init_failure ? 'Восстановить' : "Отозвать"}`}
                 color="transparent"
-                onClick={() => dispatch(closeInitiativeThunk({
-                  initiative: initiative ? initiative?.initiative.id : -1,
-                  failure: !userRights?.init_failure,
-                }))}
+                disabled={!userRights?.user_is_author && !userRights?.user_is_superuser}
+                onClick={() => {
+                  // closeInitiative({
+                  //   initiative: initiative ? initiative?.initiative.id : -1,
+                  //   failure: !userRights?.init_failure,
+                  // });
+                  switchInitiativeState({
+                    initiative: initiative ? initiative?.initiative.id : -1,
+                    failure: !userRights?.init_failure,
+                  })
+                }}
               />
               <CustomizedButton
                 className={`${styles.button}`}
@@ -393,114 +431,118 @@ export default function InitiativeCoordination() {
             className={`${styles.chat}`}
             ref={chatRef}
           >
-            {(!coordinationHistory || !coordinationHistory.length) && (
-              <div
-                style={{
-                  textAlign: 'center',
-                }}
-              >История пуста</div>
-            )}
-            {coordinationHistory && coordinationHistory.map((element, index) => {
-              // const author = teamList.find((member) => member.id === element.author_text);
-              const isServiceMessage = element.action === 'Служебное сообщение';
-              const isComment = element.action === 'Новый комментарий'
-              const isApprovement = element.action === 'Инициатива согласована'
-              const isSendToApprove = element.action === "Отправить на согласование";
-              const authorName = element.author_text?.first_name ?
-                `${element.author_text.last_name} ${element.author_text.first_name} ${element.author_text.second_name}`
-                :
-                'Админ';
-              const coordinator = element.coordinator?.first_name ?
-                `${element.coordinator.last_name} ${element.coordinator.first_name} ${element.coordinator.second_name}`
-                :
-                '';
-              const date = new Date(element.date);
-              const nextElement = coordinationHistory[index + 1];
-              const prevDate = nextElement ? new Date(nextElement.date) : null;
-              const isPreviousDay = prevDate && (date.getDate() !== prevDate.getDate());
-              // const statusName = components?.settings?.initiative_status.find((status) => status.id === element.status)?.name;
-              return (
+            <div
+              className={`${styles.messagesWrapper}`}
+            >
+              {(!coordinationHistory || !coordinationHistory.length) && (
                 <div
-                  key={element.id}
                   style={{
-                    display: 'flex',
-                    flexDirection: 'column',
+                    textAlign: 'center',
                   }}
-                >
-                  {(isServiceMessage || isApprovement || isSendToApprove) ? (
-                    <>
-                      {!isServiceMessage && (
-                        <div
-                          className={`${styles.serviceMessage}`}
-                        >
-                          {element.status?.name ? element.status.name : 'null'}
-                          &nbsp;
-                          {isSendToApprove ? 
-                            `${element.author_text?.last_name} ${element.author_text?.first_name[0]}. ${element.author_text?.second_name[0]}. ${element.text}`
-                            :
-                            element.action
-                          }
-                          &nbsp;
-                          {rolePersonList?.find((item) => item.user.id === element.coordinator?.id)?.role.name}
-                          &nbsp;
-                          {`${element.coordinator?.last_name} ${element.coordinator?.first_name[0]}. ${element.coordinator?.second_name[0]}.`}
-                        </div>
-                      )}
-                      {isServiceMessage && (
-                        <div
-                          className={`${styles.serviceMessage}`}
-                        >
-                          {element.text}
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <>
-                      <div
-                        className={`${styles.messageWrapper} ${element.author_text?.id === user?.user.id && styles.own}`}
-                      >
-                        {element.author_text?.id !== user?.user.id && (
-                          <Tooltip
-                            title={`${element.author_text?.last_name} ${element.author_text?.first_name} ${element.author_text?.second_name}`}
-                            placement="bottom"
-                          >
-                            <div
-                              className={styles.avatar}
-                            >
-                              {element.author_text?.last_name[0]}
-                            </div>
-                          </Tooltip>
-                        )}
-                        <Tooltip
-                          title={moment(element.date).format('HH:mm')}
-                          placement={`${element.author_text?.id === user?.user.id ? 'left' : 'right'}`}
-                        >
+                >История пуста</div>
+              )}
+              {coordinationHistory && coordinationHistory.map((element, index) => {
+                // const author = teamList.find((member) => member.id === element.author_text);
+                const isServiceMessage = element.action === 'Служебное сообщение';
+                const isComment = element.action === 'Новый комментарий'
+                const isApprovement = element.action === 'Инициатива согласована'
+                const isSendToApprove = element.action === "Отправить на согласование";
+                const authorName = element.author_text?.first_name ?
+                  `${element.author_text.last_name} ${element.author_text.first_name} ${element.author_text.second_name}`
+                  :
+                  'Админ';
+                const coordinator = element.coordinator?.first_name ?
+                  `${element.coordinator.last_name} ${element.coordinator.first_name} ${element.coordinator.second_name}`
+                  :
+                  '';
+                const date = new Date(element.date);
+                const nextElement = coordinationHistory[index + 1];
+                const prevDate = nextElement ? new Date(nextElement.date) : null;
+                const isPreviousDay = prevDate && (date.getDate() !== prevDate.getDate());
+                // const statusName = components?.settings?.initiative_status.find((status) => status.id === element.status)?.name;
+                return (
+                  <div
+                    key={element.id}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                    }}
+                  >
+                    {(isServiceMessage || isApprovement || isSendToApprove) ? (
+                      <>
+                        {!isServiceMessage && (
                           <div
-                            className={`${styles.messageText} ${styles.own}`}
+                            className={`${styles.serviceMessage}`}
+                          >
+                            {element.status?.name ? element.status.name : 'null'}
+                            &nbsp;
+                            {isSendToApprove ? 
+                              `${element.author_text?.last_name} ${element.author_text?.first_name[0]}. ${element.author_text?.second_name[0]}. ${element.text}`
+                              :
+                              element.action
+                            }
+                            &nbsp;
+                            {rolePersonList?.find((item) => item.user.id === element.coordinator?.id)?.role.name}
+                            &nbsp;
+                            {`${element.coordinator?.last_name} ${element.coordinator?.first_name[0]}. ${element.coordinator?.second_name[0]}.`}
+                          </div>
+                        )}
+                        {isServiceMessage && (
+                          <div
+                            className={`${styles.serviceMessage}`}
                           >
                             {element.text}
                           </div>
-                        </Tooltip>
-                        {element.author_text?.id === user?.user.id && (
+                        )}
+                      </>
+                    ) : (
+                      <>
+                        <div
+                          className={`${styles.messageWrapper} ${element.author_text?.id === user?.user.id && styles.own}`}
+                        >
+                          {element.author_text?.id !== user?.user.id && (
+                            <Tooltip
+                              title={`${element.author_text?.last_name} ${element.author_text?.first_name} ${element.author_text?.second_name}`}
+                              placement="bottom"
+                            >
+                              <div
+                                className={styles.avatar}
+                              >
+                                {element.author_text?.last_name[0]}
+                              </div>
+                            </Tooltip>
+                          )}
                           <Tooltip
-                            title={`${element.author_text?.last_name} ${element.author_text?.first_name} ${element.author_text?.second_name}`}
-                            placement="bottom"
+                            title={moment(element.date).format('HH:mm')}
+                            placement={`${element.author_text?.id === user?.user.id ? 'left' : 'right'}`}
                           >
                             <div
-                              className={`${styles.avatar} ${styles.own}`}
+                              className={`${styles.messageText} ${styles.own}`}
                             >
-                              {element.author_text?.last_name[0]}
+                              {element.text}
                             </div>
                           </Tooltip>
-                        )}
-                      </div>
-                      {isPreviousDay && <MessageSeparator date={prevDate} />}
-                    </>
-                  )}
-                  <div ref={chatBottomRef} />
-                </div>
-              );
-            })}
+                          {element.author_text?.id === user?.user.id && (
+                            <Tooltip
+                              title={`${element.author_text?.last_name} ${element.author_text?.first_name} ${element.author_text?.second_name}`}
+                              placement="bottom"
+                            >
+                              <div
+                                className={`${styles.avatar} ${styles.own}`}
+                              >
+                                {element.author_text?.last_name[0]}
+                              </div>
+                            </Tooltip>
+                          )}
+                        </div>
+                        {isPreviousDay && <MessageSeparator date={prevDate} />}
+                      </>
+                    )}
+                    <div ref={chatBottomRef} />
+                  </div>
+                );
+              })}
+            </div>
           </div>
           <div
             className={`${styles.inputMessageWrapper}`}
@@ -531,70 +573,83 @@ export default function InitiativeCoordination() {
             <div
               className={`${styles.modalContentWraper}`}
             >
-            {initiative?.roles.map((item) => (
-              <div
-                key={item.role.id}
-                className={`${styles.modalRoleWrapper}`}
-              >
+            {!initiative?.roles.length && (
+              <div>
+                Отсутствуют роли для согласования
+              </div>
+            )}
+            {initiative?.roles.map((item) => {
+              if (!item.role.is_approve) return null;
+              return (
                 <div
-                  className={`${styles.modalRoleName}`}
+                  key={item.role.id}
+                  className={`${styles.modalRoleWrapper}`}
                 >
-                  {item.role.name}
-                </div>
-                <div
-                  className={`${styles.modalUserWrapper} ${styles.header}`}
-                >
-                  <div className={`${styles.modalHeaderCell}`}>
-                    ФИО
+                  <div
+                    className={`${styles.modalRoleName}`}
+                  >
+                    {item.role.name}
                   </div>
-                  {
-                    project?.properties.map((propertie) => (
-                      <div className={`${styles.modalHeaderCell}`} key={propertie.id}>
-                        {propertie.title}
-                      </div>
-                    ))
-                  }
-                </div>
-                {item.community.map((member) => {
-                  const foundMember = membersList?.find((item) => item.id === member.user_info?.user.id);
-                  if ((user?.user.id === member.user_info?.user.id) || !member.user_info) return null;
-                  return (
-                    <div
-                      key={member.user_info.user.id}
-                      className={`${styles.modalUserWrapper}`}
-                    >
+                  <div
+                    className={`${styles.modalUserWrapper} ${styles.header}`}
+                  >
+                    <div className={`${styles.modalHeaderCell}`}>
+                      ФИО
+                    </div>
+                    {
+                      project?.properties.map((propertie) => (
+                        <div className={`${styles.modalHeaderCell}`} key={propertie.id}>
+                          {propertie.title}
+                        </div>
+                      ))
+                    }
+                  </div>
+                  {!item.community.length && (
+                    <div>
+                      Отсутствуют пользователи, назначенные на роль
+                    </div>
+                  )}
+                  {item.community.map((member) => {
+                    const foundMember = membersList?.find((item) => item.id === member.user_info?.user.id);
+                    if ((user?.user.id === member.user_info?.user.id) || !member.user_info) return null;
+                    return (
                       <div
-                        className={`${styles.checkboxWrapper}`}
+                        key={member.user_info.user.id}
+                        className={`${styles.modalUserWrapper}`}
                       >
-                        {/* <input
-                          type="checkbox"
-                          checked={!!coordinatorsState.coordinators.find((coordinator) => coordinator.id === member.user_info?.user.id)}
-                          onChange={(e) => member.user_info && modalCheckboxHandler(e, member.user_info.user)}
-                        /> */}
-                        <Checkbox
-                          checked={!!coordinatorsState.coordinators.find((coordinator) => coordinator.id === member.user_info?.user.id)}
-                          onChange={(e) => member.user_info && modalCheckboxHandler(e, member.user_info.user)}
-                        />
-                      </div>
-                      <div
-                        className={`${styles.modalCell}`}
-                      >
-                        {`${member.user_info.user.last_name} ${member.user_info.user.first_name[0]}. ${member.user_info.user.second_name[0]}.`}
-                      </div>
-                      {foundMember?.properties.map((propertie) => (
                         <div
-                          key={`${member.user_info?.user.id}_${propertie.id}`}
+                          className={`${styles.checkboxWrapper}`}
+                        >
+                          {/* <input
+                            type="checkbox"
+                            checked={!!coordinatorsState.coordinators.find((coordinator) => coordinator.id === member.user_info?.user.id)}
+                            onChange={(e) => member.user_info && modalCheckboxHandler(e, member.user_info.user)}
+                          /> */}
+                          <Checkbox
+                            checked={!!coordinatorsState.coordinators.find((coordinator) => coordinator.id === member.user_info?.user.id)}
+                            onChange={(e) => member.user_info && modalCheckboxHandler(e, member.user_info.user)}
+                          />
+                        </div>
+                        <div
                           className={`${styles.modalCell}`}
                         >
-                          {propertie.values.map((el) => el.value).join(', ')}
+                          {`${member.user_info.user.last_name} ${member.user_info.user.first_name[0]}. ${member.user_info.user.second_name[0]}.`}
                         </div>
-                      ))}
-                    </div>
-                  );
-                })}
+                        {foundMember?.properties.map((propertie) => (
+                          <div
+                            key={`${member.user_info?.user.id}_${propertie.id}`}
+                            className={`${styles.modalCell}`}
+                          >
+                            {propertie.values.map((el) => el.value).join(', ')}
+                          </div>
+                        ))}
+                      </div>
+                    );
+                  })}
 
-              </div>
-            ))}
+                </div>
+              );
+            })}
             </div>
             <div
               className={`${styles.modalButtonWrapper}`}
@@ -602,8 +657,10 @@ export default function InitiativeCoordination() {
               <CustomizedButton
                 value="Согласовать"
                 color="blue"
+                disabled={!coordinatorsState.coordinators.length}
                 onClick={() => {
-                  dispatch(sendForApprovalThunk({ ...coordinatorsState, initiative: currentInitiativeId ? currentInitiativeId : -1 }));
+                  // dispatch(sendForApprovalThunk({ ...coordinatorsState, initiative: currentInitiativeId ? currentInitiativeId : -1 }));
+                  sendForApproval({ ...coordinatorsState, initiative: currentInitiativeId ? currentInitiativeId : -1 });
                   dispatch(closeModal());
                 }}
               />

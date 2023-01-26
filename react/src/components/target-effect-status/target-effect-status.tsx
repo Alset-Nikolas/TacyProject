@@ -6,7 +6,7 @@ import MetricView from '../ui/metric-view/metric-view';
 
 // Styles
 import styles from './target-effect-status.module.scss';
-
+import sectionStyles from '../../styles/sections.module.scss';
 
 export default function TargetEffectStatus() {
   const { currentId } = useAppSelector((store) => store.state.project);
@@ -14,7 +14,7 @@ export default function TargetEffectStatus() {
   const metrics = project?.metrics || [];
 
   return (
-    <section className={`${styles.wrapper}`}>
+    <section className={`${styles.wrapper} ${sectionStyles.wrapperBorder}`}>
       <SectionHeader>
         Целевой эффект
       </SectionHeader>

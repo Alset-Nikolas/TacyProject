@@ -38,7 +38,7 @@ export default function Properties({
     return (
       <section className={`${styles.wrapper} ${styles.edit}`}>
         <div className={`${styles.header} ${styles.edit}`}>
-          Аналитика проекта
+          Атрибуты инициатив
           <CustomizedButton
             value="Добавить"
             onClick={() => addPropertie(projectForEdit, 'properties', dispatch)}
@@ -167,11 +167,11 @@ export default function Properties({
   return (
     <section className={`${styles.wrapper}`}>
       <SectionHeader>
-        Аналитика проекта
+        Атрибуты инициатив
       </SectionHeader>
       <div className={`${styles.contentWrapper}`}>
         {!project.properties.length && (
-          <SectionContent>Данные для аналитики отсутствуют</SectionContent>
+          <SectionContent>Атрибуты инициатив отсутствуют</SectionContent>
         )}
         {project.properties.map((propertie) => (
           <SectionContent

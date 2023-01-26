@@ -75,12 +75,16 @@ export default function EventInfoPage() {
 
   const onInitiativeInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    const formatDate = (dateString: string) => {
+      const dateParts = dateString.split('.');
+      return `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+    }
     setNewEventState((prevState) => {
       return {
         ...prevState,
         event: {
           ...prevState.event,
-          [name]: name.match('date') ? value.replaceAll('.', '-') : value,
+          [name]: name.match('date') ? formatDate(value) : value,
         }
       };
     })

@@ -7,6 +7,8 @@ import CustomizedSelect from '../select/Select';
 // Styles
 import styles from './target-effect.module.scss';
 import inputStyles from '../../styles/inputs.module.scss';
+import sectionStyles from '../../styles/sections.module.scss';
+
 import { handlePropertieInutChange } from '../../utils';
 import { ChangeEvent } from 'react';
 import MetricView from '../ui/metric-view/metric-view';
@@ -63,7 +65,7 @@ export default function TargetEffect({ edit }: TTargetEffectProps) {
   }
   
   return (
-    <div className={`${styles.wrapper}`}>
+    <div className={`${styles.wrapper} ${sectionStyles.wrapperBorder}`}>
       <SectionHeader>
         {title}
       </SectionHeader>

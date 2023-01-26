@@ -158,11 +158,6 @@ class Initiatives(models.Model):
                     if not coordination_init:
                         status = None
                     else:
-                        print(
-                            "!!!!!!!!!!coordination_init",
-                            coordination_init,
-                            coordination_init.properties,
-                        )
                         status = coordination_init.activate
                     elemant["status"] = status
                     item["community"].append(elemant)
@@ -264,7 +259,7 @@ class Initiatives(models.Model):
                 ),
             ),
         )
-        
+
         list_inits = (
             cls.objects.filter(project=project)
             .filter(failure=False)
@@ -340,29 +335,32 @@ class Initiatives(models.Model):
         flags["is_update"] = is_update or role.is_update
         return flags
 
-    def get_files(self):
-        def get_settings_init_files():
-            init_status = self.status
-            project = self.project
-            settings = project.settings_initiatives.first()
-            files = (
-                SettingsFilesInitiative.objects.filter(
-                    settings_project=settings
-                )
-                .order_by("title")
-                .all()
-            )
-            if init_status.value < 0:
-                return files
-            res = []
-            for file in files:
-                print(0, file.status.value, init_status.value)
-                if 0 <= file.status.value <= init_status.value:
-                    res.append(file)
-            return res
-
+    def get_settings_init_files(self):
+        print("get_settings_init_files")
+        print("get_settings_init_files")
+        print("get_settings_init_files")
+        init_status = self.status
+        project = self.project
+        settings = project.settings_initiatives.first()
+        files = (
+            SettingsFilesInitiative.objects.filter(settings_project=settings)
+            .order_by("title")
+            .all()
+        )
+        print(self.id)
+        print(init_status)
+        if init_status.value < 0:
+            return files
         res = []
-        for title_setting in get_settings_init_files():
+        for file in files:
+            print(0, file.status.value, init_status.value)
+            if 0 <= file.status.value <= init_status.value:
+                res.append(file)
+        return res
+
+    def get_files(self):
+        res = []
+        for title_setting in self.get_settings_init_files():
             file = (
                 InitiativesFiles.objects.filter(title=title_setting)
                 .filter(initiative=self)
@@ -635,9 +633,10 @@ class Events(models.Model):
 
     @classmethod
     def create_or_update(cls, info):
+        print("create_or_update", info)
         id_event = info.pop("id")
         if "initiative" in info:
-            info["initiative_id"] = info.pop("initiative")
+            info["initiative_id"] = info.pop("initiative").id
         if id_event < 0:
             return cls.objects.create(**info).id
         event = cls.objects.filter(id=id_event).first()

@@ -99,6 +99,7 @@ export default function CreateProjectPage() {
       // formData.append(`total`, (files.length - 1).toString());
 
       // if (currentProjectId) postFiles({ projectId: currentProjectId, body: formData });
+      
       createProject(projectForEdit);
       refetch();
     }

@@ -6,10 +6,11 @@ import SectionHeader from '../section/section-header/section-header';
 // Styles
 import styles from './projects-effect.module.scss';
 import inputStyles from '../../styles/inputs.module.scss'
+
 import { updateProjectForEdit } from '../../redux/state/state-slice';
 import ProjectsEffectComponent from '../projects-effect-component/projects-effect-component';
 import { useGetProjectInfoQuery } from '../../redux/state/state-api';
-import { Checkbox } from '@mui/material';
+import Checkbox from '../ui/checkbox/checkbox';
 
 type TProjectsEffectProps = {
   edit?: boolean;

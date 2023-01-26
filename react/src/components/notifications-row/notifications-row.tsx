@@ -12,7 +12,9 @@ type TNotificationsRowProps = {
 
 export default function NotificationsRow({ notification }: TNotificationsRowProps) {
   const { text, date } = notification;
-  const jsDate = new Date(date);
+  const dateMatch = date.match(/\d+/g);
+  const dateInt = dateMatch?.map((el) => Number.parseInt(el));
+  const jsDate = dateInt ? new Date(dateInt[2], dateInt[1], dateInt[0], dateInt[3], dateInt[4], dateInt[5]) : new Date();
   return (
     <div className={`${styles.wrapper}`}>
       <div className={`${styles.message}`}>

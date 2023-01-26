@@ -21,13 +21,22 @@ import { paths } from '../../consts';
 import styles from './login-form.module.scss';
 import inputStyles from '../../styles/inputs.module.scss';
 import CustomizedButton from '../button/button';
+import { useAuthUserMutation } from '../../redux/state/state-api';
 
 export default function LoginForm() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { authRequestSuccess, authRequestFailed } = useAppSelector((store) => store.auth);
+  // const { authRequestSuccess, authRequestFailed } = useAppSelector((store) => store.auth);
   const [ formData, setFormData ] = useState({ email: '', password: ''});
   const [ validationError, setValidationError ] = useState(false);
+  const [
+    authUser,
+    {
+      isError: authRequestFailed,
+      isSuccess: authRequestSuccess,
+      data: res,
+    }
+  ] = useAuthUserMutation();
 
   const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
     setValidationError(false);
@@ -44,21 +53,25 @@ export default function LoginForm() {
     if (validationErrorTemp) {
       setValidationError(validationErrorTemp);
     } else {
-      dispatch(authThunk(formData));
+      // dispatch(authThunk(formData));
+      authUser(formData);
     }
   };
 
   useEffect(() => {
     if (authRequestSuccess) {
+      localStorage.setItem('token', res.token);
+      localStorage.setItem('email', res.email);
+      localStorage.setItem('user_id', res.user_id.toString());
       navigate(`/${paths.status}`);
     }
-    return () => {
-      dispatch(setAuthState({
-        authRequest: false,
-        authRequestSuccess: false,
-        authRequestFailed: false,
-      }))
-    };
+    // return () => {
+    //   dispatch(setAuthState({
+    //     authRequest: false,
+    //     authRequestSuccess: false,
+    //     authRequestFailed: false,
+    //   }))
+    // };
   }, [authRequestSuccess]);
 
   return (

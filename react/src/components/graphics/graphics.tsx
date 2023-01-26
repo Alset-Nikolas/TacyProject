@@ -11,6 +11,7 @@ import GraphicSelectorButton from "../ui/graphic-selector-button/graphic-selecto
 
 // Styles
 import styles from './graphics.module.scss';
+import sectionStyles from '../../styles/sections.module.scss';
 
 export default function Graphics() {
   const [barsQuantity, setBarsQuantity] = useState<string>('');
@@ -44,7 +45,7 @@ export default function Graphics() {
   }, [project]);
 
   return (
-    <div className={`${styles.wrapper}`}>
+    <div className={`${styles.wrapper} ${sectionStyles.wrapperBorder}`}>
       <SectionHeader>
         <div
           className={`${styles.topWrapper}`}
@@ -67,7 +68,7 @@ export default function Graphics() {
       >
         {/* <GanttD3 data={ganttData} /> */}
       {!diagramData?.graphics.length && (
-        <div>Данные для аналитики отвутствуют</div>
+        <div>Атрибуты инициатив отвутствуют</div>
       )}
       {!!diagramData?.graphics.length && (
       <div>

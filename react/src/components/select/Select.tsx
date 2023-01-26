@@ -14,6 +14,7 @@ type TCustomizedSelectProps = {
 };
 
 const SelectMenuProps = {
+  disableScrollLock: true,
   PaperProps: {
     sx: {
       borderRadius: 0,

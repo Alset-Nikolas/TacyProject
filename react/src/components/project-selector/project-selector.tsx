@@ -9,6 +9,7 @@ import styles from './project-selector.module.scss';
 import textStyles from '../../styles/text.module.scss';
 import { useGetProjectInfoQuery, useGetProjectsListQuery } from "../../redux/state/state-api";
 import { useEffect, useState } from "react";
+import { setCurrentInitiativeId } from "../../redux/initiatives-slice";
 
 export default function ProjectSelector() {
   const dispatch = useAppDispatch();
@@ -27,6 +28,7 @@ export default function ProjectSelector() {
 
   const onSelectButtonClick = () => {
     dispatch(setCurrentProjectId(selectedId));
+    dispatch(setCurrentInitiativeId(null));
     setSkipIsFetch(false);
   };
 

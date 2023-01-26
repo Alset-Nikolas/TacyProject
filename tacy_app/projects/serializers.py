@@ -191,15 +191,13 @@ class CreateProjectSerializer(serializers.ModelSerializer):
     roles = RolesProjectSerializer(many=True, required=False, default=[])
 
     def _validate_intermediate_dates(self, attrs):
-        if "intermediate_dates" in attrs and attrs["intermediate_dates"]:
-            if (
-                attrs["intermediate_dates"][0]["date"] < attrs["date_start"]
-                or attrs["date_end"] < attrs["intermediate_dates"][-1]["date"]
-            ):
+        intermediate_dates = attrs.get("intermediate_dates", [])
+        for intermediate_date in intermediate_dates:
+            date = intermediate_date.get("date")
+            if date < attrs["date_start"] or attrs["date_end"] < date:
                 raise serializers.ValidationError(
                     {
-                        "intermediate_dates": "date_start <= intermediate_dates <= date_end",
-                        "msg_er": "Промежуточные даты должны начинаться не раньше 'Даты создания проекта' и не позже 'Даты конца проекта'",
+                        "intermediate_dates": "Промежуточные даты должны начинаться не раньше 'Даты создания проекта' и не позже 'Даты конца проекта'",
                     }
                 )
 
@@ -210,26 +208,21 @@ class CreateProjectSerializer(serializers.ModelSerializer):
             if min_date < attrs["date_start"] or max_date > attrs["date_end"]:
                 raise serializers.ValidationError(
                     {
-                        "stages": "date_start_project <= stages_dates <= date_end_project",
-                        "msg_er": "Этапы проекта не могут начинаться раньше 'Даты создания проекта' и закончится позже 'Даты конца проекта'",
+                        "stages": "Этапы проекта не могут начинаться раньше 'Даты создания проекта' и закончится позже 'Даты конца проекта'",
                     }
                 )
 
-    def _validate_main_dates(self, attrs):
+    def validate_main_dates(self, attrs):
         if attrs["date_start"] > attrs["date_end"]:
             raise serializers.ValidationError(
-                {
-                    "date_start <= date_end": "date_start_project <= date_end",
-                    "msg_er": "Дата конца проекта не может быть раньше начала.",
-                }
+                "Основные даты проекта некорректны: конец должен быть позже начала"
             )
 
     def _validate_uniq_name(self, attrs):
         if attrs["id"] <= 0 and Project.get_project_by_name(attrs["name"]):
             raise serializers.ValidationError(
                 {
-                    "name": "name project already exist",
-                    "msg_er": "Такое имя проекта уже кем-то используется.",
+                    "name": "Такое имя проекта уже кем-то используется.",
                 }
             )
         if attrs["id"] > 0:
@@ -339,15 +332,16 @@ class CreateProjectSerializer(serializers.ModelSerializer):
             )
 
     def validate(self, attrs):
+        print(attrs)
         super().validate(attrs)
-        self._validate_intermediate_dates(attrs)
+        # self._validate_intermediate_dates(attrs)
         request = self.context.get("request")
-        self._validate_stages(attrs)
-        self._validate_main_dates(attrs)
+        # self._validate_stages(attrs)
+        # self.validate_main_dates(attrs)
         self._validate_uniq_name(attrs)
         self._validate_update_exist_project(attrs)
-        self._validate_update_metrics_project(attrs)
-        self._validate_update_propertie_project(attrs)
+        # self._validate_update_metrics_project(attrs)
+        # self._validate_update_propertie_project(attrs)
         attrs["author"] = request.user
         return attrs
 
@@ -615,7 +609,7 @@ class UpdateCommunityProjectSerializer(serializers.ModelSerializer):
                     project.author == user,
                 )
             )
-            if community_obj.get('is_superuser'):
+            if community_obj.get("is_superuser"):
                 user.is_superuser_activate()
             community_ids_not_del.append(community_item.id)
             PropertiesСommunityProject.create_or_update_properties_user_in_community(
@@ -625,7 +619,8 @@ class UpdateCommunityProjectSerializer(serializers.ModelSerializer):
             СommunityProject.objects.filter(project=project)
             .exclude(id__in=community_ids_not_del)
             .all()
-        ):
+        ):  
+            print('удаление ')
             EmailManage.send_removed_in_project(
                 del_person.user, context={"project": project}
             )
