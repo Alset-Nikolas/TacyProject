@@ -123,6 +123,7 @@ export type TTeamMember = {
   email: string;
   phone: string;
   is_create: boolean;
+  is_author: boolean;
   is_superuser: boolean;
   // unit: Array<string>;
   properties: Array<{
@@ -133,7 +134,7 @@ export type TTeamMember = {
       id: number,
       value:  string,
     }>;
-  }>;
+  }>; 
 }
 
 export type TUserRequest = {
@@ -143,6 +144,7 @@ export type TUserRequest = {
   second_name: string;
   email : string;
   phone: string;
+  is_superuser: boolean;
 };
 
 export type TUser = {
@@ -165,6 +167,7 @@ export type TRequestTeamListItem<T> = {
   // }>;
   is_create: boolean;
   is_superuser: boolean;
+  is_author: boolean;
   properties: Array<{
     title: {
       id: number;

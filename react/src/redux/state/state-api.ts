@@ -59,7 +59,7 @@ export const stateApi = createApi({
           console.log(err);
         }
       },
-      invalidatesTags: ['initiative', 'project', 'list'],
+      invalidatesTags: ['initiative', 'project', 'list', 'initiatives-list'],
     }),
     deleteProject: builder.mutation<any, number>({
       query(projectId) {
@@ -211,7 +211,7 @@ export const stateApi = createApi({
           body: event,
         }
       },
-      invalidatesTags: ['events-list'],
+      invalidatesTags: ['events-list', 'project', 'initiative', 'initiatives-list'],
     }),
     deleteEvent: builder.mutation<TEvent, number>({
       query(eventId) {
@@ -371,7 +371,8 @@ export const stateApi = createApi({
           member.email = resItem.user.email;
           member.phone = resItem.user.phone;
           member.is_create = resItem.is_create;
-          member.is_superuser = resItem.is_superuser;
+          member.is_author = resItem.is_author;
+          member.is_superuser = resItem.user.is_superuser;
           // member.role = resItem.role_user.name;
           // member.rights = resItem.rights_user.map((right) => right.name);
           member.properties = resItem.properties.map((resPropertie) => {

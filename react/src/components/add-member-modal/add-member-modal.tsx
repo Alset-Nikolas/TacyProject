@@ -40,6 +40,7 @@ export default function AddMemberModal({ addMember }: TAddMemberProps) {
     phone: '',
     is_create: false,
     is_superuser: false,
+    is_author: false,
     properties: project ? project.properties.map((propertie) => {
       const item = {} as {
         id: number;

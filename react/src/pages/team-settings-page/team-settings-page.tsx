@@ -70,6 +70,7 @@ export default function TeamSettingsPage() {
         //   });
         // });
         listItem.is_create = member.is_create;
+        listItem.is_superuser = member.is_superuser;
         listItem.properties = [];
         member.properties.forEach((el, index) => {
           const foundPropertie = project.properties.find((propertie) => propertie.title === el.title);

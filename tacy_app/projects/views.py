@@ -32,6 +32,8 @@ from components.models import SettingsStatusInitiative
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 
+from .permissions import IsAdminOrReadOnlyPermission
+
 User = get_user_model()
 
 
@@ -133,6 +135,7 @@ class CreateProjectView(views.APIView):
             },
         ),
     }
+    permission_classes = [IsAdminOrReadOnlyPermission]
 
     @swagger_auto_schema(
         operation_description="Создание (обновление) проекта. Если id>0 - то обновление, иначе создание нового проекта.",
@@ -150,6 +153,7 @@ class CreateProjectView(views.APIView):
         serializer_project.is_valid(raise_exception=True)
         validated_data: tp.OrderedDict = serializer_project.validated_data
         project: Project = serializer_project.create_or_update(validated_data)
+        self.check_object_permissions(self.request, project)
         IntermediateDateProject.create_or_update_intermediate_dates_for_project(
             project,
             validated_data["intermediate_dates"],
@@ -244,6 +248,7 @@ class UpdateCommunityProjectView(views.APIView):
         Обновить информацию о сообществе -> страничка: 'Команда проекта'
     """
 
+    permission_classes = [IsAdminOrReadOnlyPermission]
     response_schema_dict = {
         "200": openapi.Response(
             description="Список людей, с правами согласования инициативы.",
@@ -305,6 +310,7 @@ class UpdateCommunityProjectView(views.APIView):
         s: UpdateCommunityProjectSerializer = UpdateCommunityProjectSerializer(
             instance=project
         )
+        print(s.data)
         return Response(
             s.data,
             status=status.HTTP_200_OK,
@@ -328,6 +334,7 @@ class UpdateCommunityProjectView(views.APIView):
         s: UpdateCommunityProjectSerializer = UpdateCommunityProjectSerializer(
             data=request.data, context={"project": project}
         )
+        self.check_object_permissions(self.request, project)
         s.is_valid(raise_exception=True)
         s.create_community(request.data)
 
@@ -417,6 +424,7 @@ class InfoProjectView(views.APIView):
 
 
 class DeleteProjectView(views.APIView):
+    permission_classes = [IsAdminOrReadOnlyPermission]
     response_schema_dict = {
         "200": openapi.Response(
             description="Проект удален",
@@ -456,6 +464,7 @@ class DeleteProjectView(views.APIView):
         request_body=UserProjectIdSerializer,
     )
     def delete(self, request):
+
         id_serializer = UserProjectIdSerializer(
             data=self.request.data, context={"user": request.user}
         )
@@ -463,14 +472,18 @@ class DeleteProjectView(views.APIView):
         project = get_object_or_404(
             Project, id=id_serializer.validated_data["id"]
         )
+        self.check_object_permissions(self.request, project)
         project.delete()
         return Response({"msg": "Проект удален"}, status=status.HTTP_200_OK)
 
 
 class FileProjectView(views.APIView):
+    permission_classes = [IsAdminOrReadOnlyPermission]
+
     def post(self, request):
         project = get_object_or_404(Project, id=self.request.GET.get("id"))
         total_files = self.request.data.get("total")
+        self.check_object_permissions(self.request, project)
         if total_files:
             for number in range(int(total_files)):
                 file_key = "file" + str(number)
@@ -493,6 +506,7 @@ class FileProjectView(views.APIView):
         s = ProjectFilesIdSerializer(
             data=self.request.data, many=True, context={"project": project}
         )
+        self.check_object_permissions(self.request, project)
         s.is_valid(raise_exception=True)
         ProjectFiles.objects.filter(
             id__in=[x.get("id") for x in s.data]

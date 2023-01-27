@@ -17,10 +17,11 @@ type TGanttD3BarsProps = {
 
 export const GanttD3Bars = ({ data }: TGanttD3BarsProps) => {
   const { rectHeight, rowHeight } = chartConfig;
-  const { RED } = fills;
+  const { RED, GREY, WHITE } = fills;
   const bars = data.map((stage, index) => {
     const marginTop = 60;
     const y = index * rowHeight + marginTop;
+    const barBackground = index % 2 ? GREY : 'rgba(255, 255, 255, 0.5)';
 
     // console.log(getCoordinate(stage.date_start));
     return (
@@ -29,6 +30,15 @@ export const GanttD3Bars = ({ data }: TGanttD3BarsProps) => {
         title={`Начало: ${stage.start} Окончание: ${stage.end}`}
         placement="bottom-start"
       >
+        <>
+        <rect
+          id={stage.id.toString()}
+          x={0}
+          y={y-10}
+          width={chartConfig.chartWidth}
+          height={32}
+          fill={barBackground}
+        />
         <rect
           id={stage.id.toString()}
           x={getCoordinate(stage.start) < 0 ? 0 : getCoordinate(stage.start)}
@@ -37,6 +47,7 @@ export const GanttD3Bars = ({ data }: TGanttD3BarsProps) => {
           height={rectHeight}
           fill={RED}
         />
+        </>
       </Tooltip>
     );
 

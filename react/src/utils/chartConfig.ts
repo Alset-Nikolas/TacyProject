@@ -9,7 +9,7 @@ export const chartConfig = {
   daysBeforeCurrentDate: 365,
   daysAfterCurrentDate: 365,
   chartHeight: 400,
-  yAxisWidth: 120,
+  yAxisWidth: 350,
   xAxisHeight: 50,
   marginTop: 20,
   months: [

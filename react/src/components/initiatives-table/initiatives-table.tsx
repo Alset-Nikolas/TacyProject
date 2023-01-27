@@ -540,7 +540,8 @@ export default function InitiativesTable({ externalInitiativesList }: TInitiativ
                   Статус
                 </th>
                 <th
-                  className={`${styles.tableCol}`}
+                  // className={`${styles.tableCol}`}
+                  className={`${styles.filesStatusCell}`}
                 >
                   Статус файлов
                 </th>

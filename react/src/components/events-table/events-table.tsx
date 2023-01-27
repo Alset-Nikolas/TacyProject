@@ -53,6 +53,10 @@ export default function EventsTable() {
     ['Выполнено', styles.ready],
     ['Запланировано', styles.planned],
   ]);
+
+  const onEventClickHandler = (eventId: number) => {
+    navigate(`/${paths.events}/info/${eventId}`);
+  }
  
   useEffect(() => {
     if (currentInitiativeId) dispatch(getEventsListThunk(currentInitiativeId))
@@ -60,11 +64,8 @@ export default function EventsTable() {
 
   return (
     <div
-      className={`${styles.wrapper}`}
+      className={`${styles.wrapper} ${sectionStyles.wrapperBorder}`}
     >
-      <div
-        className={`${sectionStyles.wrapperBorder}`}
-      >
       <SectionHeader>
         Мероприятия
       </SectionHeader>
@@ -155,18 +156,17 @@ export default function EventsTable() {
                   </td>
                 </tr>
               )}
-              {eventsList?.map((event) => (
+              {eventsList?.map((event, index) => (
                 <tr
                   key={event.event.id}
+                  className = {`${styles.tableRow} ${(index % 2) ? styles.oddRow : styles.evenRow}`}
+                  onClick={() => onEventClickHandler(event.event.id)}
                 >
                   <td
                     className={`${styles.titleCol}`}
                   >
-                    <Link
-                      to={`/${paths.events}/info/${event.event.id}`}
-                    >
+                    
                       {event.event.name}
-                    </Link>
                   </td>
                   <td
                     className={`${statusStyles.get(event.event_status)} ${styles.statusCol}`}
@@ -184,21 +184,19 @@ export default function EventsTable() {
                     {moment(event.event.date_end).format('DD.MM.YYYY')}
                   </td>
                   {event.addfields.map((addfield) => (
-                  <td
-                    key={addfield.id}
-                    className={`${styles.additionalCol}`}
-                  >
-                    {addfield.value}
-                  </td>
-                ))}
+                    <td
+                      key={addfield.id}
+                      className={`${styles.additionalCol}`}
+                    >
+                      {addfield.value}
+                    </td>
+                  ))}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
       </div>
-      </div>
-
       {(userRights?.user_is_author || user?.user.is_superuser) && (
         <div
           className={`${styles.buttonWraper}`}

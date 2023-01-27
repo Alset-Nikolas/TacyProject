@@ -335,7 +335,7 @@ export default function EditInitiative() {
                     </label>
                   ))}
                 </div>
-                <div
+                {/* <div
                   className={`${styles.sectionHeader}`}
                 >
                   Метрики
@@ -356,7 +356,7 @@ export default function EditInitiative() {
                       />
                     </label>
                   ))}
-                </div>
+                </div> */}
               </div>
             </div>
           </ol>

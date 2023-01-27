@@ -73,6 +73,7 @@ textarea.error {
   background-color: #f4f4f4FF;
   box-sizing: border-box;
   max-height: 120px;
+  font-size: 14px;
 
   p {
     overflow-y: auto;
@@ -117,12 +118,13 @@ textarea.error {
 
 .textBlock textarea {
   border: none;
-  border: 1px solid #504F4F
+  border: 1px solid #504F4F;
 }
 
 .textBlockDescription {
-  font-weight: 600;
-  font-size: 20px;
-  line-height: 30px;
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 24px;
+  letter-spacing: 0.015em;
   color: #504F4F;
 }

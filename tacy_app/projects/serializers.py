@@ -458,6 +458,7 @@ class UserBaseSerializer(serializers.ModelSerializer):
         model = User
         fields = (
             "id",
+            "is_superuser",
             "first_name",
             "last_name",
             "second_name",
@@ -537,7 +538,7 @@ class ProperitsUserSerializer(serializers.Serializer):
 class CommunityInfoSerializer(serializers.ModelSerializer):
     user = UserBaseSerializer()
     properties = ProperitsUserSerializer(many=True)
-    is_superuser = serializers.BooleanField(default=False)
+    is_superuser = serializers.BooleanField(required=False)
 
     class Meta:
         depth = 1
@@ -619,8 +620,8 @@ class UpdateCommunityProjectSerializer(serializers.ModelSerializer):
             СommunityProject.objects.filter(project=project)
             .exclude(id__in=community_ids_not_del)
             .all()
-        ):  
-            print('удаление ')
+        ):
+            print("удаление ")
             EmailManage.send_removed_in_project(
                 del_person.user, context={"project": project}
             )

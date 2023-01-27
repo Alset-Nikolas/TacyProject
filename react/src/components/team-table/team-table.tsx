@@ -57,7 +57,7 @@ export default function TeamTable({ edit, teamList, removeMember, setList }: TTe
             <TeamRow
               edit={edit}
               index={index}
-              member={member}
+              member={{ ...member }}
               setList={setList}
               removeMember={removeMember}
               key={member.id !== -1 ? member.id : `new_member_${index}`}

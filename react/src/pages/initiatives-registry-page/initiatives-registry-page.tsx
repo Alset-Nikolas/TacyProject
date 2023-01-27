@@ -7,6 +7,7 @@ import InitiativeCoordination from "../../components/initiative-coordination/ini
 import EventsDiagram from "../../components/initiative-events/initiative-events";
 import InitiativeManagement from "../../components/initiative-management/initiative-management";
 import InitiativesTable from "../../components/initiatives-table/initiatives-table";
+import Modal from "../../components/modal/modal";
 import Pictogram from "../../components/pictogram/pictogram";
 import RiskManagement from "../../components/risk-management/risk-management";
 import RolesAlloction from "../../components/roles-allocation/roles-allocation";
@@ -19,9 +20,10 @@ import {
   useGetInitiativeByIdQuery,
   useGetInitiativesListQuery,
   useGetExportUrlQuery,
-  useGetComponentsQuery
+  useGetComponentsQuery,
+  useDeleteInitiativeMutation
 } from "../../redux/state/state-api";
-import { closeLoader, showLoader } from "../../redux/state/state-slice";
+import { closeLoader, showLoader, openDeleteInitiativeModal, closeModal } from "../../redux/state/state-slice";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 
 //Styles
@@ -31,6 +33,7 @@ export default function InitiativesRegistryPage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const location = useLocation();
+  const modal = useAppSelector((store) => store.state.app.modal);
   const {
     currentId,
   } = useAppSelector((store) => store.state.project);
@@ -60,11 +63,22 @@ export default function InitiativesRegistryPage() {
   const { data: components } = useGetComponentsQuery(currentId ? currentId : -1, {
     skip: !currentId,
   });
+  const [
+    deleteInitiative,
+    {
+      isError: deleteInitiativeRequestError,
+      isSuccess: deleteInitiativeRequestSuccess,
+    }
+  ] = useDeleteInitiativeMutation();
 
   const onAddClickHandler = () => {
     // dispatch(addInitiativeThunk());
     navigate(`/${paths.registry}/add`);
   };
+
+  const onDeleteClickHandler = () => {
+    dispatch(openDeleteInitiativeModal());
+  }
 
   useEffect(() => {
     if (currentId) {
@@ -152,9 +166,46 @@ export default function InitiativesRegistryPage() {
           <section>
             <InitiativeCoordination />
           </section>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+            }}
+          >
+            <CustomizedButton
+              value="Удалить инициативу"
+              color="blue"
+              onClick={onDeleteClickHandler}
+            />
+          </div>
         </>
       )}
-      
+      {modal.isOpen && modal.type.deleteInitiative && (
+        <Modal>
+          <div className={`${styles.modalWrapper}`}>
+            <div>
+              Вы уверены,что хотите удалить элемент?
+            </div>
+            <div className={`${styles.modalButtonsWrapper}`}>
+              <CustomizedButton
+                className={`${styles.modalButton}`}
+                value="Да"
+                onClick={() => {
+                  if (currentInitiativeId) {
+                    deleteInitiative(currentInitiativeId);
+                  }
+                  dispatch(closeModal());
+                }}
+              />
+              <CustomizedButton
+                className={`${styles.modalButton}`}
+                value="Нет"
+                onClick={() => dispatch(closeModal())}
+              />
+            </div>
+          </div>
+        </Modal>
+      )}
     </div>
   );
 }

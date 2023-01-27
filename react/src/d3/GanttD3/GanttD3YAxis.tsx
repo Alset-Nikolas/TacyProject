@@ -1,3 +1,4 @@
+import { Tooltip } from "@mui/material";
 import { TStage } from "../../types";
 import { chartConfig } from "../../utils/chartConfig";
 import { fills } from "../../utils/fills";
@@ -30,9 +31,24 @@ export const GanttD3YAxis = ({ data, itemsCount }: TGanttD3YAxisProps) => {
   const stagesList = data.map(({ id, name }, i) => {
     const y = i * rowHeight + marginTop + xAxisHeight;
     const stageTitle = `${name}`;
+    const fill = (i % 2) ? GREY : 'rgba(255, 255, 255, 0.5)';
     return (
+      <g
+      key={id}
+      
+      >
+      <rect
+        x={0}
+        y={y - 20}
+        width={350}
+        height={32}
+        fill={fill}
+      />
+      <Tooltip
+        title={`${stageTitle}`}
+        placement="bottom-start"
+      >
       <text
-        key={id}
         x={10}
         y={y}
         fill={BLACK}
@@ -42,19 +58,20 @@ export const GanttD3YAxis = ({ data, itemsCount }: TGanttD3YAxisProps) => {
       >
         {stageTitle}
       </text>
+      </Tooltip>
+      </g>
     );
   });
 
   return (
     <g clipPath="url(#clip1)">
-      <rect x={0} y={0} width={yAxisWidth} height={chartHeight-200 + 32 * (itemsCount || 0)} fill={GREY} />
+      <rect x={0} y={0} width={yAxisWidth} height={chartHeight-200 + 32 * (itemsCount || 0)} fill={WHITE} />
       <rect
         x={0}
-        y={marginTop}
+        y={0}
         width={yAxisWidth}
         height={xAxisHeight + 32 * (itemsCount || 0)}
         fill={GREY}
-        fillOpacity={0.5}
       />
       <g>
       <svg x="0" y="0" width={yAxisWidth} height={chartHeight-200 + 32 * (itemsCount || 0)}>

@@ -89,7 +89,7 @@ export const GanttD3XAxis = ({ data, itemsCount }: TGanttD3XAxisProps) => {
           y={37}
           fill={BLACK}
           fontSize={16}
-        >{`${months[date.getMonth()]}`}</text>
+        >{moment(date).format('MM.YY')}</text>
       );
     }
     return null;
@@ -169,16 +169,16 @@ export const GanttD3XAxis = ({ data, itemsCount }: TGanttD3XAxisProps) => {
         fill={BLACK}
         fillOpacity={0.5}
       /> */}
-      <g>{axisLines}</g>
-      <g>{yearLabels}</g>
+      {/* <g>{axisLines}</g> */}
+      {/* <g>{yearLabels}</g> */}
       <g className="months">{monthLabels}</g>
       {/* <g>{dayLabels}</g>s */}
       {!!data && (
         <rect
           x={-200}
-          y={(32 * (itemsCount || 0) + 73)}
+          y={(32 * (itemsCount || 0) + 73) - 9}
           width={chartConfig.chartWidth + 300}
-          height={60}
+          height={75}
           fill={WHITE}
           
         />

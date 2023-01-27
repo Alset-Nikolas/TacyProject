@@ -35,7 +35,6 @@ from .models import (
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-from .permissions import IsAuthorPermission
 from django.conf import settings
 
 
@@ -845,7 +844,6 @@ class UserStatisticsInitiativesView(views.APIView):
 
 
 class RolesInitiativeView(views.APIView):
-    permission_classes = [IsAuthorPermission]
 
     def get(self, request):
         id_init = request.GET.get("id", None)
@@ -1408,19 +1406,20 @@ class ListEventView(views.APIView):
                 {
                     "event": event,
                     "event_status": event.get_status(event),
-                    "metric_fields": initiative.metric_fields.all(),
+                    "metric_fields": event.metric_fields.all(),
                     "addfields": event.addfields.all(),
                 }
                 for event in initiative.events.all()
             ]
         }
+
         s = ListEventSerializer(instance=inst)
         return Response(s.data, 200)
 
 
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAdminUser, IsAuthenticatedOrReadOnly
-from .permissions import IsAdminOrReadOnlyPermission, IsAuthorPermission
+from .permissions import IsAdminOrReadOnlyPermission
 from .serializers import (
     SettingsFilesInitiativeReadSerializer,
     InitiativesFilesSerializer,

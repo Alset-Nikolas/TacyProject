@@ -16,6 +16,11 @@ type TProjectsEffectComponentProps = {
 };
 
 export default function ProjectsEffectComponent({ title, metrics }: TProjectsEffectComponentProps) {
+  let isActive = false;
+
+  metrics.forEach((metric) => {
+    if (metric.active) isActive = true;
+  });
 
   return (
     <section className={`${styles.wrapper} ${sectionStyles.wrapperBorder}`}>
@@ -26,18 +31,21 @@ export default function ProjectsEffectComponent({ title, metrics }: TProjectsEff
         className={`${styles.section}`}
       >
       <div className={`${styles.metricsWrapper}`}>
-          {!metrics.length && (
+          {(!metrics.length || !isActive) && (
             <div>
               Метрики отсутствуют
             </div>
           )}
-          {metrics.map((el) => (
-            <MetricView
-              title={el.title}
-              value={el.value}
-              key={`${el.title}_${el.id}`}
-            />
-          ))}
+          {metrics.map((el) => {
+            if (!el.active) return null;
+            return (
+              <MetricView
+                title={el.title}
+                value={el.value}
+                key={`${el.title}_${el.id}`}
+              />
+            );
+          })}
         </div>
       </SectionContent>
     </section>

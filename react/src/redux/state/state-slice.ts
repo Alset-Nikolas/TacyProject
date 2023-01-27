@@ -47,6 +47,7 @@ type TState = {
         addMember: boolean;
         deleteProject: boolean;
         deleteEvent: boolean;
+        deleteInitiative: boolean;
         error: boolean;
         message: boolean,
         coordination: boolean,
@@ -98,6 +99,7 @@ const initialState: TState = {
         addMember: false,
         deleteProject: false,
         deleteEvent: false,
+        deleteInitiative: false,
         error: false,
         message: false,
         coordination: false,
@@ -337,6 +339,10 @@ export const stateSlice = createSlice({
       state.app.modal.isOpen = true;
       state.app.modal.type.deleteMember = true;
     },
+    openDeleteInitiativeModal: (state) => {
+      state.app.modal.isOpen = true;
+      state.app.modal.type.deleteInitiative = true;
+    },
     openAddMemberModal: (state) => {
       state.app.modal.isOpen = true;
       state.app.modal.type.addMember = true;
@@ -379,6 +385,7 @@ export const stateSlice = createSlice({
         message: false,
         coordination: false,
         rolesAllocation: false,
+        deleteInitiative: false,
       };
       state.app.modal.message = '';
       state.app.modal.data = null;
@@ -428,6 +435,7 @@ export const {
   openDeleteMemberModal,
   openDeleteProjectModal,
   openDeleteEventModal,
+  openDeleteInitiativeModal,
   openErrorModal,
   openMessageModal,
   openCoordinationModal,

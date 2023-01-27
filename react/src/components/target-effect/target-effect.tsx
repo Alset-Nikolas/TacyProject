@@ -31,6 +31,11 @@ export default function TargetEffect({ edit }: TTargetEffectProps) {
   if (!project) return null;
 
   const { metrics } = project;
+  let isActive = false;
+
+  metrics.forEach((metric) => {
+    if (metric.active) isActive = true;
+  });
 
   if (edit) {
     // const selectItemsValues = metrics.map((el) => el.value);
@@ -73,31 +78,21 @@ export default function TargetEffect({ edit }: TTargetEffectProps) {
         className={`${styles.section}`}
       >
         <div className={`${styles.metricsWrapper}`}>
-          {!metrics.length && (
+          {(!metrics.length || !isActive) && (
             <div>
               Метрики отсутствуют
             </div>
           )}
-          {metrics?.map((el) => (
-            <MetricView
-              key={el.id}
-              title={el.title}
-              value={el.target_value}
-            />
-            // <div
-            //   className={`${styles.singleMetricWrapper}`}
-            //   key={el.id}
-            // >
-            //   <Tooltip title={el.title}>
-            //     <span className={`${styles.title}`}>
-            //       {el.title}
-            //     </span>
-            //   </Tooltip>
-            //   <span className={`${styles.value}`}>
-            //     {el.target_value}
-            //   </span>
-            // </div>
-          ))}
+          {metrics?.map((el) => {
+            if (!el.active) return null;
+            return (
+              <MetricView
+                key={el.id}
+                title={el.title}
+                value={el.target_value}
+              />
+            );
+          })}
         </div>
       </SectionContent>
     </div>

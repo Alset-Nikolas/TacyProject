@@ -6,6 +6,7 @@
 * {
   box-sizing: border-box;
   font-family: 'Inter';
+  letter-spacing: 0.015em;
 }
 
 body {
