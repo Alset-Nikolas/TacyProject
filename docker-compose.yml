@@ -3,6 +3,7 @@ version: "3"
 services:
   backend:
     container_name: tacy_backend_container
+    # command: "gunicorn tacy_app.tacy_app:application --bind 0.0.0.0:8000"
     build:
       context: ./tacy_app
     restart: always
@@ -14,6 +15,7 @@ services:
       - db
     env_file:
       - ./tacy_app/.env
+
   db:
     container_name: "tacy_backend_postgres_container"
     restart: always
