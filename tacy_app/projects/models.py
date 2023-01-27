@@ -208,7 +208,7 @@ class Project(models.Model):
             inits = inits.annotate(total=Count("id")).filter(
                 total=len(files_filter)
             )
-        # inits = inits.distinct("pk")
+        inits = inits.distinct("pk")
         return self.inits_sorted(data, inits)
 
 
