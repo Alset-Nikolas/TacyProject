@@ -87,20 +87,20 @@ WSGI_APPLICATION = "tacy_app.wsgi.application"
 
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
     # "default": {
-    #     "ENGINE": "django.db.backends.postgresql",
-    #     # "NAME": "tacy_project_db",
-    #     "NAME": "teisy",
-    #     "USER": "postgres",
-    #     "PASSWORD": "qwerty",
-    #     # "HOST": "tacy_backend_postgres_container",
-    #     "HOST": "localhost",
-    #     "PORT": "5432",
+    #     "ENGINE": "django.db.backends.sqlite3",
+    #     "NAME": BASE_DIR / "db.sqlite3",
     # }
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "tacy_project_db",
+        # "NAME": "teisy",
+        "USER": "postgres",
+        "PASSWORD": "qwerty",
+        "HOST": "tacy_backend_postgres_container",
+        # "HOST": "localhost",
+        "PORT": "5432",
+    }
 }
 
 SWAGGER_SETTINGS = {

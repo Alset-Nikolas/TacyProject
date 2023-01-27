@@ -1,0 +1,37 @@
+.wrapper {
+  // overflow-x: auto;
+  height: fit-content;
+  padding-bottom: 20px;
+  // width: 100%;
+  overflow-x: auto;
+
+  table {
+    border-collapse: collapse;
+    // width: 200%;
+    table-layout: fixed;
+    width: 160px;
+    min-width: 100%;
+  }
+}
+
+.header {
+  // display: flex;
+  font-style: normal;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 28px;
+  color: #17598C;
+  &.edit {
+    color: black;
+  }
+}
+
+.modalWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  width: 345px;
+  min-height: 217px;
+}

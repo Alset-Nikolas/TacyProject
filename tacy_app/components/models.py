@@ -336,9 +336,6 @@ class Initiatives(models.Model):
         return flags
 
     def get_settings_init_files(self):
-        print("get_settings_init_files")
-        print("get_settings_init_files")
-        print("get_settings_init_files")
         init_status = self.status
         project = self.project
         settings = project.settings_initiatives.first()
@@ -347,13 +344,10 @@ class Initiatives(models.Model):
             .order_by("title")
             .all()
         )
-        print(self.id)
-        print(init_status)
         if init_status.value < 0:
             return files
         res = []
         for file in files:
-            print(0, file.status.value, init_status.value)
             if 0 <= file.status.value <= init_status.value:
                 res.append(file)
         return res

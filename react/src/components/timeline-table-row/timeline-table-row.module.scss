@@ -1,0 +1,23 @@
+.tableRow {
+  display: flex;
+  gap: 20px;
+}
+
+.tableRow {
+  display: flex;
+  gap: 20px;
+
+  div {
+    flex-basis: 102px;
+  }
+
+  div:last-child {
+    flex-basis: 30px;
+    display: flex;
+    align-items: center;
+  }
+}
+
+.input {
+  width: 102px;
+}

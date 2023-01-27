@@ -1,0 +1,33 @@
+.singleMetricWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: center;
+  width: 107px;
+}
+
+.title {
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 28px;
+  color: #504F4F;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+  cursor: default;
+}
+
+.value {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 101px;
+  height: 72px;
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 30px;
+  background: #FFFFFF;
+  border-radius: 10px;
+}

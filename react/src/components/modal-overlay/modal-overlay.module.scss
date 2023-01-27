@@ -1,0 +1,12 @@
+.back {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: linear-gradient(180deg, rgba(141, 176, 64, 0.4) 0%, rgba(23, 89, 140, 0.4) 100%);
+    z-index: 1000;
+  }
