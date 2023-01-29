@@ -1,10 +1,7 @@
 .wrapper {
-  // width: 385px;
   display: flex;
   flex-direction: column;
   background: #FFFFFF;
-  box-shadow: 0px 2px 22px 4px rgba(0, 0, 0, 0.1);
-  border-radius: 10px;
   height: fit-content;
 
   &.edit {
@@ -95,6 +92,7 @@
 
 .description {
   width: 100%;
+  resize: none;
 }
 
 .headerRow {
@@ -137,5 +135,11 @@
 .checkbox {
   display: flex;
   justify-content: center;
+  align-items: flex-start;
+}
+
+.title {
+  display: flex;
+  justify-content: flex-start;
   align-items: flex-start;
 }

@@ -10,8 +10,6 @@ import SectionHeader from "../section/section-header/section-header";
 import styles from './initiatives-table-configuration.module.scss';
 import sectionStyles from '../../styles/sections.module.scss';
 import Checkbox from "../ui/checkbox/checkbox";
-import { style } from "@mui/system";
-
 
 type TInitiativesTableConfigurationProps = {
   edit?: boolean;
@@ -183,11 +181,9 @@ export default function InitiativesTableConfiguration({ edit, components }: TIni
 
   return (
     <div
-      className={`${styles.wrapper}`}
+      className={`${styles.wrapper} ${sectionStyles.wrapperBorder}`}
     >
-      <SectionHeader
-        edit
-      >
+      <SectionHeader>
         Таблица реестра инициатив
       </SectionHeader>
       <SectionContent

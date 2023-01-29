@@ -25,13 +25,12 @@ export const GanttD3Bars = ({ data }: TGanttD3BarsProps) => {
 
     // console.log(getCoordinate(stage.date_start));
     return (
-      <Tooltip
-        key={stage.id}
-        title={`Начало: ${stage.start} Окончание: ${stage.end}`}
-        placement="bottom-start"
-      >
-        <>
+      
+      <>
         <rect
+          style={{
+            zIndex: 1000,
+          }}
           id={stage.id.toString()}
           x={0}
           y={y-10}
@@ -39,16 +38,22 @@ export const GanttD3Bars = ({ data }: TGanttD3BarsProps) => {
           height={32}
           fill={barBackground}
         />
-        <rect
-          id={stage.id.toString()}
-          x={getCoordinate(stage.start) < 0 ? 0 : getCoordinate(stage.start)}
-          y={y}
-          width={setWidth(getCoordinate(stage.start), getCoordinate(stage.end))}
-          height={rectHeight}
-          fill={RED}
-        />
-        </>
-      </Tooltip>
+        <Tooltip
+          key={stage.id}
+          title={`Начало: ${stage.start} Окончание: ${stage.end}`}
+          placement="top"
+        >
+          <rect
+            id={stage.id.toString()}
+            x={getCoordinate(stage.start) < 0 ? 0 : getCoordinate(stage.start)}
+            y={y}
+            width={setWidth(getCoordinate(stage.start), getCoordinate(stage.end))}
+            height={rectHeight}
+            fill={RED}
+          />
+        </Tooltip>
+      </>
+      
     );
 
 

@@ -61,7 +61,10 @@ export default function ComponentsSettingsEditPage() {
   };
 
   useEffect(() => {
-    if (!editComponents) dispatch(setComponentsState({ value: components }))
+    if (!editComponents) dispatch(setComponentsState({ value: components }));
+    return () => {
+      dispatch(setComponentsState({ value: null }))
+    }
   }, [components])
 
   // useEffect(() => {

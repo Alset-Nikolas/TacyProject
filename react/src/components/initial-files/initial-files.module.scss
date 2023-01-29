@@ -21,13 +21,12 @@
 
 .wrapperEdit {
   padding-left: 20px;
-  margin: 0 0 48px 0;
   background: #FFFFFF;
 }
 
 .content {
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 20px;
   padding: 20px;
   background-color: #F4f4f4;
@@ -131,9 +130,9 @@ textarea.error {
 }
 
 .link {
-  font-weight: 600;
-  font-size: 18px;
-  line-height: 24px;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 28px;
   color: #17598C;
   text-decoration: none;
 }

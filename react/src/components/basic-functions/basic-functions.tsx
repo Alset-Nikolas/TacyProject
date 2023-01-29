@@ -27,6 +27,11 @@ export default function BasicFunctions({
   const { currentId } = useAppSelector((store) => store.state.project);
   const { data: project } = useGetProjectInfoQuery(currentId);
   const projectForEdit = useAppSelector((store) => store.state.projectForEdit);
+  const titles = {
+    tasks: 'Задачи',
+    purpose: 'Цели',
+    descripton: 'Периметр проекта',
+  }
 
   const onChangeHandler = (e: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
     if (projectForEdit) {
@@ -53,7 +58,7 @@ export default function BasicFunctions({
                 className={`${styles.textBlockDescription}`}
                 htmlFor="purpose"
               >
-                Цели:
+                {`${titles.purpose}:`}
               </label>
               <textarea
                 className={`${styles.purpose} ${error?.purpose ? styles.error : ''}`}
@@ -65,14 +70,14 @@ export default function BasicFunctions({
             <div className={`${styles.textBlockEdit}`}>
               <label
                 className={`${styles.textBlockDescription}`}
-                htmlFor="tasks"
+                htmlFor="description"
               >
-                Задачи:
+                {`${titles.descripton}:`}
               </label>
               <textarea
-                className={`${styles.tasks} ${error?.tasks ? styles.error : ''}`}
-                name="tasks"
-                value={projectForEdit.tasks}
+                className={`${styles.description} ${error?.description ? styles.error : ''}`}
+                name="description"
+                value={projectForEdit.description}
                 onChange={onChangeHandler}
               />
             </div>
@@ -80,14 +85,14 @@ export default function BasicFunctions({
           <div className={`${styles.textBlockEdit}`}>
             <label
               className={`${styles.textBlockDescription}`}
-              htmlFor="description"
+              htmlFor="tasks"
             >
-              Описание:
+              {`${titles.tasks}:`}
             </label>
             <textarea
-              className={`${styles.descrition} ${error?.descrition ? styles.error : ''}`}
-              name="description"
-              value={projectForEdit.description}
+              className={`${styles.tasks} ${error?.tasks ? styles.error : ''}`}
+              name="tasks"
+              value={projectForEdit.tasks}
               onChange={onChangeHandler}
             />
             {/* {!! description && description} */}
@@ -117,7 +122,7 @@ export default function BasicFunctions({
                 className={`${styles.textBlockDescription}`}
                 htmlFor="purpose"
               >
-                Цели:
+                {`${titles.purpose}:`}
               </label>
               <textarea
                 className={`${styles.purpose}`}
@@ -129,14 +134,14 @@ export default function BasicFunctions({
             <div className={`${styles.textBlockEdit} ${styles.bottomArea}`}>
               <label
                 className={`${styles.textBlockDescription}`}
-                htmlFor="tasks"
+                htmlFor="description"
               >
-                Задачи:
+                {`${titles.descripton}:`}
               </label>
               <textarea
                 className={`${styles.tasks}`}
-                name="tasks"
-                value={projectForEdit.tasks}
+                name="description"
+                value={projectForEdit.description}
                 onChange={onChangeHandler}
               />
             </div>
@@ -144,14 +149,14 @@ export default function BasicFunctions({
           <div className={`${styles.textBlockEdit}`}>
             <label
               className={`${styles.textBlockDescription}`}
-              htmlFor="description"
+              htmlFor="tasks"
             >
-              Описание:
+              {`${titles.tasks}:`}
             </label>
             <textarea
               className={`${styles.descrition}`}
-              name="description"
-              value={projectForEdit.description}
+              name="tasks"
+              value={projectForEdit.tasks}
               onChange={onChangeHandler}
             />
             {/* {!! description && description} */}
@@ -172,7 +177,7 @@ export default function BasicFunctions({
         <div className={`${styles.leftBlock}`}>
           <div className={`${styles.textBlock}`}>
             <span className={`${styles.textBlockDescription}`}>
-              Цели:
+              {`${titles.purpose}:`}
             </span>
             {!!project.purpose && (
               <p>
@@ -182,22 +187,22 @@ export default function BasicFunctions({
           </div>
           <div className={`${styles.textBlock}`}>
             <span className={`${styles.textBlockDescription}`}>
-              Задачи:
+              {`${titles.descripton}:`}
             </span>
-            {!!project.tasks && (
+            {!!project.description && (
               <p>
-                {project.tasks}
+                {project.description}
               </p>
             )}
           </div>
         </div>
         <div className={`${styles.textBlock} ${styles.description}`}>
           <span className={`${styles.textBlockDescription}`}>
-            Описание:
+            {`${titles.tasks}:`}
           </span>
-          {!! project.description && (
+          {!! project.tasks && (
             <p>
-              {project.description}
+              {project.tasks}
             </p>
           )}
         </div>

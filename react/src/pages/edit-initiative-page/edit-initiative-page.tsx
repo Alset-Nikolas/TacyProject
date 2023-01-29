@@ -6,7 +6,7 @@ import EditInitiative from "../../components/edit-initiative/edit-initiative";
 import InitiativeManagement from "../../components/initiative-management/initiative-management";
 import RiskManagement from "../../components/risk-management/risk-management";
 import { paths } from "../../consts";
-import { useGetComponentsQuery } from "../../redux/state/state-api";
+import { useGetComponentsQuery, useGetRisksListQuery } from "../../redux/state/state-api";
 import { useAppSelector } from "../../utils/hooks";
 
 // Styles
@@ -15,7 +15,7 @@ import styles from './edit-initiative-page.module.scss';
 export default function EditInitiativePage() {
   const navigate = useNavigate();
   const { initiativeEdit } = useAppSelector((store) => store.state.app);
-  const risksList = useAppSelector((store) => store.risks.list);
+  // const risksList = useAppSelector((store) => store.risks.list);
   const [addRisk, setAddRisk] = useState(false);
   const {
     currentId,
@@ -23,6 +23,9 @@ export default function EditInitiativePage() {
   const { data: components } = useGetComponentsQuery(currentId ? currentId : -1, {
     skip: !currentId,
   });
+  const initiativeId = useAppSelector((store) => store.initiatives.currentInitiativeId);
+  const { data: risksList } = useGetRisksListQuery(initiativeId ? initiativeId : -1);
+
 
   return (
     <div className={`${styles.wrapper}`}>
@@ -43,7 +46,7 @@ export default function EditInitiativePage() {
           />
         ) : (
           <>
-            {!risksList.length && (
+            {!risksList?.length && (
               <div
                 style={{
                   display: 'flex',
@@ -60,7 +63,7 @@ export default function EditInitiativePage() {
                 />
               </div>
             )}
-            {!!risksList.length && (
+            {!!risksList?.length && (
               <>
                 <RiskManagement
                   components={components!}

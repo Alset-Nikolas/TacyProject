@@ -59,7 +59,7 @@ export const stateApi = createApi({
           console.log(err);
         }
       },
-      invalidatesTags: ['initiative', 'project', 'list', 'initiatives-list'],
+      invalidatesTags: ['initiative', 'project', 'list', 'initiatives-list', 'components'],
     }),
     deleteProject: builder.mutation<any, number>({
       query(projectId) {
@@ -358,7 +358,7 @@ export const stateApi = createApi({
           dispatch(openErrorModal('При сохранении произошла ошибка'));
         }
       },
-    invalidatesTags: ['components', 'initiatives-list', 'initiative', 'team-list'],
+    invalidatesTags: ['components', 'initiatives-list', 'initiative', 'team-list', 'project-files-settings'],
     }),
     getTeamList: builder.query<Array<TTeamMember>, { id: number, project: TProject | null }>({
       query: ({ id }) => `/project/community/?id=${id}`,
@@ -389,6 +389,8 @@ export const stateApi = createApi({
             };
           });
 
+          member.addfields = resItem.addfields;
+
           return member;
         });
 
@@ -404,7 +406,7 @@ export const stateApi = createApi({
           body: { community_info: body },
         }
       },
-      invalidatesTags: ['team-list', 'user-rights'],
+      invalidatesTags: ['team-list', 'user-rights', 'initiative'],
       async onQueryStarted({ projectId }, { dispatch, queryFulfilled, getState }) {
         // const { data: project } = stateApi.useGetProjectInfoQuery(projectId);
         const state = getState();
@@ -463,9 +465,14 @@ export const stateApi = createApi({
             propGraphic.propertieName = propertieName;
             const metricssEntries = Object.entries(el[1]);
             const graphicData = metricssEntries.map((el) => {
-              const metricName = project?.metrics.find((metric) => metric.id === +el[0])?.title;
+              const metric = project?.metrics.find((metric) => metric.id === +el[0]);
+              const metricName = metric?.title;
+              const metricUnits = metric?.units;
+              const isPercent = metric?.is_percent;
               return {
                 metricName: metricName ? metricName : 'Сумма',
+                units: metricUnits,
+                isPercent: isPercent,
                 data: el[1],
               };
             });

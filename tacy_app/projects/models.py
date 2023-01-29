@@ -69,6 +69,11 @@ class Project(models.Model):
     def get_community(self):
         return self.community.all()
 
+    def update_community(self):
+        for user_in_project in self.community_info.all():
+            print("user_in_project", user_in_project)
+            user_in_project.update_user()
+
     @classmethod
     def get_project_by_name(cls, name):
         return cls.objects.filter(name=name).first()
@@ -127,7 +132,7 @@ class Project(models.Model):
                 key=lambda x: x.metric_fields.filter(metric=metrics_sorted[0])
                 .first()
                 .value,
-                reverse=not bool(metrics_sorted[1]),
+                reverse=bool(int(metrics_sorted[1])),
             )
         return inits.all()
 
@@ -208,7 +213,7 @@ class Project(models.Model):
             inits = inits.annotate(total=Count("id")).filter(
                 total=len(files_filter)
             )
-        inits = inits.distinct("pk")
+        # inits = inits.distinct("pk")
         return self.inits_sorted(data, inits)
 
 
@@ -227,7 +232,6 @@ class ProjectFiles(models.Model):
 
     @classmethod
     def add_file(cls, project: Project, file):
-        print("file", file)
         return cls.objects.create(
             project=project, file=file, file_name=str(file)
         )
@@ -337,7 +341,6 @@ class MetricsProject(models.Model):
         ids_not_delete = []
         for metric_info in metrics:
             m_id = metric_info.get("id")
-            print("m_id", m_id)
             if m_id and m_id > 0:
                 metric_old = cls.objects.filter(id=m_id).first()
                 metric_old.title = metric_info.get("title")
@@ -392,6 +395,8 @@ class PropertiesItemsProject(models.Model):
         max_length=10,
         help_text="Сокращение для графиков",
         verbose_name="Сокращение значения свойства",
+        default="",
+        blank=True,
     )
 
     class Meta:
@@ -416,20 +421,20 @@ class PropertiesItemsProject(models.Model):
         propertie,
         values: typing.List[str],
     ):
-        print("update_properties_values_for_project !!!!", values)
         ids_not_delete = []
         for val in values:
             id = val.get("id")
+            value_short = val.get("value_short") or val.get("value")[:4] + "."
             if id and id > 0:
                 val_obj = cls.get_property_item_by_id(id)
                 val_obj.value = val.get("value")
-                val_obj.value_short = val.get("value_short")
+                val_obj.value_short = value_short
                 val_obj.save()
             else:
                 val_obj = cls.objects.create(
                     propertie=propertie,
                     value=val.get("value"),
-                    value_short=val.get("value_short"),
+                    value_short=value_short,
                 )
             ids_not_delete.append(val_obj.id)
             val["id"] = val_obj.id
@@ -536,6 +541,21 @@ class СommunityProject(models.Model):
     def __str__(self):
         return f"<СommunityProject project={self.project.name} person={self.user.email}>"
 
+    def update_user(self, value=""):
+        for (
+            community_settings_add_field
+        ) in self.project.community_settings.all():
+            title = community_settings_add_field
+            add_filid_obj = (
+                CommunityAddFields.objects.filter(title=title)
+                .filter(community=self)
+                .first()
+            )
+            if not add_filid_obj:
+                CommunityAddFields.objects.create(
+                    title=title, community=self, value=value
+                )
+
     @classmethod
     def create_or_update_user_in_community(
         cls,
@@ -597,7 +617,23 @@ class CommunityAddFields(models.Model):
         CommunitySettingsAddFields,
         on_delete=models.CASCADE,
     )
-    value = models.CharField(max_length=500)
+    value = models.CharField(
+        max_length=500,
+        blank=True,
+        null=True,
+        default="",
+    )
+
+    @classmethod
+    def create_or_update_addfields_user_in_community(
+        cls, community, addfields
+    ):
+        for field in addfields:
+            cls.objects.update_or_create(
+                community=community,
+                title=field.get("title").get("id"),
+                defaults={"value": field.get("value")},
+            )
 
 
 class PropertiesСommunityProject(models.Model):
@@ -704,7 +740,6 @@ class RolesProject(models.Model):
 
     @classmethod
     def create_or_update(cls, project: Project, roles):
-        print("create_or_update", roles)
         ids_not_delete = []
         for item in roles:
             id = item.get("id")

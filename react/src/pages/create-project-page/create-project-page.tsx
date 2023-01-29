@@ -8,10 +8,10 @@ import CustomizedButton from '../../components/button/button';
 import { paths } from '../../consts';
 import textStyles from '../../styles/text.module.scss';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
-import { closeModal, createProjectThunk, emptyProjectForEdit, getProjectInfoThunk, setState } from '../../redux/state/state-slice';
+import { closeModal, createProjectThunk, emptyProjectForEdit, getProjectInfoThunk, openErrorModal, setState } from '../../redux/state/state-slice';
 import { addPropertie, handleInputChange } from '../../utils';
 import Modal from '../../components/modal/modal';
-import { TMetrica, TIntermediateDate } from '../../types';
+import { TMetrica, TIntermediateDate, TPropertie, TPropertieEdit } from '../../types';
 import fileSrc from '../../images/icons/file.svg';
 
 // Styles
@@ -29,7 +29,13 @@ export default function CreateProjectPage() {
   const projectForEdit = useAppSelector((store) => store.state.projectForEdit);
   const [file, setFile] = useState<Blob | null>(null);
   const currentProjectId = useAppSelector((store) => store.state.project.currentId);
-  const [createProject, { isSuccess: isCreateSuccess, data: createResponse }] = usePostProjectMutation();
+  const [createProject,
+    {
+      isSuccess: isCreateSuccess,
+      isError: isCreateError,
+      data: createResponse
+    }
+  ] = usePostProjectMutation();
   const modal = useAppSelector((store) => store.state.app.modal);
   const [validationError, setValidationError] = useState({
     name: false,
@@ -47,6 +53,7 @@ export default function CreateProjectPage() {
   });
   const [files, setFiles] = useState<Array<any>>([null]);
   const [postFiles] = usePostFilesMutation();
+  const [ isSamePropNames, setIsSamePropNames ] = useState(false);
 
   const validateEmptyInputs = () => {
     let isValid = true;
@@ -75,6 +82,18 @@ export default function CreateProjectPage() {
           if (!(dateEl as TIntermediateDate).date) isValid = false;
         })
       }
+      if (key === 'properties' && (value instanceof Array)) {
+        value.forEach((propEl, elIndex) => {
+          value.forEach((el, index) => {
+            if (index !== elIndex) {
+              if ((el as TPropertieEdit).title === (propEl as TPropertieEdit).title) {
+                isValid = false;
+                setIsSamePropNames(true);
+              }
+            }
+          });
+        })
+      }
     });
 
     return isValid;
@@ -88,20 +107,15 @@ export default function CreateProjectPage() {
     const isValid = validateEmptyInputs(); 
     if (projectForEdit && isValid) {
       const projectEntries = Object.entries(projectForEdit);
-
-      // projectEntries.forEach((el) => {
-      //   formData.append(el[0], el[1] instanceof Array || typeof el[1] === 'number' ? JSON.stringify(el[1]) : el[1]);
-      // });
-      // files.forEach((el, index) => {
-      //   if (el) formData.append(`file${index}`, el);
-      // });
-
-      // formData.append(`total`, (files.length - 1).toString());
-
-      // if (currentProjectId) postFiles({ projectId: currentProjectId, body: formData });
-      
       createProject(projectForEdit);
       refetch();
+    } else {
+      if (isSamePropNames) {
+        dispatch(openErrorModal('У атрибутов инициатив не может быть одинаковых названий'));
+        setIsSamePropNames(false);
+      } else {
+        dispatch(openErrorModal('Проверьте правильность заполнения полей'));
+      }
     }
   };
 
@@ -133,6 +147,9 @@ export default function CreateProjectPage() {
       if (createResponse) postFiles({ projectId: createResponse.id, body: formData });
       navigate(paths.settings.basic.absolute);
     }
+    if (isCreateError) {
+      dispatch(openErrorModal('При создании произошла ошибка'));
+    }
     return () => {
       dispatch(setState({
         projectCreate: {
@@ -142,7 +159,7 @@ export default function CreateProjectPage() {
         },
       }));
     }
-  }, [isCreateSuccess]);
+  }, [isCreateSuccess, isCreateError]);
 
   useEffect(() => {
     dispatch(emptyProjectForEdit());
@@ -183,7 +200,7 @@ export default function CreateProjectPage() {
         edit
       />
       <BasicFunctions
-        create
+        edit
         error={validationError}
         setFile={setFile}
       />
@@ -212,7 +229,7 @@ export default function CreateProjectPage() {
           onClick={onSaveClick}
         />
       </div>
-      {modal.isOpen && modal.type.error && (
+      {/* {modal.isOpen && modal.type.error && (
         <Modal
           closeModal={() => dispatch(closeModal())}
         >
@@ -236,7 +253,7 @@ export default function CreateProjectPage() {
             </div>
           </div>
         </Modal>
-      )}
+      )} */}
     </div>
   );
 }

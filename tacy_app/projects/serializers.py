@@ -14,6 +14,8 @@ from .models import (
     СommunityProject,
     RolesProject,
     IntermediateDateProject,
+    CommunityAddFields,
+    CommunitySettingsAddFields,
 )
 from notifications.email import EmailManage
 from notifications.models import NotificationsUser
@@ -332,7 +334,6 @@ class CreateProjectSerializer(serializers.ModelSerializer):
             )
 
     def validate(self, attrs):
-        print(attrs)
         super().validate(attrs)
         # self._validate_intermediate_dates(attrs)
         request = self.context.get("request")
@@ -535,9 +536,24 @@ class ProperitsUserSerializer(serializers.Serializer):
         return data
 
 
+class CommunitySettingsAddFieldsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CommunitySettingsAddFields
+        fields = "__all__"
+
+
+class CommunityAddFieldsSerializer(serializers.ModelSerializer):
+    title = CommunitySettingsAddFieldsSerializer()
+
+    class Meta:
+        model = CommunityAddFields
+        fields = "__all__"
+
+
 class CommunityInfoSerializer(serializers.ModelSerializer):
     user = UserBaseSerializer()
     properties = ProperitsUserSerializer(many=True)
+    addfields = CommunityAddFieldsSerializer(many=True)
     is_superuser = serializers.BooleanField(required=False)
 
     class Meta:
@@ -548,6 +564,7 @@ class CommunityInfoSerializer(serializers.ModelSerializer):
             "is_create",
             "is_superuser",
             "properties",
+            "addfields",
             "is_author",
             "date_create",
         )
@@ -616,12 +633,14 @@ class UpdateCommunityProjectSerializer(serializers.ModelSerializer):
             PropertiesСommunityProject.create_or_update_properties_user_in_community(
                 community_item, community_obj["properties"]
             )
+            CommunityAddFields.create_or_update_addfields_user_in_community(
+                community_item, community_obj.get("addfields")
+            )
         for del_person in (
             СommunityProject.objects.filter(project=project)
             .exclude(id__in=community_ids_not_del)
             .all()
         ):
-            print("удаление ")
             EmailManage.send_removed_in_project(
                 del_person.user, context={"project": project}
             )

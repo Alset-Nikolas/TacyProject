@@ -96,7 +96,6 @@ class SentForApproval(views.APIView):
                 "text": request.data.get("text"),
                 "action": TYPE_SEND_APPROVAL,
             }
-            print(instace)
             CoordinationInitiativeHistory.create(instace)
             initiative = Initiatives.get_by_id(initiative_id)
             NotificationsUser.sent_approval(initiative, instace)

@@ -112,7 +112,7 @@ export default function StatusManagement({ edit, components }: TStatusManagement
   );
 
   return (
-    <section className={`${styles.wrapper}`}>
+    <section className={`${styles.wrapper} ${sectionStyles.wrapperBorder}`}>
       <SectionHeader>
         Статусы инициативы
       </SectionHeader>

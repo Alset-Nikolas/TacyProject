@@ -75,18 +75,9 @@ export const GanttD3YAxis = ({ data, itemsCount }: TGanttD3YAxisProps) => {
       />
       <g>
       <svg x="0" y="0" width={yAxisWidth} height={chartHeight-200 + 32 * (itemsCount || 0)}>
-        {stagesList.length ?
-          stagesList
-          :
-          <text
-            x={10}
-            y={marginTop + xAxisHeight}
-            fill={BLACK}
-            className={text}
-          >
-            Список пуст
-          </text>
-          }
+
+          {stagesList}
+
         </svg>
       </g>
     </g>

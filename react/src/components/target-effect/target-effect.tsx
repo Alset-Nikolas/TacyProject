@@ -90,6 +90,8 @@ export default function TargetEffect({ edit }: TTargetEffectProps) {
                 key={el.id}
                 title={el.title}
                 value={el.target_value}
+                units={el.units}
+                is_percent={el.is_percent}
               />
             );
           })}

@@ -220,7 +220,7 @@ export default function TeamTableManagement({ edit, editButton, components }: TR
   }
 
   return (
-    <section className={`${styles.wrapper}`}>
+    <section className={`${styles.wrapper} ${sectionStyles.wrapperBorder}`}>
       <SectionHeader>
         Таблица команды проекта
       </SectionHeader>

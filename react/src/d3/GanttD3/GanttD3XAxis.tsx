@@ -5,6 +5,7 @@ import { chartConfig } from "../../utils/chartConfig";
 import { fills } from "../../utils/fills";
 import { dateScale, getCoordinate } from "../../utils/utilities";
 import { TIntermediateDate } from "../../types";
+import { Tooltip } from "@mui/material";
 
 type TGanttD3XAxisProps = {
   data?: Array<TIntermediateDate>;
@@ -98,16 +99,20 @@ export const GanttD3XAxis = ({ data, itemsCount }: TGanttD3XAxisProps) => {
   const intermediateDatesLabels = data?.map((item) => {
     return (
       <g key={item.title+item.date}>
+        <Tooltip
+          title={`Дата: ${item.date} Мероприятие: ${item.title}`}
+          placement="top"
+        >
         <line
           x1={getCoordinate(item.date)}
           y1={40}
           x2={getCoordinate(item.date)}
           y2={(32 * (itemsCount || 0) + 78)}
-          strokeWidth={1}
+          strokeWidth={2}
           stroke={BLACK}
           strokeDasharray={4}
         />
-        <text
+        {/* <text
           x={getCoordinate(item.date)}
           dx={dayWidth / 2}
           y={(32 * (itemsCount || 0) + 93)}
@@ -126,7 +131,8 @@ export const GanttD3XAxis = ({ data, itemsCount }: TGanttD3XAxisProps) => {
           fontSize={16}
         >
           {item.date}
-        </text>
+        </text> */}
+        </Tooltip>
       </g>
     );
   })
@@ -176,9 +182,9 @@ export const GanttD3XAxis = ({ data, itemsCount }: TGanttD3XAxisProps) => {
       {!!data && (
         <rect
           x={-200}
-          y={(32 * (itemsCount || 0) + 73) - 9}
+          y={(32 * (itemsCount || 0) + 73) - 19}
           width={chartConfig.chartWidth + 300}
-          height={75}
+          height={85}
           fill={WHITE}
           
         />

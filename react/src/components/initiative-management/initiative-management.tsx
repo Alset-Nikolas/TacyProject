@@ -89,6 +89,9 @@ export default function InitiativeManagement({ edit, editButton }: TInitiativeMa
               </div>
               <ol className={`${styles.paramsList}`}>
                 <li>
+                  Автор
+                </li>
+                <li>
                   Дата реистрации
                 </li>
                 <li>
@@ -182,6 +185,16 @@ export default function InitiativeManagement({ edit, editButton }: TInitiativeMa
         </div>
         {currentInitiative && (
           <ol className={`${styles.paramsList}`}>
+            <li>
+              <div>
+                <div>
+                  Автор:
+                </div>
+                <div>
+                  {`${currentInitiative.initiative.author.last_name} ${currentInitiative.initiative.author.first_name[0]}. ${currentInitiative.initiative.author.second_name[0]}.`}
+                </div>
+              </div>
+            </li>
             <li>
               <div>
                 <div>

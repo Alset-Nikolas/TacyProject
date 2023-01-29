@@ -38,6 +38,8 @@ export default function TargetEffectStatus() {
               <MetricView
                 title={el.title}
                 value={el.target_value}
+                units={el.units}
+                is_percent={el.is_percent}
                 key={el.id}
               />
             );

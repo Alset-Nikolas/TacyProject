@@ -45,6 +45,7 @@ import Checkbox from "../ui/checkbox/checkbox";
 
 export default function InitiativeCoordination() {
   const dispatch = useAppDispatch();
+  const [isOpen, setIsOpen] = useState(false);
   // const initiative = useAppSelector((store) => store.initiatives.initiative);
   const {
     currentInitiativeId
@@ -259,414 +260,431 @@ export default function InitiativeCoordination() {
     <div
       className={`${styles.wrapper} ${sectionStyles.wrapperBorder}`}
     >
-      <SectionHeader
-        className={`${styles.header}`}
-      >
-        Согласование инициативы
+      <SectionHeader>
+        <div
+          className={`${sectionStyles.hideContentHeader}`}
+          onClick={() => setIsOpen((prevState) => !prevState)}
+        >
+          Согласование инициативы
+          <Pictogram
+            type={isOpen ? 'close' : 'show'}
+            cursor="pointer"
+          />
+        </div>
       </SectionHeader>
-      <div
-        className={`${styles.content}`}
-      >
-        <div
-          className={`${styles.col}`}
-        >
+      {isOpen && (
+        <>
           <div
-            className={`${styles.infoBlock}`}
+            className={`${styles.content}`}
           >
             <div
-              className={`${styles.historyHeader}`}
+              className={`${styles.col}`}
             >
-              История согласования
-            </div>
-            <div
-              className={`${styles.history}`}
-            >
-              <ul
-                className={`${styles.historyList}`}
+              <div
+                className={`${styles.infoBlock}`}
               >
-                {coordinationHistory && coordinationHistory.map((element, index) => {
-                  const isServiceMessage = element.action === 'Служебное сообщение';
-                  const isApprovement = element.action === 'Инициатива согласована'
-                  const isSendToApprove = element.action === "Отправить на согласование";
-                  const elementsDate = new Date(element.date);
-                  if (!isServiceMessage && !isApprovement && !isSendToApprove) return null;
-                  // if (isServiceMessage) {
-                  //   return (
-                  //     <div
-                  //       key={element.id}
-                  //       className={`${styles.serviceMessage}`}
-                  //     >
-                  //       {element.text}
-                  //     </div>
-                  //   );
-                  // }
-                  return (
-                    <li
-                      key={element.id}
-                      className={`${styles.historyRow}`}
-                    >
-                      <div>
-                        {moment(elementsDate).format('DD.MM.YYYY')}
-                      </div>
-                      <div>
-                        {element.status?.name ? element.status.name : 'null'}
-                      </div>
-                      <div>
-                        {isServiceMessage && element.text}
-                        {isSendToApprove && `${element.author_text?.last_name} ${element.author_text?.first_name[0]}. ${element.author_text?.second_name[0]}. ${element.text}`}
-                        {isApprovement && element.action}
-                      </div>
-                      <div>
-                        {rolePersonList?.find((item) => item.user.id === element.coordinator?.id)?.role.name}
-                      </div>
-                      <div>
-                        {!isServiceMessage && `${element.coordinator?.last_name} ${element.coordinator?.first_name[0]}. ${element.coordinator?.second_name[0]}.`}
-                      </div>
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
-          </div>
-          <div
-            className={`${styles.infoBlock}`}
-          >
-            <div
-              className={`${styles.documents}`}
-            >
-              <div>
-                Документы
-              </div>
-              {initiativeFiles?.map((item, index) => {
-                if (initiative?.initiative.status?.value !== undefined &&
-                  (item.title.status.value >= initiative?.initiative.status?.value &&
-                    initiative?.initiative.status?.value !== -1)) return null;
-                return (
-                  <div
-                    key={item.file.id}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <div>
-                      {item.title.title}
-                    </div>
-                    <div>
-                      <InitiativeFileUpload
-                        index={index}
-                        fileUploadHandler={setFiles}
-                        file={item.file}
-                      />
-                    </div>
-                  </div>
-                )
-              })}
-              <div>
-                На текущем этапе:
-              </div>
-              {initiativeFiles?.map((item, index) => {
-                if (item.title.status.id !== initiative?.initiative.status?.id) return null;
-                return (
-                  <div
-                    key={item.file.id}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <div>
-                      {item.title.title}
-                    </div>
-                    <div>
-                      <InitiativeFileUpload
-                        index={index}
-                        fileUploadHandler={setFiles}
-                        file={item.file}
-                      />
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-          <div
-            className={`${styles.buttonWrapper}`}
-          >
-            <div
-              className={`${styles.commentButtonsWrapper}`}
-            >
-              <CustomizedButton
-                className={`${styles.button}`}
-                value={`${userRights?.init_failure ? 'Восстановить' : "Отозвать"}`}
-                color="transparent"
-                disabled={!userRights?.user_is_author && !userRights?.user_is_superuser}
-                onClick={() => {
-                  // closeInitiative({
-                  //   initiative: initiative ? initiative?.initiative.id : -1,
-                  //   failure: !userRights?.init_failure,
-                  // });
-                  switchInitiativeState({
-                    initiative: initiative ? initiative?.initiative.id : -1,
-                    failure: !userRights?.init_failure,
-                  })
-                }}
-              />
-              <CustomizedButton
-                className={`${styles.button}`}
-                value="Согласовать"
-                color="blue"
-                disabled={coordinationButtonIsDisabled}
-                onClick={postCoordinateHandler}
-              />
-            </div>
-          </div>
-          {/* )} */}
-        </div>
-        <div
-          className={`${styles.col}`}
-        >
-          
-          <div
-            className={`${styles.chat}`}
-            ref={chatRef}
-          >
-            <div
-              className={`${styles.messagesWrapper}`}
-            >
-              {(!coordinationHistory || !coordinationHistory.length) && (
                 <div
-                  style={{
-                    textAlign: 'center',
-                  }}
-                >История пуста</div>
-              )}
-              {coordinationHistory && coordinationHistory.map((element, index) => {
-                // const author = teamList.find((member) => member.id === element.author_text);
-                const isServiceMessage = element.action === 'Служебное сообщение';
-                const isComment = element.action === 'Новый комментарий'
-                const isApprovement = element.action === 'Инициатива согласована'
-                const isSendToApprove = element.action === "Отправить на согласование";
-                const authorName = element.author_text?.first_name ?
-                  `${element.author_text.last_name} ${element.author_text.first_name} ${element.author_text.second_name}`
-                  :
-                  'Админ';
-                const coordinator = element.coordinator?.first_name ?
-                  `${element.coordinator.last_name} ${element.coordinator.first_name} ${element.coordinator.second_name}`
-                  :
-                  '';
-                const date = new Date(element.date);
-                const nextElement = coordinationHistory[index + 1];
-                const prevDate = nextElement ? new Date(nextElement.date) : null;
-                const isPreviousDay = prevDate && (date.getDate() !== prevDate.getDate());
-                // const statusName = components?.settings?.initiative_status.find((status) => status.id === element.status)?.name;
-                return (
-                  <div
-                    key={element.id}
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                    }}
+                  className={`${styles.historyHeader}`}
+                >
+                  История согласования
+                </div>
+                <div
+                  className={`${styles.history}`}
+                >
+                  <ul
+                    className={`${styles.historyList}`}
                   >
-                    {(isServiceMessage || isApprovement || isSendToApprove) ? (
-                      <>
-                        {!isServiceMessage && (
-                          <div
-                            className={`${styles.serviceMessage}`}
-                          >
-                            {element.status?.name ? element.status.name : 'null'}
-                            &nbsp;
-                            {isSendToApprove ? 
-                              `${element.author_text?.last_name} ${element.author_text?.first_name[0]}. ${element.author_text?.second_name[0]}. ${element.text}`
-                              :
-                              element.action
-                            }
-                            &nbsp;
-                            {rolePersonList?.find((item) => item.user.id === element.coordinator?.id)?.role.name}
-                            &nbsp;
-                            {`${element.coordinator?.last_name} ${element.coordinator?.first_name[0]}. ${element.coordinator?.second_name[0]}.`}
-                          </div>
-                        )}
-                        {isServiceMessage && (
-                          <div
-                            className={`${styles.serviceMessage}`}
-                          >
-                            {element.text}
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <>
-                        <div
-                          className={`${styles.messageWrapper} ${element.author_text?.id === user?.user.id && styles.own}`}
+                    {coordinationHistory && coordinationHistory.map((element, index) => {
+                      const isServiceMessage = element.action === 'Служебное сообщение';
+                      const isApprovement = element.action === 'Инициатива согласована'
+                      const isSendToApprove = element.action === "Отправить на согласование";
+                      const elementsDate = new Date(element.date);
+                      if (!isServiceMessage && !isApprovement && !isSendToApprove) return null;
+                      // if (isServiceMessage) {
+                      //   return (
+                      //     <div
+                      //       key={element.id}
+                      //       className={`${styles.serviceMessage}`}
+                      //     >
+                      //       {element.text}
+                      //     </div>
+                      //   );
+                      // }
+                      return (
+                        <li
+                          key={element.id}
+                          className={`${styles.historyRow}`}
                         >
-                          {element.author_text?.id !== user?.user.id && (
-                            <Tooltip
-                              title={`${element.author_text?.last_name} ${element.author_text?.first_name} ${element.author_text?.second_name}`}
-                              placement="bottom"
-                            >
-                              <div
-                                className={styles.avatar}
-                              >
-                                {element.author_text?.last_name[0]}
-                              </div>
-                            </Tooltip>
-                          )}
-                          <Tooltip
-                            title={moment(element.date).format('HH:mm')}
-                            placement={`${element.author_text?.id === user?.user.id ? 'left' : 'right'}`}
-                          >
-                            <div
-                              className={`${styles.messageText} ${styles.own}`}
-                            >
-                              {element.text}
-                            </div>
-                          </Tooltip>
-                          {element.author_text?.id === user?.user.id && (
-                            <Tooltip
-                              title={`${element.author_text?.last_name} ${element.author_text?.first_name} ${element.author_text?.second_name}`}
-                              placement="bottom"
-                            >
-                              <div
-                                className={`${styles.avatar} ${styles.own}`}
-                              >
-                                {element.author_text?.last_name[0]}
-                              </div>
-                            </Tooltip>
-                          )}
-                        </div>
-                        {isPreviousDay && <MessageSeparator date={prevDate} />}
-                      </>
-                    )}
-                    <div ref={chatBottomRef} />
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-          <div
-            className={`${styles.inputMessageWrapper}`}
-          >
-            <textarea
-              name="text"
-              placeholder="Сообщение"
-              value={commentState.text}
-              className={`${styles.textInput}`}
-              onChange={inputChangeHandler}
-              ref={chatInputRef}
-            />
-            <Pictogram
-              type="send"
-              cursor="pointer"
-              onClick={postCommentHandler}
-            />
-          </div>
-        </div>
-      </div>
-      {modal.isOpen && modal.type.coordination && (
-        <Modal
-          closeModal={() => dispatch(closeModal())}
-        >
-          <div
-            className={`${styles.coordinationModalWraper}`}
-          >
-            <div
-              className={`${styles.modalContentWraper}`}
-            >
-            {!initiative?.roles.length && (
-              <div>
-                Отсутствуют роли для согласования
+                          <div>
+                            {moment(elementsDate).format('DD.MM.YYYY')}
+                          </div>
+                          <div>
+                            {element.status?.name ? element.status.name : 'null'}
+                          </div>
+                          <div>
+                            {isServiceMessage && element.text}
+                            {isSendToApprove && `${element.author_text?.last_name} ${element.author_text?.first_name[0]}. ${element.author_text?.second_name[0]}. ${element.text}`}
+                            {isApprovement && element.action}
+                          </div>
+                          <div>
+                            {rolePersonList?.find((item) => item.user.id === element.coordinator?.id)?.role.name}
+                          </div>
+                          <div>
+                            {!isServiceMessage && `${element.coordinator?.last_name} ${element.coordinator?.first_name[0]}. ${element.coordinator?.second_name[0]}.`}
+                          </div>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
               </div>
-            )}
-            {initiative?.roles.map((item) => {
-              if (!item.role.is_approve) return null;
-              return (
+              <div
+                className={`${styles.infoBlock}`}
+              >
                 <div
-                  key={item.role.id}
-                  className={`${styles.modalRoleWrapper}`}
+                  className={`${styles.documents}`}
                 >
                   <div
-                    className={`${styles.modalRoleName}`}
+                    className={`${styles.documentsHeader}`}
                   >
-                    {item.role.name}
+                    Документы
                   </div>
-                  <div
-                    className={`${styles.modalUserWrapper} ${styles.header}`}
-                  >
-                    <div className={`${styles.modalHeaderCell}`}>
-                      ФИО
-                    </div>
-                    {
-                      project?.properties.map((propertie) => (
-                        <div className={`${styles.modalHeaderCell}`} key={propertie.id}>
-                          {propertie.title}
-                        </div>
-                      ))
-                    }
-                  </div>
-                  {!item.community.length && (
-                    <div>
-                      Отсутствуют пользователи, назначенные на роль
-                    </div>
-                  )}
-                  {item.community.map((member) => {
-                    const foundMember = membersList?.find((item) => item.id === member.user_info?.user.id);
-                    if ((user?.user.id === member.user_info?.user.id) || !member.user_info) return null;
+                  {initiativeFiles?.map((item, index) => {
+                    if (initiative?.initiative.status?.value !== undefined &&
+                      (item.title.status.value >= initiative?.initiative.status?.value &&
+                        initiative?.initiative.status?.value !== -1)) return null;
                     return (
                       <div
-                        key={member.user_info.user.id}
-                        className={`${styles.modalUserWrapper}`}
+                        key={item.file.id}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                        }}
                       >
-                        <div
-                          className={`${styles.checkboxWrapper}`}
-                        >
-                          {/* <input
-                            type="checkbox"
-                            checked={!!coordinatorsState.coordinators.find((coordinator) => coordinator.id === member.user_info?.user.id)}
-                            onChange={(e) => member.user_info && modalCheckboxHandler(e, member.user_info.user)}
-                          /> */}
-                          <Checkbox
-                            checked={!!coordinatorsState.coordinators.find((coordinator) => coordinator.id === member.user_info?.user.id)}
-                            onChange={(e) => member.user_info && modalCheckboxHandler(e, member.user_info.user)}
+                        <div>
+                          {item.title.title}
+                        </div>
+                        <div>
+                          <InitiativeFileUpload
+                            index={index}
+                            fileUploadHandler={setFiles}
+                            file={item.file}
                           />
                         </div>
-                        <div
-                          className={`${styles.modalCell}`}
-                        >
-                          {`${member.user_info.user.last_name} ${member.user_info.user.first_name[0]}. ${member.user_info.user.second_name[0]}.`}
+                      </div>
+                    )
+                  })}
+                  {initiative?.initiative.status && initiative?.initiative.status?.value > 0 && (
+                    <div
+                      className={`${styles.documentsHeader}`}
+                    >
+                      На текущем этапе:
+                    </div>
+                  )}
+                  {initiativeFiles?.map((item, index) => {
+                    if (item.title.status.id !== initiative?.initiative.status?.id) return null;
+                    return (
+                      <div
+                        key={item.file.id}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                        }}
+                      >
+                        <div>
+                          {item.title.title}
                         </div>
-                        {foundMember?.properties.map((propertie) => (
-                          <div
-                            key={`${member.user_info?.user.id}_${propertie.id}`}
-                            className={`${styles.modalCell}`}
-                          >
-                            {propertie.values.map((el) => el.value).join(', ')}
-                          </div>
-                        ))}
+                        <div>
+                          <InitiativeFileUpload
+                            index={index}
+                            fileUploadHandler={setFiles}
+                            file={item.file}
+                          />
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+              <div
+                className={`${styles.buttonWrapper}`}
+              >
+                <div
+                  className={`${styles.commentButtonsWrapper}`}
+                >
+                  <CustomizedButton
+                    className={`${styles.button}`}
+                    value={`${userRights?.init_failure ? 'Восстановить' : "Отозвать"}`}
+                    color="transparent"
+                    disabled={!userRights?.user_is_author && !userRights?.user_is_superuser}
+                    onClick={() => {
+                      // closeInitiative({
+                      //   initiative: initiative ? initiative?.initiative.id : -1,
+                      //   failure: !userRights?.init_failure,
+                      // });
+                      switchInitiativeState({
+                        initiative: initiative ? initiative?.initiative.id : -1,
+                        failure: !userRights?.init_failure,
+                      })
+                    }}
+                  />
+                  <CustomizedButton
+                    className={`${styles.button}`}
+                    value="Согласовать"
+                    color="blue"
+                    disabled={coordinationButtonIsDisabled}
+                    onClick={postCoordinateHandler}
+                  />
+                </div>
+              </div>
+              {/* )} */}
+            </div>
+            <div
+              className={`${styles.col}`}
+            >
+              
+              <div
+                className={`${styles.chat}`}
+                ref={chatRef}
+              >
+                <div
+                  className={`${styles.messagesWrapper}`}
+                >
+                  {(!coordinationHistory || !coordinationHistory.length) && (
+                    <div
+                      style={{
+                        textAlign: 'center',
+                      }}
+                    >История пуста</div>
+                  )}
+                  {coordinationHistory && coordinationHistory.map((element, index) => {
+                    // const author = teamList.find((member) => member.id === element.author_text);
+                    const isServiceMessage = element.action === 'Служебное сообщение';
+                    const isComment = element.action === 'Новый комментарий'
+                    const isApprovement = element.action === 'Инициатива согласована'
+                    const isSendToApprove = element.action === "Отправить на согласование";
+                    const authorName = element.author_text?.first_name ?
+                      `${element.author_text.last_name} ${element.author_text.first_name} ${element.author_text.second_name}`
+                      :
+                      'Админ';
+                    const coordinator = element.coordinator?.first_name ?
+                      `${element.coordinator.last_name} ${element.coordinator.first_name} ${element.coordinator.second_name}`
+                      :
+                      '';
+                    const date = new Date(element.date);
+                    const nextElement = coordinationHistory[index + 1];
+                    const prevDate = nextElement ? new Date(nextElement.date) : null;
+                    const isPreviousDay = prevDate && (date.getDate() !== prevDate.getDate());
+                    // const statusName = components?.settings?.initiative_status.find((status) => status.id === element.status)?.name;
+                    return (
+                      <div
+                        key={element.id}
+                        style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                        }}
+                      >
+                        {(isServiceMessage || isApprovement || isSendToApprove) ? (
+                          <>
+                            {!isServiceMessage && (
+                              <div
+                                className={`${styles.serviceMessage}`}
+                              >
+                                {element.status?.name ? element.status.name : 'null'}
+                                &nbsp;
+                                {isSendToApprove ? 
+                                  `${element.author_text?.last_name} ${element.author_text?.first_name[0]}. ${element.author_text?.second_name[0]}. ${element.text}`
+                                  :
+                                  element.action
+                                }
+                                &nbsp;
+                                {rolePersonList?.find((item) => item.user.id === element.coordinator?.id)?.role.name}
+                                &nbsp;
+                                {`${element.coordinator?.last_name} ${element.coordinator?.first_name[0]}. ${element.coordinator?.second_name[0]}.`}
+                              </div>
+                            )}
+                            {isServiceMessage && (
+                              <div
+                                className={`${styles.serviceMessage}`}
+                              >
+                                {element.text}
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <div
+                              className={`${styles.messageWrapper} ${element.author_text?.id === user?.user.id && styles.own}`}
+                            >
+                              {element.author_text?.id !== user?.user.id && (
+                                <Tooltip
+                                  title={`${element.author_text?.last_name} ${element.author_text?.first_name} ${element.author_text?.second_name}`}
+                                  placement="bottom"
+                                >
+                                  <div
+                                    className={styles.avatar}
+                                  >
+                                    {element.author_text?.last_name[0]}
+                                  </div>
+                                </Tooltip>
+                              )}
+                              <Tooltip
+                                title={moment(element.date).format('HH:mm')}
+                                placement={`${element.author_text?.id === user?.user.id ? 'left' : 'right'}`}
+                              >
+                                <div
+                                  className={`${styles.messageText} ${styles.own}`}
+                                >
+                                  {element.text}
+                                </div>
+                              </Tooltip>
+                              {element.author_text?.id === user?.user.id && (
+                                <Tooltip
+                                  title={`${element.author_text?.last_name} ${element.author_text?.first_name} ${element.author_text?.second_name}`}
+                                  placement="bottom"
+                                >
+                                  <div
+                                    className={`${styles.avatar} ${styles.own}`}
+                                  >
+                                    {element.author_text?.last_name[0]}
+                                  </div>
+                                </Tooltip>
+                              )}
+                            </div>
+                            {isPreviousDay && <MessageSeparator date={prevDate} />}
+                          </>
+                        )}
+                        <div ref={chatBottomRef} />
                       </div>
                     );
                   })}
-
                 </div>
-              );
-            })}
-            </div>
-            <div
-              className={`${styles.modalButtonWrapper}`}
-            >
-              <CustomizedButton
-                value="Согласовать"
-                color="blue"
-                disabled={!coordinatorsState.coordinators.length}
-                onClick={() => {
-                  // dispatch(sendForApprovalThunk({ ...coordinatorsState, initiative: currentInitiativeId ? currentInitiativeId : -1 }));
-                  sendForApproval({ ...coordinatorsState, initiative: currentInitiativeId ? currentInitiativeId : -1 });
-                  dispatch(closeModal());
-                }}
-              />
+              </div>
+              <div
+                className={`${styles.inputMessageWrapper}`}
+              >
+                <textarea
+                  name="text"
+                  placeholder="Сообщение"
+                  value={commentState.text}
+                  className={`${styles.textInput}`}
+                  onChange={inputChangeHandler}
+                  ref={chatInputRef}
+                />
+                <Pictogram
+                  type="send"
+                  cursor="pointer"
+                  onClick={postCommentHandler}
+                />
+              </div>
             </div>
           </div>
-        </Modal>
+          {modal.isOpen && modal.type.coordination && (
+            <Modal
+              closeModal={() => dispatch(closeModal())}
+            >
+              <div
+                className={`${styles.coordinationModalWraper}`}
+              >
+                <div
+                  className={`${styles.modalContentWraper}`}
+                >
+                {!initiative?.roles.length && (
+                  <div>
+                    Отсутствуют роли для согласования
+                  </div>
+                )}
+                {initiative?.roles.map((item) => {
+                  if (!item.role.is_approve) return null;
+                  return (
+                    <div
+                      key={item.role.id}
+                      className={`${styles.modalRoleWrapper}`}
+                    >
+                      <div
+                        className={`${styles.modalRoleName}`}
+                      >
+                        {item.role.name}
+                      </div>
+                      <div
+                        className={`${styles.modalUserWrapper} ${styles.header}`}
+                      >
+                        <div className={`${styles.modalHeaderCell}`}>
+                          ФИО
+                        </div>
+                        {
+                          project?.properties.map((propertie) => (
+                            <div className={`${styles.modalHeaderCell}`} key={propertie.id}>
+                              {propertie.title}
+                            </div>
+                          ))
+                        }
+                      </div>
+                      {!item.community.length && (
+                        <div>
+                          Отсутствуют пользователи, назначенные на роль
+                        </div>
+                      )}
+                      {item.community.map((member) => {
+                        const foundMember = membersList?.find((item) => item.id === member.user_info?.user.id);
+                        if ((user?.user.id === member.user_info?.user.id) || !member.user_info) return null;
+                        return (
+                          <div
+                            key={member.user_info.user.id}
+                            className={`${styles.modalUserWrapper}`}
+                          >
+                            <div
+                              className={`${styles.checkboxWrapper}`}
+                            >
+                              {/* <input
+                                type="checkbox"
+                                checked={!!coordinatorsState.coordinators.find((coordinator) => coordinator.id === member.user_info?.user.id)}
+                                onChange={(e) => member.user_info && modalCheckboxHandler(e, member.user_info.user)}
+                              /> */}
+                              <Checkbox
+                                checked={!!coordinatorsState.coordinators.find((coordinator) => coordinator.id === member.user_info?.user.id)}
+                                onChange={(e) => member.user_info && modalCheckboxHandler(e, member.user_info.user)}
+                              />
+                            </div>
+                            <div
+                              className={`${styles.modalCell}`}
+                            >
+                              {`${member.user_info.user.last_name} ${member.user_info.user.first_name[0]}. ${member.user_info.user.second_name[0]}.`}
+                            </div>
+                            {foundMember?.properties.map((propertie) => (
+                              <div
+                                key={`${member.user_info?.user.id}_${propertie.id}`}
+                                className={`${styles.modalCell}`}
+                              >
+                                {propertie.values.map((el) => el.value).join(', ')}
+                              </div>
+                            ))}
+                          </div>
+                        );
+                      })}
+
+                    </div>
+                  );
+                })}
+                </div>
+                <div
+                  className={`${styles.modalButtonWrapper}`}
+                >
+                  <CustomizedButton
+                    value="Согласовать"
+                    color="blue"
+                    disabled={!coordinatorsState.coordinators.length}
+                    onClick={() => {
+                      // dispatch(sendForApprovalThunk({ ...coordinatorsState, initiative: currentInitiativeId ? currentInitiativeId : -1 }));
+                      sendForApproval({ ...coordinatorsState, initiative: currentInitiativeId ? currentInitiativeId : -1 });
+                      dispatch(closeModal());
+                    }}
+                  />
+                </div>
+              </div>
+            </Modal>
+          )}
+        </>
       )}
     </div>
   );

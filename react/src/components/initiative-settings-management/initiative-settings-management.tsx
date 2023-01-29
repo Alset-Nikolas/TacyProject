@@ -89,7 +89,7 @@ export default function InitiativeSettingsManagement({ edit, editButton, compone
               </div>
               <ol className={`${styles.paramsList}`}>
                 <li>
-                  Дата реистрации
+                  Дата регистрации
                 </li>
                 <li>
                   Текущее состояние

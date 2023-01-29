@@ -85,7 +85,7 @@ export const handlePropertieInutChange = (
     } else if (key === 'values_short' && typeof propertieIndex === 'number') {
       const propVluesArray = [...propsArrayElement['values']];
       const currentPropertie = { ...propVluesArray[propertieIndex] };
-      currentPropertie.value_short = value;
+      currentPropertie.value_short = value.slice(0, 10);
       propVluesArray[propertieIndex] = currentPropertie;
       propsArrayElement['values'] = propVluesArray;
 
@@ -226,15 +226,21 @@ export const removePropertieValue = (
   projectForEditState: TProjectForEdit,
   propTitle: string,
   index: number,
+  indexOfPropertie: number,
+  existingValues: Array<{
+    id: number,
+    value: string;
+    value_short: string;
+  }>,
   dispatch: AppDispatch,
 ) => {
   const propsArray = [...projectForEditState.properties];
   const propertie = { ...propsArray.find((propertie) => propertie.title === propTitle) } as TPropertieEdit;
-  const indexOfPropertie = propsArray.findIndex((propertie) => propertie.title === propTitle);
+  // const indexOfPropertie = propsArray.findIndex((propertie) => propertie.title === propTitle);
 
-  if (typeof propertie === 'undefined' || indexOfPropertie === -1) return;
+  if (typeof propertie === 'undefined') return;
 
-  const values = [ ...propertie.values ];
+  const values = [ ...existingValues ];
   values.splice(index, 1)
   propertie.values = values;
 

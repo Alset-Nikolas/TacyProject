@@ -8,6 +8,7 @@ from components.models import (
     SettingsStatusInitiative,
 )
 import copy
+from django.db.models import Q
 
 # Create your models here.
 
@@ -106,9 +107,12 @@ class GraficsProject(models.Model):
     @classmethod
     def generate_start_statistic_status(cls, project):
         res = {}
-        for (
-            status
-        ) in project.settings_initiatives.first().initiative_status.all():
+        inits_status_inn_project = (
+            project.settings_initiatives.first()
+            .initiative_status.filter(~Q(value=-2))
+            .all()
+        )
+        for status in inits_status_inn_project:
             for m_project in MetricsProject.objects.filter(
                 project=project
             ).all():
@@ -119,9 +123,7 @@ class GraficsProject(models.Model):
                 if status not in item:
                     item[status] = 0
         res["enum"] = dict()
-        for (
-            status
-        ) in project.settings_initiatives.first().initiative_status.all():
+        for status in inits_status_inn_project:
             if status not in res["enum"]:
                 res["enum"][status] = 0
         return res
@@ -165,6 +167,7 @@ class GraficsProject(models.Model):
                         new_format = []
                         total_sum_value = 0
                         for x_name, y_value in grafic_item.items():
+                            print("x_name", x_name)
                             new_format.append(
                                 {
                                     "name": x_name.value,
@@ -188,32 +191,31 @@ class GraficsProject(models.Model):
                         )
 
         for m_id, grafic_item in status_grafic.items():
-            if m_id not in m_id_not_in_stat:  # только активные графики
-                new_format = []
-                total_sum_value = 0
-                for x_name, y_value in grafic_item.items():
-                    new_format.append(
-                        {
-                            "name": x_name.name,
-                            "name_short": x_name.name,
-                            "value": y_value,
-                        }
-                    )
-                    total_sum_value += y_value
-                new_format.sort(key=lambda x: x.get("value"), reverse=True)
+            # if m_id not in m_id_not_in_stat:  # только активные графики
+            new_format = []
+            total_sum_value = 0
+            for x_name, y_value in grafic_item.items():
                 new_format.append(
                     {
-                        "name": "Сумма",
-                        "name_short": "Сумма",
-                        "value": total_sum_value,
+                        "name": x_name.name,
+                        "name_short": x_name.name,
+                        "value": y_value,
                     }
                 )
-                new_format_status_grafic[m_id] = group_small_values(
-                    new_format, quantity
-                )
-            else:
-                new_format_status_grafic.pop(m_id)
-        print(new_format_res)
+                total_sum_value += y_value
+            new_format.sort(key=lambda x: x.get("value"), reverse=True)
+            new_format.append(
+                {
+                    "name": "Сумма",
+                    "name_short": "Сумма",
+                    "value": total_sum_value,
+                }
+            )
+            new_format_status_grafic[m_id] = group_small_values(
+                new_format, quantity
+            )
+        # else:
+        #     new_format_status_grafic.pop(m_id)
 
         return {
             "grafics": new_format_res,
@@ -224,7 +226,12 @@ class GraficsProject(models.Model):
     def get_statistic_metrics_by_project(
         cls, project, inits=None, quantity=None
     ):
-        inits = inits or Initiatives.objects.filter(project=project).all()
+        inits = (
+            inits
+            or Initiatives.objects.filter(project=project)
+            .filter(~Q(status__value=-2))
+            .all()
+        )
         res = GraficsProject.generate_start_statistic(project)
         res_status = GraficsProject.generate_start_statistic_status(project)
         for init in inits:
@@ -256,8 +263,3 @@ class GraficsProject(models.Model):
             inits=Initiatives.get_user_initiatievs(user, project),
             quantity=quantity,
         )
-
-    @classmethod
-    def get_statistic_by_project(cls, project):
-        for m_obj in project.metrics.all():
-            print(m_obj.title, m_obj.value)

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SelectChangeEvent, Tooltip } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import SectionContent from "../section/section-content/section-content";
@@ -16,7 +16,7 @@ import {
   useLazyGetSortedInitiativesQuery
 } from "../../redux/state/state-api";
 import Pictogram from "../pictogram/pictogram";
-import { REACT_APP_BACKEND_BASE_URL } from "../../consts";
+import { paths, REACT_APP_BACKEND_BASE_URL } from "../../consts";
 import { InitiativeTableHoverPopup } from "../initiative-table-hover-popup/initiative-table-hover-popup";
 import { InitiativeTableHoverFilePopup } from "../initiative-table-hover-file-popup/initiative-table-hover-file-popup";
 import SelectUnits from "../select-units/select-units";
@@ -30,12 +30,16 @@ import styles from './initiatives-table.module.scss';
 import sectionStyles from '../../styles/sections.module.scss';
 import inputStyles from '../../styles/inputs.module.scss';
 import SelectFiles from "../select-files/select-files";
+import { useGetAuthInfoByIdQuery } from "../../redux/auth/auth-api";
+import { useNavigate } from "react-router-dom";
 
 type TInitiativesTableProps = {
   externalInitiativesList: Array<TInitiative>;
+  addButton?: boolean;
 };
 
-export default function InitiativesTable({ externalInitiativesList }: TInitiativesTableProps) {
+export default function InitiativesTable({ externalInitiativesList, addButton }: TInitiativesTableProps) {
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { currentInitiativeId } = useAppSelector((store) => store.initiatives);
   const { currentId } = useAppSelector((store) => store.state.project);
@@ -85,6 +89,9 @@ export default function InitiativesTable({ externalInitiativesList }: TInitiativ
   const [initiativeFilter, setInitiativeFilter] = useState('');
   const [rolesFilter, setRolesFilter] = useState<Array<{role: number, items: Array<{id: number, item: string}>}>>(project ? project.roles.map((role) => {return {role: role.id, items: []}}) : []);
   const [filesFilter, setFilesFilter] = useState<Array<{ title: string, id: number }>>([]);
+  const { data: user } = useGetAuthInfoByIdQuery(currentId ? currentId : -1, {
+    skip: !currentId,
+  });
 
   const getRolesForQuery = () => {
     let queryParam = '';
@@ -116,36 +123,20 @@ export default function InitiativesTable({ externalInitiativesList }: TInitiativ
       data: sortedInitiatives,
     }
    ] = useLazyGetSortedInitiativesQuery();
-  // const {
-  //   data: sortedInitiatives,
-  //   isSuccess: isSortQuerySuccess,
-  //   isError: isSortQueryFailed,
-  // } = useGetSortedInitiativesQuery({
-  //   id:  currentId ? currentId : -1,
-  //   name: initiativeFilter,
-  //   status: statusFilter.map((el) => el.id),
-  //   roles: getRolesForQuery(),
-  //   properties: getPropertiesForQuery(),
-  //   metrics: sortMetrics.metric.id !== -1 ?`${sortMetrics.metric.id},${sortMetrics.type.value}` : '',
-  // }, {
-  //   skip: !isSortQuery || !currentId,
-  // });
   const initiativesList = isShowFilteredList && sortedInitiatives ? sortedInitiatives.project_initiatives : externalInitiativesList;
   const [isShowPopup, setIsShowPopup] = useState<Array<Array<boolean>>>(initiativesList ? initiativesList.map((initiative) => {
     const arrayOfRoleFlags = initiative.roles.map(() => false);
     return arrayOfRoleFlags;
   }) : []);
   const [isShowFileStatusPopup, setIsShowFileStatusPopup] = useState<Array<boolean>>(initiativesList ? initiativesList.map(() => false) : []);
+  const tableWrapperRef = useRef<HTMLDivElement>(null);
 
   const onInitiativeClickHandler = (initiative: TInitiative) => {
     dispatch(setCurrentInitiativeId(initiative.initiative.id));
-    
-    // dispatch(getInitiativeByIdThunk(initiative.initiative.id));
   }
 
   const exportHandler = () => {
     if (currentId) getUrl(currentId);
-    
   };
 
   const roleMouseEnterHandler = (initiativeIndex: number, roleIndex: number) => {
@@ -292,6 +283,11 @@ export default function InitiativesTable({ externalInitiativesList }: TInitiativ
     setFilesFilter(newValues);
   }
 
+  const onAddClickHandler = () => {
+    // dispatch(addInitiativeThunk());
+    navigate(`/${paths.registry}/add`);
+  };
+
   useEffect(() => {
     const newFilesList = [] as typeof filesList;
     filesSettings?.forEach((item) => {
@@ -351,7 +347,10 @@ export default function InitiativesTable({ externalInitiativesList }: TInitiativ
   }, [initiativesList])
 
   return (
-    <div className={`${sectionStyles.wrapperBorder} ${styles.wrapper}`}>
+    <div
+      className={`${sectionStyles.wrapperBorder} ${styles.wrapper}`}
+      ref={tableWrapperRef}
+    >
         <SectionHeader
           className={`${styles.tableHeader}`}
         >
@@ -554,18 +553,24 @@ export default function InitiativesTable({ externalInitiativesList }: TInitiativ
                     null
                   )
                 ))}
-                {components && components.table_registry.metrics.map((metric, index) => (
-                  metric.initiative_activate ? (
-                    <th
-                      key={`${index}_${metric.id}`}
-                      className={`${styles.tableCol}`}
-                    >
-                      {metric.title}
-                    </th>
-                  ) : (
-                    null
-                  )
-                ))}
+                {components && components.table_registry.metrics.map((metric, index) => {
+                  const foundMetric = project ? project.metrics.find((item) => item.id === metric.id) : undefined;
+                  return (
+                    metric.initiative_activate && foundMetric?.is_aggregate ? (
+                      <th
+                        key={`${index}_${metric.id}`}
+                        className={`${styles.tableCol}`}
+                      >
+                        {metric.title},
+                        &nbsp;
+                        {(!foundMetric?.is_percent && foundMetric?.units !== 'бм') ? foundMetric?.units : ''}
+                        {foundMetric?.is_percent && '%'}
+                      </th>
+                    ) : (
+                      null
+                    )
+                  );
+                })}
                 {components && components.table_registry.roles.map((item) => {
                   if (!item.initiative_activate) return null;
                   return (
@@ -627,6 +632,7 @@ export default function InitiativesTable({ externalInitiativesList }: TInitiativ
                         <InitiativeTableHoverFilePopup
                           files={item.files}
                           initiativeIndex={index}
+                          parent={tableWrapperRef.current}
                         />
                       )}
                     </td>
@@ -642,15 +648,30 @@ export default function InitiativesTable({ externalInitiativesList }: TInitiativ
                         null
                       )
                     ))}
-                    {item.metric_fields.map((metric) => (
-                      metric.metric.initiative_activate ? (
-                        <td key={`${index}_${metric.metric.id}`}>
-                          {metric.value}
-                        </td>
-                      ) : (
-                        null
-                      )
-                    ))}
+                    {item.metric_fields.map((metric) => {
+                      const foundMetric = project ? project.metrics.find((item) => item.id === metric.metric.id) : undefined;
+                      return (
+                        metric.metric.initiative_activate && foundMetric?.is_aggregate ? (
+                          <td key={`${index}_${metric.metric.id}`}>
+                            {foundMetric.is_percent ? (
+                              <>
+                                {(metric.value as number) * 100}
+                                {/* &nbsp; */}
+                                {/* % */}
+                              </>
+                            ) : (
+                              <>
+                                {metric.value}
+                                {/* &nbsp;
+                                {metric.metric.units !== 'бм' ? metric.metric.units : ''} */}
+                              </>
+                            )}
+                          </td>
+                        ) : (
+                          null
+                        )
+                      );
+                    })}
                     {item.roles.map((item, roleIndex) => {
                       const memberNames = item.community.map((el) => `${el.user_info?.user.last_name} ${el.user_info?.user.first_name[0]}. ${el.user_info?.user.second_name[0]}.`);
                       if (!item.role.initiative_activate) return null;
@@ -672,6 +693,7 @@ export default function InitiativesTable({ externalInitiativesList }: TInitiativ
                             community={item.community}
                             initiativeIndex={index}
                             roleIndex={roleIndex}
+                            parent={tableWrapperRef.current}
                           />
                         )}
                       </td>
@@ -688,6 +710,16 @@ export default function InitiativesTable({ externalInitiativesList }: TInitiativ
             </div>
           )}
         </div>
+        {(user && user.user_flags_in_project?.is_create || user?.user.is_superuser) && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '16px 25px'}}>
+            <CustomizedButton
+              value="Добавить"
+              color="blue"
+              onClick={onAddClickHandler}
+              disabled={!project?.id}
+            />
+          </div>
+        )}
       </div>
   );
 }

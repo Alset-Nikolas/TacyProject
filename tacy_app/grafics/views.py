@@ -78,7 +78,6 @@ class StatisticMetricsView(views.APIView):
             return Response({"msg": "id project not valid"}, 400)
         if quantity and quantity.isdigit():
             quantity = int(quantity)
-        print("quantity", quantity)
         project = get_object_or_404(Project, id=id)
         stat = GraficsProject.get_statistic_metrics_by_project(
             project, quantity=quantity

@@ -11,14 +11,15 @@ import {
   useGetRolesQuery,
   useSetRolesMutation,
   useGetTeamListQuery,
-  useGetUserRightsQuery
+  useGetUserRightsQuery,
+  useGetComponentsQuery
 } from "../../redux/state/state-api";
 import { Checkbox, SelectChangeEvent } from "@mui/material";
 
 // Styles
 import styles from './role-allocation.module.scss';
 import sectionStyles from '../../styles/sections.module.scss';
-import { TPropertie, TRole, TTeamMember, TUser } from "../../types";
+import { TPropertie, TRole, TRolesAllocationModalMembersList, TTeamMember, TUser } from "../../types";
 import { closeModal, openRolesAllocationModal } from "../../redux/state/state-slice";
 import Modal from "../modal/modal";
 
@@ -36,6 +37,7 @@ export default function RolesAlloction() {
   const [roles, setRoles] = useState(initiative ? initiative.roles : []);
   const { currentId } = useAppSelector((store) => store.state.project);
   const { data: project } = useGetProjectInfoQuery(currentId ? currentId : -1);
+  const { data: components } = useGetComponentsQuery(currentId ? currentId : -1);
   const { data: teamList } = useGetTeamListQuery({ id: currentId ? currentId : -1, project: project ? project : null });
   const [fullMembersList, setFullMembersList] = useState(teamList ? teamList.map((member) => {return { name: member.name, id: member.id }}) : []);
   const [membersList, setMembersList] = useState(teamList ? teamList : []);
@@ -45,9 +47,10 @@ export default function RolesAlloction() {
       isSuccess: isSuccessSetRoles,
     }
   ] = useSetRolesMutation();
-  const { data: rolePersonList, refetch: rolePersonListRefetch } = useGetRolesQuery(currentInitiativeId ? currentInitiativeId : -1, {
+  const { data: fetchedRolePersonList, refetch: rolePersonListRefetch } = useGetRolesQuery(currentInitiativeId ? currentInitiativeId : -1, {
     skip: !currentInitiativeId,
   });
+  const [ rolePersonList, setRolePersonList ] = useState(fetchedRolePersonList ? fetchedRolePersonList : []);
   const [modalMembersLis, setModalMemberList] = useState<Array<{
     id: number,
     active: boolean,
@@ -68,14 +71,7 @@ export default function RolesAlloction() {
 
   const addPersonToRole = (role: TRole & {project: number}, index: number) => {
     setModalMemberList(() => {
-      const newState = [] as Array<{id: number, active: boolean, user_name: string, user: TUser & {id: number}, properties: Array<{
-        id: number;
-        title: string;
-        values: Array<{
-            id: number;
-            value: string;
-        }>;
-    }>}>;
+      const newState = [] as Array<TRolesAllocationModalMembersList>;
       rolePersonList?.forEach((item) => {
         const membersProperties = teamList?.find((member) => member.id === item.user.id)?.properties;
 
@@ -110,14 +106,35 @@ export default function RolesAlloction() {
     dispatch(openRolesAllocationModal(role));
   }
 
-  const deletePersonFromRole = (roleIndex: number, personIndex: number) => {
+  const deletePersonFromRole = (roleIndex: number, personIndex: number, personId: number | undefined) => {
+    setRolePersonList((prevState) => {
+      const foundIndex = prevState.findIndex((el) => el.user.id === personId);
+      if (foundIndex === -1) return prevState;
+
+      const newState = [...prevState];
+      newState.splice(foundIndex, 1);
+
+      return newState;
+    });
+    
     setRoles((prevState) => {
       const newState = [...prevState];
       const currentRole = { ...newState[roleIndex] };
       const currentRoleUsers = [...currentRole.community];
+      // const currentUserId = currentRoleUsers[personIndex].user_info?.user.id;
+
       currentRoleUsers.splice(personIndex, 1);
       currentRole.community = currentRoleUsers;
       newState[roleIndex] = currentRole;
+
+      // setMembersList((prevState) => {
+      //   const newState = [...prevState];
+      //   const addingUser = teamList?.find((member) => member.id === currentUserId);
+      //   if (addingUser) {
+      //     newState.push(addingUser);
+      //   }
+      //   return newState;
+      // });
 
       return newState;
     });
@@ -205,6 +222,9 @@ export default function RolesAlloction() {
     setRoles(initiative ? initiative.roles : []);
   }, [initiative])
 
+  useEffect(() => {
+    setRolePersonList(fetchedRolePersonList ? fetchedRolePersonList : []);
+  }, [fetchedRolePersonList]);
   // useEffect(() => {
   //   if (teamList) setMembersList(() => {
   //     const newMembersList = [...fullMembersList];
@@ -224,12 +244,7 @@ export default function RolesAlloction() {
     >
       <SectionHeader>
         <div
-          style={{
-            display: 'flex',
-            gap: '20px',
-            alignItems: 'center',
-            cursor: 'pointer',
-          }}
+          className={`${sectionStyles.hideContentHeader}`}
           onClick={() => setIsOpen((prevState) => !prevState)}
         >
           Распределение ролей
@@ -241,7 +256,9 @@ export default function RolesAlloction() {
       </SectionHeader>
       {isOpen && (
         <>
-          <SectionContent>
+          <SectionContent
+            className={`${styles.section}`}
+          >
             <div
               className={`${styles.contentWrapper}`}
             >
@@ -266,14 +283,17 @@ export default function RolesAlloction() {
                       >
                         ФИО
                       </div>
-                      {project?.properties.map((property) => (
-                        <div
-                          key={`${property.id}`}
-                          className={`${styles.propertyCell} ${styles.header}`}
-                        >
-                          {property.title}
-                        </div>
-                      ))}
+                      {components?.table_community.properties.map((property) => {
+                        if (!property.is_community_activate) return null;
+                        return (
+                          <div
+                            key={`${property.id}`}
+                            className={`${styles.propertyCell} ${styles.header}`}
+                          >
+                            {property.title}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                   {
@@ -281,7 +301,7 @@ export default function RolesAlloction() {
                       return (
                         <div
                           key={item.role.id}
-                          className={`${styles.roleGroup}`}
+                          className={`${styles.roleGroup} ${roleIndex % 2 ? styles.oddRow : styles.evenRow}`}
                         >
                           <div
                             className={`${styles.roleCell}`}
@@ -307,12 +327,10 @@ export default function RolesAlloction() {
                             className={`${styles.membersWrapper}`}
                           >
                             {item.community.map((member, userIndex) => {
-                              // if (!member.user_info) return null;
                               let items: Array<string> = [notAllocated];
                               if (membersList) items = items.concat(membersList.map((el) => el.name));
                               if (member.user_info && member.user_info.user.id !== -1) items = items.concat([`${member.user_info?.user.last_name} ${member.user_info?.user.first_name} ${member.user_info?.user.second_name}`]);
-                              // const items= membersList ? member.user_info ? [...membersList, notAllocated, `${member.user_info?.user.last_name} ${member.user_info?.user.first_name} ${member.user_info?.user.second_name}`] : [...membersList, notAllocated] : [notAllocated]}
-
+                              
                               return (
                                 <div
                                   key={member.user_info ? member.user_info.user.id : `new_${userIndex}`}
@@ -328,14 +346,14 @@ export default function RolesAlloction() {
                                         <Pictogram
                                           type="delete-filled"
                                           cursor="pointer"
-                                          onClick={() => deletePersonFromRole(roleIndex, userIndex)}
+                                          onClick={() => deletePersonFromRole(roleIndex, userIndex, member.user_info?.user.id)}
                                         />
                                       </div>
                                     )}
                                     <div
                                       style={{
-                                        border: '0.5px solid #504F4F',
-                                        backgroundColor: '#FFFFFF',
+                                        // border: '0.5px solid #504F4F',
+                                        // backgroundColor: '#FFFFFF',
                                         width: '100%',
                                       }}
                                     >
@@ -343,6 +361,7 @@ export default function RolesAlloction() {
                                     </div>
                                   </div>
                                   {member.user_info?.properties.map((propertie) => {
+                                    if (!propertie.title.is_community_activate) return null;
                                     return (
                                       <div
                                         key={`${member.user_info?.user.id}-${propertie.title.id}`}

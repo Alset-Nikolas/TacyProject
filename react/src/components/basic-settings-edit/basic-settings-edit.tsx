@@ -21,6 +21,7 @@ import ProjectStages from '../project-stages/project-stages';
 
 // Syles
 import styles from './basic-settings-edit.module.scss';
+import { TIntermediateDate, TMetrica, TPropertieEdit } from '../../types';
 
 type TBasicSettingsEditProps = {
   // onSaveClick: MouseEventHandler<HTMLButtonElement>;
@@ -48,6 +49,65 @@ export default function BasicSettingsEdit({ onCancelClick, setIsEdit }: TBasicSe
   ] = usePostProjectMutation();
   const [deleteFiles] = useDeleteFilesMutation();
   const [postFiles] = usePostFilesMutation();
+  const [validationError, setValidationError] = useState({
+    name: false,
+    date_start: false,
+    date_end: false,
+    purpose: false,
+    tasks: false,
+    description: false,
+    intermediate_dates: [],
+    stages: [],
+    metrics: [],
+    properties: [],
+    roles: [],
+    rights: [],
+  });
+  const [ isSamePropNames, setIsSamePropNames ] = useState(false);
+
+  const validateEmptyInputs = () => {
+    let isValid = true;
+    const projectEntries = Object.entries(projectForEdit ? projectForEdit : {});
+    if (!projectEntries.length) return false;
+
+    projectEntries.forEach((el) => {
+      const key = el[0];
+      const value = el[1];
+      if (typeof value === 'string') {
+        if (!value) {
+          isValid = false;
+          setValidationError((prevState) => ({ ...prevState, [key]: true }));
+        } else {
+          setValidationError((prevState) => ({ ...prevState, [key]: false }));
+        }
+      }
+      if (key === 'metrics' && (value instanceof Array)) {
+        value.forEach((metric) => {
+          if (!(metric as TMetrica).title) isValid = false;
+        })
+      }
+      if (key === 'intermediate_dates' && (value instanceof Array)) {
+        value.forEach((dateEl) => {
+          if (!(dateEl as TIntermediateDate).title) isValid = false;
+          if (!(dateEl as TIntermediateDate).date) isValid = false;
+        })
+      }
+      if (key === 'properties' && (value instanceof Array)) {
+        value.forEach((propEl, elIndex) => {
+          value.forEach((el, index) => {
+            if (index !== elIndex) {
+              if ((el as TPropertieEdit).title === (propEl as TPropertieEdit).title) {
+                isValid = false;
+                setIsSamePropNames(true);
+              }
+            }
+          });
+        })
+      }
+    });
+
+    return isValid;
+  };
 
   useEffect(() => {
     if (project) dispatch(setProjectForEdit(makeProjectFordit(project)));
@@ -73,7 +133,9 @@ export default function BasicSettingsEdit({ onCancelClick, setIsEdit }: TBasicSe
   ]);
 
   const onSaveClick = () => {
-    if (projectForEdit) {
+    const isValid = validateEmptyInputs(); 
+
+    if (projectForEdit && isValid) {
       // dispatch(createProjectThunk(projectForEdit));
 
       saveProject(projectForEdit);
@@ -88,6 +150,13 @@ export default function BasicSettingsEdit({ onCancelClick, setIsEdit }: TBasicSe
         formData.append(`total`, (files.length - 1).toString());
 
         if (currentId) postFiles({ projectId: currentId, body: formData });
+      }
+    } else {
+      if (isSamePropNames) {
+        dispatch(openErrorModal('У атрибутов инициатив не может быть одинаковых названий'));
+        setIsSamePropNames(false);
+      } else {
+        dispatch(openErrorModal('Проверьте правильность заполнения полей'));
       }
     }
   };
@@ -168,9 +237,9 @@ export default function BasicSettingsEdit({ onCancelClick, setIsEdit }: TBasicSe
           onClick={onSaveClick}
         />
       </div>
-      {modal.isOpen && modal.type.error && (
+      {/* {modal.isOpen && modal.type.error && (
         <ModalInfo message={modal.message} />
-      )}
+      )} */}
     </div>
   );
 }

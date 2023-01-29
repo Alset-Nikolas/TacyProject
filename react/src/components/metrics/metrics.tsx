@@ -4,6 +4,7 @@ import SectionContent from '../section/section-content/section-content';
 import SectionHeader from '../section/section-header/section-header';
 import styles from './metrics.module.scss';
 import inputStyles from '../../styles/inputs.module.scss';
+import sectionStyles from '../../styles/sections.module.scss';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import { updateProjectForEdit, updateProjectState } from '../../redux/state/state-slice';
 import { addPropertie, handlePropertieInutChange, removePropertie } from '../../utils';
@@ -62,7 +63,7 @@ export default function Metrics({
             className={`${styles.headerRow}`}
           >
             <div
-              className={`${styles.metricCell} ${styles.header} ${styles.edit}`}
+              className={`${sectionStyles.editHeaderWithButton}`}
             >
               {title}
               <CustomizedButton
@@ -307,7 +308,7 @@ export default function Metrics({
     );
   }
   return (
-    <section className={`${styles.wrapper}`}>
+    <section className={`${styles.wrapper} ${sectionStyles.wrapperBorder}`}>
       <SectionHeader>
         {title}
       </SectionHeader>
@@ -321,7 +322,7 @@ export default function Metrics({
           className={`${styles.metricRow}`}
         >
           <div
-            className={`${styles.checkbox}`}
+            className={`${styles.title}`}
           >
             Название
           </div>
@@ -348,7 +349,7 @@ export default function Metrics({
             className={`${styles.metricRow}`}
           >
             <div
-              className={`${styles.checkbox}`}
+              className={`${styles.title}`}
             >
               {el.title}
             </div>

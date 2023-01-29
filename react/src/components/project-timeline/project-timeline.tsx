@@ -62,18 +62,26 @@ export default function ProjectTimeline({
         Этапы проекта
       </SectionHeader>
       {/* <SectionContent> */}
-      <div>
-        {/* {timeline?.map((el, index) => (
-          <div key={index}>
-            {el.title}
-            {el.date}
-          </div>
-        ))} */}
-        <GanttD3
-          data={listForDiagram}
-          intermediateDates={timeline}  
-        />
-      </div>
+      {listForDiagram.length || timeline.length ? (
+        <div>
+          {/* {timeline?.map((el, index) => (
+            <div key={index}>
+              {el.title}
+              {el.date}
+            </div>
+          ))} */}
+          <GanttD3
+            data={listForDiagram}
+            intermediateDates={timeline}  
+          />
+        </div>
+      ) : (
+        <div
+          style={{
+            padding: 20,
+          }}
+        >Нет этапов и промежуточных дат</div>
+      )}
       {/* </SectionContent> */}
     </div>
   );

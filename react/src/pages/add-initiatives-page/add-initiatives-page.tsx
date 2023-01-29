@@ -194,7 +194,7 @@ export default function AddInitiativePage() {
               <label
                 className={`${styles.label}`}
               >
-                <div>Название инициативы</div>
+                <div>Название инициативы*</div>
                 <input
                   name="name"
                   value={newInitiativeState.initiative.name}
@@ -211,7 +211,7 @@ export default function AddInitiativePage() {
               <label
                 className={`${styles.label}`}
               >
-                <li>Текущее состояние</li>
+                <li>Текущее состояние*</li>
                 <input
                   name="current_state"
                   value={newInitiativeState.initiative.current_state}
@@ -221,7 +221,7 @@ export default function AddInitiativePage() {
               <label
                 className={`${styles.label}`}
               >
-                <li>Предпосылки инициативы</li>
+                <li>Предпосылки инициативы*</li>
                 <input
                   name="reasons"
                   value={newInitiativeState.initiative.reasons}
@@ -231,7 +231,7 @@ export default function AddInitiativePage() {
               <label
                 className={`${styles.label}`}
               >
-                <li>Описание инициативы</li>
+                <li>Описание инициативы*</li>
                 <input
                   name="description"
                   value={newInitiativeState.initiative.description}
@@ -273,7 +273,7 @@ export default function AddInitiativePage() {
                     className={`${styles.label}`}
                     key={field.title.id}
                   >
-                    <li>{field.title.title}</li>
+                    <li>{`${field.title.title}*`}</li>
                     <input
                       value={field.value}
                       onChange={(e) => onAddfieldInputChange(e.target.value, index)}

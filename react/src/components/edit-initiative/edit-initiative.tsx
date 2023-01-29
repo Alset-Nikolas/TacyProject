@@ -8,6 +8,7 @@ import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import CustomizedButton from "../button/button";
 import SelectUnits from "../select-units/select-units";
 import CustomizedSelect from "../select/Select";
+import { TInitiativeInfo } from '../../types';
 
 //Styles
 import styles from './edit-initiative.module.scss';
@@ -75,6 +76,8 @@ export default function EditInitiative() {
     e.preventDefault();
     // dispatch(addInitiativeThunk(newInitiativeState));
     const tempInitiativeState = {...newInitiativeState};
+    const { author, ...initiative } = tempInitiativeState.initiative;
+    tempInitiativeState.initiative = initiative as TInitiativeInfo;
     const metrics = [...tempInitiativeState.metric_fields];
     const convertedMetrics = metrics.map((item) => {
       return {

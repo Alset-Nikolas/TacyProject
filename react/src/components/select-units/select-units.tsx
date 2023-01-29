@@ -1,6 +1,7 @@
 import Select, { SelectChangeEvent } from '@mui/material/Select';
 import { Checkbox, MenuItem } from '@mui/material';
 import { ReactNode } from 'react';
+import Pictogram from '../pictogram/pictogram';
 
 type TSelectUnitsProps = {
   items?: Array<string>;
@@ -59,6 +60,22 @@ export default function SelectUnits({
       onChange={onChange}
       name={name}
       id={id}
+      IconComponent={(props) => (
+        <div
+          {...props}
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: 15,
+            height: 15,
+          }}
+        >
+          <Pictogram
+            type="selector-arrow"
+          />
+        </div>
+      )}
     >
       {items?.map((el) => (
         <MenuItem value={el} key={el}>

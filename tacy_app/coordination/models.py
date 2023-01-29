@@ -103,14 +103,12 @@ class StagesCoordinationInitiative(models.Model):
 
     @classmethod
     def add_stage(cls, info):
-        print("info", info)
         stage = (
             cls.objects.filter(initiative_id=info.get("initiative_id"))
             .filter(coordinator_stage=info.get("coordinator_stage"))
             .filter(status=info.get("status"))
             .first()
         )
-        print("stage", stage)
         if not stage:
             return cls.objects.create(**info)
         return stage

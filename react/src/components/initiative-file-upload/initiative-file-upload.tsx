@@ -2,6 +2,7 @@ import { ChangeEvent, Dispatch, FC, SetStateAction, useRef, useState } from "rea
 import { REACT_APP_BACKEND_BASE_URL } from "../../consts";
 import fileSrc from '../../images/icons/file.svg';
 import { useDeleteInitiativeFileMutation, usePostInitiativeFileMutation } from "../../redux/state/state-api";
+import { useAppSelector } from "../../utils/hooks";
 import Pictogram from "../pictogram/pictogram";
 
 // Styles
@@ -20,38 +21,23 @@ type TFileUploadProps = {
 
 const InitiativeFileUpload:FC<TFileUploadProps> = ({ fileUploadHandler, index, file }) => {
   const descRef = useRef<HTMLSpanElement>(null)
+  const initiativeId = useAppSelector((store) => store.initiatives.currentInitiativeId);
   const [postFile] = usePostInitiativeFileMutation();
   const [deleteFile] = useDeleteInitiativeFileMutation();
-  // const [isShowDeleteIcon, setIsShowDeleteIcon] = useState(false);
 
   const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     const fileName = files ? files[0].name : 'error';
-    // if (descRef.current) descRef.current.innerText = fileName;
-    // // setIsShowDeleteIcon(true);
-    // if (typeof fileUploadHandler === 'function') {
-    //   fileUploadHandler((prevState) => {
-    //     const newState = [...prevState];
-    //     newState[index].file = files ? files[0] : 'error';
-    //     // if (index === prevState.length -1) newState.push(null); 
-    //     return newState;
-    //   });
-    // }
     const formData = new FormData();
     if (files) {
       formData.append('file', files[0]);
+      if (initiativeId) localStorage.setItem('initiative-id', initiativeId.toString());
       postFile({ fileId: file.id, body: formData })
     }
   };
 
   const removeNewFile = (index: number) => {
-    // if (typeof fileUploadHandler === 'function') {
-    //   fileUploadHandler((prevState) => {
-    //     const newState = [...prevState];
-    //     newState[index].file = null;
-    //     return newState;
-    //   });
-    // }
+    if (initiativeId) localStorage.setItem('initiative-id', initiativeId.toString());
     deleteFile(file.id);
   };
 

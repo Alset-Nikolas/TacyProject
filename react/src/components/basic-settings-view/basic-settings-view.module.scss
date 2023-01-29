@@ -125,3 +125,13 @@
 .modalButton {
   width: 102px;
 }
+
+.effects {
+  display: flex;
+  gap: 40px;
+  
+  & > div,
+  & > section {
+    flex: 1 1;
+  }
+}

@@ -94,7 +94,6 @@ class SettingsFilesInitiativeSerializer(serializers.ModelSerializer):
         read_only_fields = ["settings_project"]
 
     def create(self, validated_data):
-        print("validated_data", validated_data)
         id = validated_data.pop("id")
         validated_data["settings_project"] = self.context.get(
             "settings_project"
@@ -290,6 +289,7 @@ class StatusInitiativeSerializer(serializers.ModelSerializer):
 class MainInitiativeSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
     status = StatusInitiativeSerializer(required=False)
+    author = UserBaseSerializer(required=False)
 
     class Meta:
         model = Initiatives
@@ -306,56 +306,10 @@ class MainInitiativeSerializer(serializers.ModelSerializer):
             "date_registration",
             "status",
         ]
-        read_only_fields = ["author"]
+        # read_only_fields = ["author"]
 
     def validate(self, attrs):
-        id = attrs.get("id")
-        project = attrs.get("project")
-        self.context["project"] = project
-        name = attrs.get("name")
-        if id < 0:
-            initiative = Initiatives.get_by_name(
-                project,
-                name,
-            )
-            if initiative:
-                raise serializers.ValidationError(
-                    {
-                        "name": f"initiative in project already exist",
-                        "msg_er": "Инициатива с таким названием у данного проекта уже создана",
-                    }
-                )
-        else:
-            initiative_update = Initiatives.get_by_id(id)
-            initiative_old_name = Initiatives.get_by_name(
-                project,
-                name,
-            )
-            if not initiative_update:
-                raise serializers.ValidationError(
-                    {
-                        "id": f"initiative not exist",
-                        "msg_er": "Инициативы с таким id не существует",
-                    }
-                )
-
-            if initiative_old_name and (
-                initiative_old_name.id != initiative_update.id
-            ):
-                raise serializers.ValidationError(
-                    {
-                        "name": f"initiative in project already exist",
-                        "msg_er": "Название иницативы уже используется",
-                    }
-                )
-            if initiative_update.project != project:
-                raise serializers.ValidationError(
-                    {
-                        "project": f"initiative in project not exist",
-                        "msg_er": "Такой инициативы у проекта не было создано",
-                    }
-                )
-
+        self.context["project"] = attrs.get("project")
         return super().validate(attrs)
 
 
@@ -484,6 +438,7 @@ class InitiativesPropertiesFieldsSerializer(serializers.ModelSerializer):
 class RolesUserInInitiativeSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(read_only=True)
     user = UserBaseSerializer()
+    # properties = ProperitsUserSerializer(many=True)
     role = RolesProjectSerializer()
 
     class Meta:
@@ -491,6 +446,7 @@ class RolesUserInInitiativeSerializer(serializers.ModelSerializer):
         fields = [
             "id",
             "user",
+            # "properties",
             "role",
         ]
 
@@ -620,16 +576,6 @@ class InitiativeSerializer(serializers.Serializer):
                 }
             )
         return super().validate(metric_fields)
-
-    def validate(self, attrs):
-        user = self.context.get("user")
-        project = self.context.get("project")
-        flags_rights = Project.get_user_rights_flag_in_project(user, project)
-        if not flags_rights.get("is_create"):
-            raise serializers.ValidationError(
-                f"У пользователя {user.email} нет прав на создание инициативы"
-            )
-        return super().validate(attrs)
 
     def create_or_update(self, data):
         initiative = data.get("initiative")
@@ -922,32 +868,11 @@ class MainRiskSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 {"initiative": "initiative not exist"}
             )
-
         id = attrs.get("id")
-        if id < 0:
-            if Risks.cheack_name(init, attrs.get("name")):
-                raise serializers.ValidationError(
-                    {"name": "Имя уже используется"}
-                )
-        else:
+        if id > 0:
             risk: Risks = Risks.get_by_id(attrs.get("id"))
             if not risk:
                 raise serializers.ValidationError({"id": "id not exist"})
-
-            if risk.initiative != init:
-                raise serializers.ValidationError(
-                    {"initiative or risk": "У инициативы нет таких рисков"}
-                )
-            new_name = attrs.get("name")
-            risk_problem = (
-                Risks.objects.filter(initiative=init)
-                .filter(name=new_name)
-                .first()
-            )
-            if risk_problem and risk_problem.id != id:
-                raise serializers.ValidationError(
-                    {"name": "Навание риска - уникально в рамках инициативы"}
-                )
         return super().validate(attrs)
 
 
@@ -1127,8 +1052,6 @@ class EventSerializer(serializers.Serializer):
         event = data.get("event")
         event["author_id"] = self.context.get("user").id
         event["initiative"] = initiative
-        print("event", event)
-        print("initiative", initiative.id)
         event_id = Events.create_or_update(event)
         EventsAddFields.create(event_id, data.get("addfields"))
         metrics_delta = EventMetricsFields.create_or_update(

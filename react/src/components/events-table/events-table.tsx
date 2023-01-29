@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { paths } from "../../consts";
 import { GanttD3 } from "../../d3/GanttD3/GanttD3";
@@ -13,13 +13,18 @@ import moment from "moment";
 // styles
 import sectionStyles from '../../styles/sections.module.scss';
 import styles from './events-table.module.scss';
-import { useGetEventsListQuery } from "../../redux/state/state-api";
-
+import {
+  useGetEventsListQuery,
+  useGetProjectInfoQuery
+} from "../../redux/state/state-api";
+import Pictogram from "../pictogram/pictogram";
 
 export default function EventsTable() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const [isOpen, setIsOpen] = useState(false);
   const { currentId } = useAppSelector((store) => store.state.project);
+  const { data: project } = useGetProjectInfoQuery(currentId);
   const { data: components } = useGetComponentsQuery(currentId ? currentId : -1);
   const { userRights } = useAppSelector((store) => store.auth);
   const { data: user } = useGetAuthInfoByIdQuery(currentId ? currentId : -1, {
@@ -38,15 +43,6 @@ export default function EventsTable() {
   const { data: eventsList } = useGetEventsListQuery(initiative?.initiative.id ? initiative?.initiative.id : -1, {
     skip: !initiative?.initiative.id,
   });
-  // const tableData = useMemo(() => {
-  //   return eventsList.map((item) => {
-  //     return {
-  //       title: item.event.name,
-  //       dateStart: item.event.date_start,
-  //       dateEnd: item.event.date_end,
-  //     }
-  //   });
-  // }, [eventsList]);
   const statusStyles = new Map([
     ['В работе', styles.inProgress],
     ['Просрочено', styles.outdated],
@@ -67,149 +63,157 @@ export default function EventsTable() {
       className={`${styles.wrapper} ${sectionStyles.wrapperBorder}`}
     >
       <SectionHeader>
-        Мероприятия
-      </SectionHeader>
-
-      <div
-        className={`${styles.content}`}
-      >
-        {/* <div
-          className={`${styles.firstColumn}`}
-        >
-          <table
-            className={`${styles.table}`}
-          >
-            <thead>
-              <tr
-                className={`${styles.tableHeader}`}
-              >
-                <th
-                  className={`${styles.titleCol}`}
-                >
-                  Название мероприятия
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {eventsList.map((event) => (
-                <tr
-                  key={event.event.id}
-                >
-                  <td
-                    className={`${styles.titleCol}`}
-                  >
-                    {event.event.name}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div> */}
         <div
-          className={`${styles.tableWrapper}`}
+          className={`${sectionStyles.hideContentHeader}`}
+          onClick={() => setIsOpen((prevState) => !prevState)}
         >
-
-          <table
-            className={`${styles.table}`}
-          >
-            <thead>
-              <tr
-                className={`${styles.tableHeader}`}
-              >
-                <th
-                  className={`${styles.titleCol}`}
-                >
-                  Название мероприятия
-                </th>
-                <th
-                  className={`${styles.statusCol}`}
-                >
-                  Статус
-                </th>
-                <th
-                  className={`${styles.dateCol}`}
-                >
-                  Дата начала
-                </th>
-                <th
-                  className={`${styles.dateCol}`}
-                >
-                  Дата окончания
-                </th>
-                {!!components && components.settings?.event_addfields.map((addfield) => (
-                  <th
-                    key={addfield.id}
-                    className={`${styles.additionalCol}`}
-                  >
-                    {addfield.title}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {!eventsList?.length && (
-                <tr>
-                  <td
-                    className={`${styles.emptyEvents}`}
-                  >
-                    Список мероприятий пуст
-                  </td>
-                </tr>
-              )}
-              {eventsList?.map((event, index) => (
-                <tr
-                  key={event.event.id}
-                  className = {`${styles.tableRow} ${(index % 2) ? styles.oddRow : styles.evenRow}`}
-                  onClick={() => onEventClickHandler(event.event.id)}
-                >
-                  <td
-                    className={`${styles.titleCol}`}
-                  >
-                    
-                      {event.event.name}
-                  </td>
-                  <td
-                    className={`${statusStyles.get(event.event_status)} ${styles.statusCol}`}
-                  >
-                    {event.event_status}
-                  </td>
-                  <td
-                    className={`${styles.dateCol}`}
-                  >
-                    {moment(event.event.date_start).format('DD.MM.YYYY')}
-                  </td>
-                  <td
-                    className={`${styles.dateCol}`}
-                  >
-                    {moment(event.event.date_end).format('DD.MM.YYYY')}
-                  </td>
-                  {event.addfields.map((addfield) => (
-                    <td
-                      key={addfield.id}
-                      className={`${styles.additionalCol}`}
-                    >
-                      {addfield.value}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-      {(userRights?.user_is_author || user?.user.is_superuser) && (
-        <div
-          className={`${styles.buttonWraper}`}
-        >
-          <CustomizedButton
-            value="Добавить"
-            color="blue"
-            onClick={() => {
-              navigate(`/${paths.events}/add`, { state: { initiativeId: currentInitiativeId }});
-            }}
+          Мероприятия
+          <Pictogram
+            type={isOpen ? 'close' : 'show'}
+            cursor="pointer"
           />
         </div>
-      )}
+      </SectionHeader>
+      {isOpen && (
+        <>
+          <div
+            className={`${styles.content}`}
+          >
+            <div
+              className={`${styles.tableWrapper}`}
+            >
+
+              <table
+                className={`${styles.table}`}
+              >
+                <thead>
+                  <tr
+                    className={`${styles.tableHeader}`}
+                  >
+                    <th
+                      className={`${styles.titleCol}`}
+                    >
+                      Название мероприятия
+                    </th>
+                    <th
+                      className={`${styles.statusCol}`}
+                    >
+                      Статус
+                    </th>
+                    <th
+                      className={`${styles.dateCol}`}
+                    >
+                      Дата начала
+                    </th>
+                    <th
+                      className={`${styles.dateCol}`}
+                    >
+                      Дата окончания
+                    </th>
+                    {!!components && components.settings?.event_addfields.map((addfield) => (
+                      <th
+                        key={addfield.id}
+                        className={`${styles.additionalCol}`}
+                      >
+                        {addfield.title}
+                      </th>
+                    ))}
+                    {components && components.table_registry.metrics.map((metric, index) => {
+                      const foundMetric = project ? project.metrics.find((item) => item.id === metric.id) : undefined;
+                      return (
+                        metric.initiative_activate && foundMetric?.is_aggregate ? (
+                          <th
+                            key={`${index}_${metric.id}`}
+                            className={`${styles.tableCol}`}
+                          >
+                            {metric.title}
+                          </th>
+                        ) : (
+                          null
+                        )
+                      );
+                    })}
+                  </tr>
+                </thead>
+                <tbody>
+                  {!eventsList?.length && (
+                    <tr>
+                      <td
+                        className={`${styles.emptyEvents}`}
+                      >
+                        Список мероприятий пуст
+                      </td>
+                    </tr>
+                  )}
+                  {eventsList?.map((event, index) => (
+                    <tr
+                      key={event.event.id}
+                      className = {`${styles.tableRow} ${(index % 2) ? styles.oddRow : styles.evenRow}`}
+                      onClick={() => onEventClickHandler(event.event.id)}
+                    >
+                      <td
+                        className={`${styles.titleCol}`}
+                      >
+                        
+                          {event.event.name}
+                      </td>
+                      <td
+                        className={`${statusStyles.get(event.event_status)} ${styles.statusCol}`}
+                      >
+                        {event.event_status}
+                      </td>
+                      <td
+                        className={`${styles.dateCol}`}
+                      >
+                        {moment(event.event.date_start).format('DD.MM.YYYY')}
+                      </td>
+                      <td
+                        className={`${styles.dateCol}`}
+                      >
+                        {moment(event.event.date_end).format('DD.MM.YYYY')}
+                      </td>
+                      {event.addfields.map((addfield) => (
+                        <td
+                          key={addfield.id}
+                          className={`${styles.additionalCol}`}
+                        >
+                          {addfield.value}
+                        </td>
+                      ))}
+                      {event.metric_fields.map((addfield) => {
+                        const foundMetric = project ? project.metrics.find((item) => item.id === addfield.metric.id) : undefined;
+                        return addfield.metric.initiative_activate && foundMetric?.is_aggregate ? (
+                          <td
+                            key={addfield.metric.id}
+                            className={`${styles.additionalCol}`}
+                          >
+                            {addfield.value}
+                          </td>
+                        ) : (
+                          null
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          {(userRights?.user_is_author || user?.user.is_superuser) && (
+            <div
+              className={`${styles.buttonWraper}`}
+            >
+              <CustomizedButton
+                value="Добавить"
+                color="blue"
+                onClick={() => {
+                  navigate(`/${paths.events}/add`, { state: { initiativeId: currentInitiativeId }});
+                }}
+              />
+            </div>
+          )}
+        </>
+      )}      
     </div>
     
   )

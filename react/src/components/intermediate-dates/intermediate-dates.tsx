@@ -3,6 +3,7 @@ import SectionContent from '../section/section-content/section-content';
 
 // Styles
 import styles from './intermediate-dates.module.scss';
+import sectionStyles from '../../styles/sections.module.scss';
 import TimelineTableRow from '../timeline-table-row/timeline-table-row';
 import TimelineStageRow from '../timeline-stage-row/timeline-stage-row';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
@@ -34,6 +35,7 @@ export default function IntermediateDates({
       <section className={`${styles.editWrapper}`}>
         {/* <div className={`${styles.tableRow}`}> */}
         <SectionHeader
+          className={`${sectionStyles.editHeaderWithButton}`}
           edit
         >
           <div

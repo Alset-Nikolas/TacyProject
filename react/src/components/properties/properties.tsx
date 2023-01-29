@@ -9,6 +9,7 @@ import { addPropertie, addPropertieValue, handlePropertieInutChange, isPropertie
 
 // Styles
 import styles from './properties.module.scss';
+import sectionStyles from '../../styles/sections.module.scss'
 import CustomizedButton from '../button/button';
 import { useGetProjectInfoQuery } from '../../redux/state/state-api';
 
@@ -37,13 +38,16 @@ export default function Properties({
     // if (!isPropertieEdit(projectForEdit.properties)) return null;
     return (
       <section className={`${styles.wrapper} ${styles.edit}`}>
-        <div className={`${styles.header} ${styles.edit}`}>
+        <SectionHeader
+          className={`${sectionStyles.editHeaderWithButton}`}
+          edit
+        >
           Атрибуты инициатив
           <CustomizedButton
             value="Добавить"
             onClick={() => addPropertie(projectForEdit, 'properties', dispatch)}
           />
-        </div>
+        </SectionHeader>
         <div className={`${styles.content}`}>
           {/* <div  className={`${styles.closeButton}`}>
             <Pictogram
@@ -140,7 +144,7 @@ export default function Properties({
                         <Pictogram
                           type="delete"
                           cursor="pointer"
-                          onClick={() => removePropertieValue(projectForEdit, el.title, itemIndex, dispatch)}
+                          onClick={() => removePropertieValue(projectForEdit, el.title, itemIndex, index, el.values, dispatch)}
                         />
                       </div>
                     )}
@@ -165,7 +169,7 @@ export default function Properties({
     );
   }
   return (
-    <section className={`${styles.wrapper}`}>
+    <section className={`${styles.wrapper} ${sectionStyles.wrapperBorder}`}>
       <SectionHeader>
         Атрибуты инициатив
       </SectionHeader>

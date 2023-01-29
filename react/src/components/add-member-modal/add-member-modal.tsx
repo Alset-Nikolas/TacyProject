@@ -1,7 +1,7 @@
 import { SelectChangeEvent } from "@mui/material";
 import { setDefaultResultOrder } from "dns/promises";
 import { ChangeEvent, useState } from "react";
-import { useGetProjectInfoQuery } from "../../redux/state/state-api";
+import { useGetComponentsQuery, useGetProjectInfoQuery } from "../../redux/state/state-api";
 import { closeModal } from "../../redux/state/state-slice";
 import { addMember } from "../../redux/team-slice";
 import { TTeamMember } from "../../types";
@@ -21,6 +21,9 @@ export default function AddMemberModal({ addMember }: TAddMemberProps) {
   const dispatch = useAppDispatch();
   const { currentId } = useAppSelector((store) => store.state.project);
   const { data: project } = useGetProjectInfoQuery(currentId ? currentId : -1);
+  const { data: components } = useGetComponentsQuery(currentId ? currentId : -1, {
+    skip: !currentId,
+  });
   const [stage, setStage] = useState(1);
   const [isError, setIsError] = useState(false);
   const [name, setName] = useState({
@@ -54,6 +57,27 @@ export default function AddMemberModal({ addMember }: TAddMemberProps) {
       item.id = propertie.id;
       item.title = propertie.title;
       item.values = [];
+      return item;
+    }) : [],
+    addfields: components ? components.table_community.settings_addfields_community.map((addfield, propIndex) => {
+      const item = {} as {
+        id: number;
+        title: {
+            id: number;
+            title: string;
+            project: number;
+        };
+        value: string;
+      };
+
+      item.id = addfield.id;
+      item.title = {
+        id: addfield.id,
+        title: addfield.title,
+        project: currentId ? currentId : -1,
+      };
+      item.value = '';
+
       return item;
     }) : [],
   });

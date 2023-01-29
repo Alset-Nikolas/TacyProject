@@ -136,14 +136,22 @@ export default function RiskManagement({ edit, editButton, isSettings, component
   );
 
   if (isSettings) return (
-    <section className={`${styles.wrapper}`}>
+    <section className={`${styles.wrapper} ${sectionStyles.wrapperBorder}`}>
       <SectionHeader>
         Риски
       </SectionHeader>
       <SectionContent
         className={`${styles.content}`}
       >
-        <ol>
+        <ol
+          className={`${styles.markedRisksList}`}
+        >
+          <li>
+            №
+          </li>
+          <li>
+            Название
+          </li>
           {settings.risks_addfields.map((addfield) => {
             return (
               <li

@@ -3,6 +3,7 @@ import SectionContent from '../section/section-content/section-content';
 
 // Styles
 import styles from './project-stages.module.scss';
+import sectionStyles from '../../styles/sections.module.scss';
 import TimelineTableRow from '../timeline-table-row/timeline-table-row';
 import TimelineStageRow from '../timeline-stage-row/timeline-stage-row';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
@@ -35,15 +36,10 @@ export default function ProjectStages({
       <section className={`${styles.editWrapper}`}>
         {/* <div className={`${styles.tableRow}`}> */}
         <SectionHeader
+          className={`${sectionStyles.editHeaderWithButton}`}
           edit
         >
-          <div
-            style={{
-              marginRight: 10,
-            }}
-          >
-            Этапы проекта
-          </div>
+          Этапы проекта
           {!projectForEdit.stages.length && (
             <div>
               <CustomizedButton

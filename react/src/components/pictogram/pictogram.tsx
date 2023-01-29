@@ -9,6 +9,7 @@ import deleteFilledIconSrc from '../../images/icons/delete_filled.svg';
 import showIconSrc from '../../images/icons/arrow.svg';
 import exportIconSrc from '../../images/icons/export.svg';
 import sendIconSrc from '../../images/icons/send.svg';
+import selectorArrowIconSrc from '../../images/icons/selector_arrow.svg';
 import { MouseEventHandler } from 'react';
 
 type TPictogramProps = {
@@ -23,7 +24,8 @@ type TPictogramProps = {
     'show' |
     'close' |
     'export' |
-    'send';
+    'send' |
+    'selector-arrow';
   cursor?: 'pointer' | 'default', 
   onClick?: MouseEventHandler<HTMLImageElement>;
 };
@@ -66,6 +68,9 @@ export default function Pictogram({ type, onClick, cursor = 'default' }: TPictog
     break;
     case 'send':
       iconSrc = sendIconSrc;
+    break;
+    case 'selector-arrow':
+      iconSrc = selectorArrowIconSrc;
     break;
     default:
       iconSrc = settingsIconSrc;

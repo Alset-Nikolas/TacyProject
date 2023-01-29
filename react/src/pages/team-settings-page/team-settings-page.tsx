@@ -94,6 +94,7 @@ export default function TeamSettingsPage() {
             }),
           });
         });
+        listItem.addfields = member.addfields; 
     
         return listItem;
       })

@@ -21,7 +21,8 @@ import {
   useGetInitiativesListQuery,
   useGetExportUrlQuery,
   useGetComponentsQuery,
-  useDeleteInitiativeMutation
+  useDeleteInitiativeMutation,
+  useGetUserRightsQuery
 } from "../../redux/state/state-api";
 import { closeLoader, showLoader, openDeleteInitiativeModal, closeModal } from "../../redux/state/state-slice";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
@@ -30,7 +31,7 @@ import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import styles from './initiatives-registry-page.module.scss';
 
 export default function InitiativesRegistryPage() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const location = useLocation();
   const modal = useAppSelector((store) => store.state.app.modal);
@@ -38,9 +39,6 @@ export default function InitiativesRegistryPage() {
     currentId,
   } = useAppSelector((store) => store.state.project);
   const { data: project } = useGetProjectInfoQuery(currentId);
-  const {
-    userRights
-  } = useAppSelector((store) => store.auth);
   const { data: user } = useGetAuthInfoByIdQuery(currentId ? currentId : -1, {
     skip: !currentId,
   });
@@ -59,6 +57,9 @@ export default function InitiativesRegistryPage() {
   } = useGetInitiativeByIdQuery(currentInitiativeId ? currentInitiativeId : -1, {
     skip: !currentInitiativeId,
   });
+  const { data: userRights } = useGetUserRightsQuery(currentInitiativeId ? currentInitiativeId : -1, {
+    skip: !currentInitiativeId,
+  });
   const isInitiativeApproved = initiative?.initiative.status?.value === -1;
   const { data: components } = useGetComponentsQuery(currentId ? currentId : -1, {
     skip: !currentId,
@@ -71,10 +72,10 @@ export default function InitiativesRegistryPage() {
     }
   ] = useDeleteInitiativeMutation();
 
-  const onAddClickHandler = () => {
-    // dispatch(addInitiativeThunk());
-    navigate(`/${paths.registry}/add`);
-  };
+  // const onAddClickHandler = () => {
+  //   // dispatch(addInitiativeThunk());
+  //   navigate(`/${paths.registry}/add`);
+  // };
 
   const onDeleteClickHandler = () => {
     dispatch(openDeleteInitiativeModal());
@@ -123,17 +124,18 @@ export default function InitiativesRegistryPage() {
       >
         <InitiativesTable
           externalInitiativesList={initiativesList || []}
+          addButton
         />
-        {(user && user.user_flags_in_project?.is_create || user?.user.is_superuser) && (
+        {/* {(user && user.user_flags_in_project?.is_create || user?.user.is_superuser) && (
           <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '40px'}}>
             <CustomizedButton
-              value="Добавить инициативу"
+              value="Добавить"
               color="blue"
               onClick={onAddClickHandler}
               disabled={!project?.id}
             />
           </div>
-        )}
+        )} */}
       </section>
       {initiative && (
         <>
@@ -166,18 +168,21 @@ export default function InitiativesRegistryPage() {
           <section>
             <InitiativeCoordination />
           </section>
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-            }}
-          >
-            <CustomizedButton
-              value="Удалить инициативу"
-              color="blue"
-              onClick={onDeleteClickHandler}
-            />
-          </div>
+          {(userRights?.user_is_author || userRights?.user_is_superuser) && (
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                marginBottom: 40,
+              }}
+            >
+              <CustomizedButton
+                value="Удалить инициативу"
+                color="blue"
+                onClick={onDeleteClickHandler}
+              />
+            </div>
+          )}
         </>
       )}
       {modal.isOpen && modal.type.deleteInitiative && (

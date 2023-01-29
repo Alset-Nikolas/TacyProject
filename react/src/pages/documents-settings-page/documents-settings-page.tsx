@@ -14,6 +14,8 @@ import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 
 // Styles
 import styles from './documents-settings-page.module.scss';
+import sectionStyles from '../../styles/sections.module.scss';
+import SectionContent from '../../components/section/section-content/section-content';
 
 export default function DocumentsSettingsPage() {
   const dispatch = useAppDispatch();
@@ -39,8 +41,10 @@ export default function DocumentsSettingsPage() {
     postFilesSettings,
     {
       isError: postFilesSettingsError,
+      isSuccess: postFilesSettingsSuccess,
     },
   ] = usePostFilesSettingsMutation();
+  const [edit, setEdit] = useState(false);
 
   const SelectStyle = {
     minWidth: '223px',
@@ -128,7 +132,10 @@ export default function DocumentsSettingsPage() {
   };
 
   const cancelButtonClickHandler = () => {
-    if (filesSettings) setTempFilesSettings(filesSettings);
+    if (filesSettings) {
+      setTempFilesSettings(filesSettings);
+      setEdit(false);
+    }
   };
 
   const addFileSettings = (index: number) => {
@@ -167,12 +174,15 @@ export default function DocumentsSettingsPage() {
   }, [filesSettings]);
 
   useEffect(() => {
+    if (postFilesSettingsSuccess) {
+      setEdit(false);
+    }
     if (postFilesSettingsError) {
       dispatch(openErrorModal('Произошла ошибка. Проверьте заполнение полей'));
     }
-  }, [postFilesSettingsError])
+  }, [postFilesSettingsError, postFilesSettingsSuccess])
 
-  return (
+  if (edit) return (
     <div className={`${styles.wrapper}`}>
       <SectionHeader
         edit
@@ -243,6 +253,51 @@ export default function DocumentsSettingsPage() {
       {modal.isOpen && modal.type.message && (
         <ModalInfo message={modal.message} />
       )}
+    </div>
+  );
+
+  return (
+    <div className={`${styles.wrapper} ${sectionStyles.wrapperBorder}`}>
+      <SectionHeader
+        className={`${sectionStyles.editHeaderWithButton}`}
+      >
+        Прикрепляемые документы
+        <Pictogram
+          type="edit"
+          onClick={() => setEdit(true)}
+        />
+      </SectionHeader>
+      <SectionContent
+        className={`${styles.settingsWrapper}`}
+      >
+        {tempFilesSettings.map((item, index) => {
+          if (item.status.value < 0) return null;
+          return (
+            <div
+              key={item.status.id}
+              className={`${styles.statusWrapper}`}
+            >
+              <div
+                className={`${styles.statusHeaderView}`}
+              >
+                {item.status.name}
+              </div>
+              <div
+                className={`${styles.filesListView}`}
+              >
+                {item.settings_file.map((fileItem, fileItemIndex) => (
+                  <div
+                    key={fileItem.id}
+                    className={`${styles.fileInputWrapper}`}
+                  >
+                    {fileItem.title}
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </SectionContent>
     </div>
   );
 }

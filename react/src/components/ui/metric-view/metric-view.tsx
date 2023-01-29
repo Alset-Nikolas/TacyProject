@@ -4,11 +4,13 @@ import styles from './metric-view.module.scss';
 type TMetricProps = {
   value: number;
   title: string;
+  units: string;
+  is_percent?: boolean;
 }
 
-export default function MetricView({ value, title }: TMetricProps) {
+export default function MetricView({ value, title, units, is_percent }: TMetricProps) {
   return (
-    <Tooltip title={title}>
+    <Tooltip title={`${title}, ${(!is_percent && units !== 'бм') ? units : ''}${is_percent ? '%' : ''}`}>
       <div
         className={`${styles.singleMetricWrapper}`}
       >
@@ -16,7 +18,10 @@ export default function MetricView({ value, title }: TMetricProps) {
           {value}
         </div>
           <span className={`${styles.title}`}>
-            {title}
+            {title},
+            <br />
+            {(!is_percent && units !== 'бм') ? units : ''}
+            {is_percent && '%'}
           </span>
       </div>
     </Tooltip>

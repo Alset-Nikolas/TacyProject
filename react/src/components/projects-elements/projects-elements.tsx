@@ -18,6 +18,7 @@ import { rights as rightsObj } from '../../consts';
 // Styles
 import styles from './projects-elements.module.scss';
 import inputStyles from '../../styles/inputs.module.scss';
+import sectionStyles from '../../styles/sections.module.scss';
 
 type TProjectsElementsProps = {
   // units: Array<any>;
@@ -180,7 +181,7 @@ export default function ProjectsElements({ roles, rights, edit }: TProjectsEleme
     );
   }
   return (
-    <div className={`${styles.wrapper}`}>
+    <div className={`${styles.wrapper} ${sectionStyles.wrapperBorder}`}>
       <SectionHeader>
         Роли
       </SectionHeader>

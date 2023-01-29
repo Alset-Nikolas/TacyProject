@@ -67,7 +67,6 @@ class NotificationsUser(models.Model):
         coordinator_obj = info.get("coordinator")
         author_obj = info.get("author_text")
         status_obj = info.get("status")
-        print("coordinator_obj", coordinator_obj)
         cls.objects.create(
             user=author_obj,
             text=f"Вы отправили инициативу id:{initiative_id} на согласование {coordinator_obj.email}, статус инициативы сейчас {status_obj.name} проект: {initiative.project.name}",

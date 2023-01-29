@@ -76,13 +76,8 @@ export default function BasicSettingsView({ onEditClick }: TBasicSettingsViewPro
       <section className={`${styles.middleSectionWrapper}`}>
         <Metrics />
         <div
-          style={{
-            display: 'flex',
-            gap: 40,
-          }}>
-          {/* <TargetEffect
-            metrics={project?.metrics}
-          /> */}
+          className={`${styles.effects}`}
+        >
           <TargetEffect />
           <ProjectsEffect />
         </div>

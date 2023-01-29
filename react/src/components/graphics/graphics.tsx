@@ -113,13 +113,15 @@ export default function Graphics() {
                   key={index}
                 >
                   <Tooltip
-                    title={el.metricName}
+                    title={`${el.metricName}${(!el.isPercent && el.units && el.units !== 'бм') ? `, ${el.units}` : ''}${el.isPercent ? ', %' : ''}`}
                     placement="bottom-start"
                   >
                     <div
                       className={`${styles.metricNameGraphic}`}
                     >
                       {el.metricName}
+                      {(!el.isPercent && el.units && el.units !== 'бм') ? `, ${el.units}` : ''}
+                      {!!el.isPercent && ', %'}
                   </div>
                  </Tooltip>
                   <div

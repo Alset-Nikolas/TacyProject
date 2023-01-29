@@ -103,7 +103,7 @@ export default function EventManagement({ edit, components }: TEventManagementPr
   );
 
   return (
-    <section className={`${styles.wrapper}`}>
+    <section className={`${styles.wrapper} ${sectionStyles.wrapperBorder}`}>
       <SectionHeader
         className={`${styles.header}`}
       >

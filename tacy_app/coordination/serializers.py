@@ -46,7 +46,6 @@ class SentForApprovalSerializer(serializers.Serializer):
             raise serializers.ValidationError({"files": "not"})
         project: Project = initiative_obj.project
         for coordinator_user in attrs.get("coordinators"):
-            print(coordinator_user)
             community_user_info = project.community_info.filter(
                 user_id=coordinator_user.get("id")
             ).first()

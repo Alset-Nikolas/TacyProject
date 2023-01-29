@@ -42,6 +42,8 @@ export default function ProjectsEffectComponent({ title, metrics }: TProjectsEff
               <MetricView
                 title={el.title}
                 value={el.value}
+                units={el.units}
+                is_percent={el.is_percent}
                 key={`${el.title}_${el.id}`}
               />
             );

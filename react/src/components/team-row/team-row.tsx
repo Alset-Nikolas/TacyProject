@@ -1,9 +1,14 @@
 import { SelectChangeEvent } from "@mui/material";
 import { ChangeEvent, useContext } from "react";
-import { useGetComponentsQuery, useGetProjectInfoQuery, useGetTeamListQuery } from "../../redux/state/state-api";
-import { closeModal, openDeleteMemberModal } from "../../redux/state/state-slice";
-// import { addNotExistingPropertie, setList } from "../../redux/team-slice";
-// import { useGetTeamListQuery } from "../../redux/team/team-api";
+import {
+  useGetComponentsQuery,
+  useGetProjectInfoQuery,
+  useGetTeamListQuery,
+} from "../../redux/state/state-api";
+import {
+  closeModal,
+  openDeleteMemberModal
+} from "../../redux/state/state-slice";
 import { TTeamMember } from "../../types";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import CustomizedButton from "../button/button";
@@ -27,14 +32,11 @@ type TTeamRowProps = {
 };
 
 export default function TeamRow({ index, member, edit, header, removeMember, setList }: TTeamRowProps) {
-  // const project = useAppSelector((store) => store.state.project.value);
   const { currentId } = useAppSelector((store) => store.state.project);
   const { data: project } = useGetProjectInfoQuery(currentId ? currentId : -1);
   const { data: components } = useGetComponentsQuery(currentId ? currentId : -1, {
     skip: !currentId,
   });
-  // const membersList = useAppSelector((store) => store.team.list);
-  // const { data: membersList } = useGetTeamListQuery({ id: currentId ? currentId : -1, project: project ? project : null });
   const modal = useAppSelector((store) => store.state.app.modal);
   const dispatch = useAppDispatch();
   const selectStyle = {
@@ -67,6 +69,16 @@ export default function TeamRow({ index, member, edit, header, removeMember, set
         Телефон
       </th>
       {
+        components?.table_community.settings_addfields_community.map((addfield, propIndex) => {
+          // if (!components?.table_community.properties[propIndex].is_community_activate) return null;
+          return (
+          <th className={`${styles.cellWrapper}`} key={addfield.id}>
+            {addfield.title}
+          </th>
+          );
+        })
+      }
+      {
         project.properties.map((propertie, propIndex) => {
           if (!components?.table_community.properties[propIndex].is_community_activate) return null;
           return (
@@ -84,7 +96,7 @@ export default function TeamRow({ index, member, edit, header, removeMember, set
   );
 
   if (!member || typeof index === 'undefined') return null;
-  const { name, phone, email, /* role, rights, */properties, is_create, is_superuser } = member;
+  const { name, phone, email, /* role, rights, */properties, is_create, is_superuser, addfields } = member;
 
   const onRemoveClickHandler = () => {
     dispatch(openDeleteMemberModal());
@@ -121,6 +133,29 @@ export default function TeamRow({ index, member, edit, header, removeMember, set
           ...newList,
         ]);
       }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
+  const handleAddfieldInputChange = (e: ChangeEvent<HTMLInputElement>, addfieldIndex: number) => {
+    try {
+      if (!membersList) throw new Error('Member list is not defined');
+
+      const newMemberState = { ...member };
+      const value = e.target.value;
+      const newList = [...membersList];
+
+      const addfields = [...newMemberState.addfields];
+      const currentAddfield = {...addfields[addfieldIndex]};
+      currentAddfield.value = value;
+      addfields[addfieldIndex] = currentAddfield;
+      newMemberState.addfields = addfields;
+      newList[index] = newMemberState;
+      setList([
+        ...newList,
+      ]);
+      
     } catch (e) {
       console.log(e);
     }
@@ -281,6 +316,28 @@ export default function TeamRow({ index, member, edit, header, removeMember, set
             </div>
           )}
         </td>
+        {addfields.map((addfield, index) => {
+
+          return   (
+            <td
+              key={addfield.id}
+              className={`${styles.cell}`}
+            >
+              {edit ? (
+                <input
+                  className={`${styles.input}`}
+                  value={addfield.value}
+                  onChange={(e) => handleAddfieldInputChange(e, index)}
+                  autoComplete="off"
+                />
+              ) : (
+                <div className={`${styles.cell}`}>
+                  {addfield.value}
+                </div>
+              )}
+            </td>
+          );
+        })}
         {!!project.properties.length && project.properties.map((propertie, propIndex) => {
           const outputPropertie = properties.find((prop) => prop.title === propertie.title);
           if (!outputPropertie) {

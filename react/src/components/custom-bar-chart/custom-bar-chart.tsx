@@ -12,7 +12,7 @@ export default function CustomBarChart({ data }: TCustomBarChartProps) {
 
   return (
     <div>
-      <BarChart width={390} height={250} data={data}>
+      <BarChart width={((100 * data.length) > 390) ? (100 * data.length) : 390} height={250} data={data}>
         {/* <CartesianGrid strokeDasharray="3 3" /> */}
         <XAxis dataKey="name_short" />
         <YAxis />

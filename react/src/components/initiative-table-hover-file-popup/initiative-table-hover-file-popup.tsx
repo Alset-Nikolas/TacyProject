@@ -1,4 +1,5 @@
-import { FC, useRef } from "react";
+import { FC, useEffect, useRef, useState } from "react";
+import ReactDOM from "react-dom";
 import { useGetProjectInfoQuery } from "../../redux/state/state-api";
 import { TUser } from "../../types";
 import { useAppSelector } from "../../utils/hooks";
@@ -19,38 +20,59 @@ type TInitiativeTableHoverPopupProps = {
     };
   }>;
   initiativeIndex: number;
+  parent: HTMLDivElement | null;
 };
 
-export const InitiativeTableHoverFilePopup:FC<TInitiativeTableHoverPopupProps> = ({ files, initiativeIndex }) => {
+export const InitiativeTableHoverFilePopup:FC<TInitiativeTableHoverPopupProps> = ({ files, initiativeIndex, parent }) => {
+  const portalDiv = document.getElementById('modal-root')!;
   const { currentId } = useAppSelector((store) => store.state.project);
-  const { data: project } = useGetProjectInfoQuery(currentId);
   const popupRef = useRef<HTMLDivElement>(null);
+  const [popupWidth, setPopupWidth] = useState(0);
+
 
   const cell = document.querySelector(`#file-status-${initiativeIndex}`) as HTMLTableCellElement;
   
+  const parentRect = parent?.getBoundingClientRect();
   const clientRect = cell?.getBoundingClientRect();
-  const offesetHeight = clientRect.top + cell?.clientHeight;
-  const popupWidth = popupRef.current ? popupRef.current.clientWidth : 0;
-  const offesetLeft = clientRect.left - (popupWidth / 2);
+  const offesetHeight = clientRect.bottom - (parentRect ? parentRect.top : 0);
+  // const popupWidth = popupRef.current ? popupRef.current.clientWidth : 0;
+  const offesetLeft = clientRect.left - (popupWidth / 2) - (parentRect ? parentRect.left : 0);
 
-  const statusStyles = new Map([
-    [true, styles.statusApproved],
-    [false, styles.statusNotApproved],
-    [null, styles.statusNone],
-  ]);
 
-  return (
-    
+  let style: {
+    top: string | number,
+    left: string | number,
+    right: string | number,
+  } = {
+    top: offesetHeight + (parentRect ? parentRect.top : 0),
+    left: offesetLeft + (parentRect ? parentRect.left : 0),
+    right: '',
+  };
+
+  if (parentRect && (offesetLeft + popupWidth + parentRect.left > parentRect.right)) {
+    style = {
+      top: offesetHeight + (parentRect ? parentRect.top : 0),
+      left: '',
+      right: 0 + (parentRect ? parentRect.right : 0),
+    }
+  }
+
+  useEffect(() => {
+    if (popupRef.current) setPopupWidth(popupRef.current.clientWidth);
+  }, [])
+
+  return ReactDOM.createPortal(
     <div
       className={`${styles.wrapper}`}
-      style={{
-        top: offesetHeight,
-        left: offesetLeft
-      }}
+      style={style}
       ref={popupRef}
     >
       {!files.length && (
-        <div>
+        <div
+          style={{
+            color: 'black',
+          }}
+        >
           Список файлов пуст
         </div>
       )}
@@ -91,6 +113,7 @@ export const InitiativeTableHoverFilePopup:FC<TInitiativeTableHoverPopupProps> =
           })}
         </>
       )}
-    </div>
+    </div>,
+    portalDiv
   );
 }

@@ -307,10 +307,10 @@ class UpdateCommunityProjectView(views.APIView):
     )
     def get(self, request, format=None):
         project: Project = get_project_by_id_or_active(request)
+        project.update_community()
         s: UpdateCommunityProjectSerializer = UpdateCommunityProjectSerializer(
             instance=project
         )
-        print(s.data)
         return Response(
             s.data,
             status=status.HTTP_200_OK,

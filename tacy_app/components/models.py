@@ -80,16 +80,22 @@ class Initiatives(models.Model):
         max_length=500,
         verbose_name="Текущее состояние инициативы",
         help_text="Введите текущее состояние инициативы",
+        blank=True,
+        null=True,
     )
     reasons = models.CharField(
         max_length=500,
         verbose_name="Предпосылки инициативы",
         help_text="Введите предпосылкт инициативы",
+        blank=True,
+        null=True,
     )
     description = models.CharField(
         max_length=500,
         verbose_name="Описание инициативы",
         help_text="Введите описание инициативы",
+        blank=True,
+        null=True,
     )
     date_registration = models.DateField(
         verbose_name="Дата регистраци инициативы",
@@ -117,15 +123,15 @@ class Initiatives(models.Model):
 
     class Meta:
         db_table = "initiatives"
-        constraints = [
-            models.UniqueConstraint(
-                fields=["project", "name"], name="unique name initiatives"
-            )
-        ]
+        # constraints = [
+        #     models.UniqueConstraint(
+        #         fields=["project", "name"], name="unique name initiatives"
+        #     )
+        # ]
 
-    @classmethod
-    def get_by_name(cls, project, name):
-        return cls.objects.filter(project=project).filter(name=name).first()
+    # @classmethod
+    # def get_by_name(cls, project, name):
+    #     return cls.objects.filter(project=project).filter(name=name).first()
 
     @classmethod
     def get_by_id(cls, id):
@@ -138,7 +144,6 @@ class Initiatives(models.Model):
         ] = RolesProject.get_roles_by_project(self.project)
         ans = [{"role": x, "community": []} for x in roles_in_project]
         for user_in_init in community_in_init:
-            print("user_in_init", user_in_init)
             for item in ans:
                 if item.get("role") == user_in_init.role:
                     elemant = dict()
@@ -185,7 +190,6 @@ class Initiatives(models.Model):
 
         else:
             initiative = cls.objects.filter(id=info["id"]).first()
-            initiative.author_id = info.get("author_id")
             initiative.name = info.get("name")
             initiative.current_state = info.get("current_state")
             initiative.reasons = info.get("reasons")
@@ -238,11 +242,31 @@ class Initiatives(models.Model):
                     initiative=self, title=new_field, value=""
                 )
 
+    def update_files(self):
+        settings_initiatives = self.project.settings_initiatives.first()
+
+        for new_file in SettingsFilesInitiative.objects.filter(
+            settings_project=settings_initiatives
+        ).all():
+
+            if (
+                not InitiativesFiles.objects.filter(initiative=self)
+                .filter(title=new_file)
+                .exists()
+            ):
+                InitiativesFiles.objects.create(
+                    initiative=self,
+                    title=new_file,
+                    file=None,
+                    file_name="",
+                )
+
     def check_updates(self):
         self.update_date()
         self.update_metrics()
         self.update_properties()
         self.update_addfields()
+        self.update_files()
 
     @classmethod
     def get_user_initiatievs(cls, user, project):
@@ -331,8 +355,15 @@ class Initiatives(models.Model):
         if user.is_superuser:
             is_approve = True
             is_update = True
-        flags["is_approve"] = is_approve or role.is_approve
-        flags["is_update"] = is_update or role.is_update
+        elif role is None:
+            is_approve = False
+            is_update = False
+        else:
+            is_approve = role.is_approve
+            is_update = role.is_update
+
+        flags["is_approve"] = is_approve
+        flags["is_update"] = is_update
         return flags
 
     def get_settings_init_files(self):
@@ -392,7 +423,11 @@ class InitiativesAddFields(models.Model):
         blank=True,
         null=True,
     )
-    value = models.CharField(max_length=200)
+    value = models.CharField(
+        max_length=500,
+        blank=True,
+        null=True,
+    )
 
     class Meta:
         db_table = "initiatives_add_fields"
@@ -627,7 +662,6 @@ class Events(models.Model):
 
     @classmethod
     def create_or_update(cls, info):
-        print("create_or_update", info)
         id_event = info.pop("id")
         if "initiative" in info:
             info["initiative_id"] = info.pop("initiative").id
@@ -814,12 +848,12 @@ class Risks(models.Model):
     )
 
     class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=["initiative", "name"],
-                name="unique field risk name",
-            )
-        ]
+        # constraints = [
+        #     models.UniqueConstraint(
+        #         fields=["initiative", "name"],
+        #         name="unique field risk name",
+        #     )
+        # ]
         db_table = "risks"
 
     @classmethod
@@ -1033,7 +1067,7 @@ class SettingsStatusInitiative(models.Model):
             cls.objects.create(
                 settings_project=settings_project,
                 value=-1,
-                name="Согласовано",
+                name="Завершено",
             )
         if (
             not cls.objects.filter(settings_project=settings_project)
@@ -1048,6 +1082,7 @@ class SettingsStatusInitiative(models.Model):
 
     @classmethod
     def create_or_update(cls, settings_components, info):
+        print("settings_components", info)
         ids_not_delete = []
         for el_info in info:
             name_field = el_info.get("name")

@@ -81,7 +81,7 @@ export default function InitialFiles({
         <SectionHeader
           edit
         >
-          Установочные файлы
+          Установочные документы
         </SectionHeader>
         {/* </div> */}
         <div  className={`${styles.content} ${styles.edit}`}>
@@ -127,7 +127,7 @@ export default function InitialFiles({
   return (
     <div className={`${styles.wrapper} ${sectionStyles.wrapperBorder}`}>
       <SectionHeader>
-        Установочные файлы
+        Установочные документы
       </SectionHeader>
       <div  className={`${styles.content}`}>
         {!filesInfo?.length && (

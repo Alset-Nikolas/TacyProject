@@ -36,6 +36,11 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from django.conf import settings
+from .permissions import (
+    IsUserCreatorInitiativesOrAdminPermission,
+    IsUserAuthorInitiativesOrAdminPermission,
+    IsUserUpdateInitiativesOrAdminPermission,
+)
 
 
 def get_project_by_id_or_active(request) -> tp.Optional[Project]:
@@ -261,6 +266,7 @@ class UpdateSettingsInitiativeView(views.APIView):
 
 # ++++++++++++++++++++++ИНИЦИАТИВЫ+++++++++++++++++++++++++++
 class CreateInitiativeView(views.APIView):
+    permission_classes = [IsUserCreatorInitiativesOrAdminPermission]
     response_schema_dict = {
         "400": openapi.Response(
             description="Передан id несуществующей проекта",
@@ -286,18 +292,20 @@ class CreateInitiativeView(views.APIView):
     def post(self, request):
         project_id = request.data.get("initiative", {}).get("project", None)
         project = Project.get_project_by_id(project_id)
+        self.check_object_permissions(self.request, project)
         if not project:
             return Response({"initiative": {"project": "not exist"}}, 400)
         data = request.data
         data["initiative"] = request.data.get("initiative", {})
-        data["initiative"]["author"] = request.user.id
+
         s = InitiativeSerializer(
             data=request.data,
             context={"user": request.user, "project": project},
         )
         s.is_valid(raise_exception=True)
+        data["initiative"]["author"] = request.user.id
         s.create_or_update(request.data)
-        return Response(request.data, 200)
+        return Response(s.data, 200)
 
 
 class InfoInitiativeView(views.APIView):
@@ -423,11 +431,11 @@ class InfoInitiativeView(views.APIView):
             }
         )
 
-        print("InfoInitiativeView", init.get_community_roles())
         return Response(s.data, 200)
 
 
 class DeleteInitiativeView(views.APIView):
+    permission_classes = [IsUserAuthorInitiativesOrAdminPermission]
     response_schema_dict = {
         "200    ": openapi.Response(
             description="Передан id несуществующей проекта",
@@ -466,6 +474,7 @@ class DeleteInitiativeView(views.APIView):
         init: Initiatives = get_object_or_404(
             Initiatives, id=request.GET.get("id")
         )
+        self.check_object_permissions(self.request, init)
         init.delete_node()
         return Response({"msg": "Инициатива удалена"}, 200)
 
@@ -598,8 +607,6 @@ class ListInitiativesView(views.APIView):
         list_inits = project.get_list_inits_after_filters_and_sorted(
             request.GET
         )
-        print(list_inits)
-        print(len(list_inits))
         [x.check_updates() for x in list_inits]
 
         inst = {
@@ -844,6 +851,7 @@ class UserStatisticsInitiativesView(views.APIView):
 
 
 class RolesInitiativeView(views.APIView):
+    permission_classes = [IsUserAuthorInitiativesOrAdminPermission]
 
     def get(self, request):
         id_init = request.GET.get("id", None)
@@ -864,6 +872,7 @@ class RolesInitiativeView(views.APIView):
         init: Initiatives = get_object_or_404(
             Initiatives, id=request.GET.get("id")
         )
+        self.check_object_permissions(self.request, init)
         serializer = RolesUserInInitiativeSerializer(
             data=request.data,
             context={
@@ -880,6 +889,7 @@ class RolesInitiativeView(views.APIView):
 
 # ++++++++++++++++++++++РИСКИ+++++++++++++++++++++++++++
 class CreateRiskView(views.APIView):
+    permission_classes = [IsUserUpdateInitiativesOrAdminPermission]
     response_schema_dict = {
         "200": openapi.Response(
             description="Название риска в рамках инициативы уникально.",
@@ -926,10 +936,12 @@ class CreateRiskView(views.APIView):
     )
     def post(self, request):
         initiative_id = request.data.get("risk", {}).get("initiative", None)
+        init = get_object_or_404(Initiatives, id=initiative_id)
+        self.check_object_permissions(self.request, init)
         s: RiskInfoSerializer = RiskInfoSerializer(
             data=request.data,
             context={
-                "initiative": get_object_or_404(Initiatives, id=initiative_id),
+                "initiative": init,
                 "user": request.user,
             },
         )
@@ -1102,6 +1114,7 @@ class ListRiskView(views.APIView):
 
 
 class DeleteRiskView(views.APIView):
+    permission_classes = [IsUserUpdateInitiativesOrAdminPermission]
     response_schema_dict = {
         "200": openapi.Response(
             description="Удаление риска",
@@ -1134,6 +1147,7 @@ class DeleteRiskView(views.APIView):
         s.is_valid(raise_exception=True)
         id_risk = request.data.get("id")
         risc_obj = get_object_or_404(Risks, id=id_risk)
+        self.check_object_permissions(self.request, risc_obj.initiative)
         risc_obj.delete()
         return Response({"msg": "risk delete"}, 200)
 
@@ -1222,6 +1236,8 @@ class InfoEventView(views.APIView):
 
 
 class CreateEventView(views.APIView):
+    permission_classes = [IsUserUpdateInitiativesOrAdminPermission]
+
     @swagger_auto_schema(
         operation_description="Создать мероприятие",
         request_body=EventSerializer,
@@ -1229,6 +1245,7 @@ class CreateEventView(views.APIView):
     def post(self, request):
         initiative_id = request.data.get("event", {}).get("initiative", None)
         initiative = get_object_or_404(Initiatives, id=initiative_id)
+        self.check_object_permissions(self.request, initiative)
         data = request.data
 
         s: EventSerializer = EventSerializer(
@@ -1236,12 +1253,13 @@ class CreateEventView(views.APIView):
         )
         s.is_valid(raise_exception=True)
         data = s.data
-        print(s.data)
         s.create_or_update(s.data)
         return Response(s.data, 201)
 
 
 class DeleteEventView(views.APIView):
+    permission_classes = [IsUserUpdateInitiativesOrAdminPermission]
+
     @swagger_auto_schema(
         operation_description="Удаление мероприятия",
         manual_parameters=[
@@ -1258,6 +1276,7 @@ class DeleteEventView(views.APIView):
         if not id_event or not id_event.isdigit():
             return Response("get id event", 404)
         ev = get_object_or_404(Events, id=id_event)
+        self.check_object_permissions(self.request, ev.initiative)
         ev.delete_node(id_event)
         return Response({"msg": "Мероприятие удалено"}, 204)
 
@@ -1490,12 +1509,13 @@ class InitiativesSettingsFilesViewSet(
 
 
 class InitiativeFile(views.APIView):
+    permission_classes = [IsUserUpdateInitiativesOrAdminPermission]
+
     def get(self, request):
         id_init = request.GET.get("id", None)
         if not id_init or not id_init.isdigit():
             return Response("get id id_init", 404)
         init = get_object_or_404(Initiatives, id=id_init)
-        print(init.get_files())
         s = InfoInitiativesFilesSerializer(
             instance=init.get_files(), many=True
         )
@@ -1506,6 +1526,7 @@ class InitiativeFile(views.APIView):
         if not id_file or not id_file.isdigit():
             return Response("get id file", 404)
         file = get_object_or_404(InitiativesFiles, id=id_file)
+        self.check_object_permissions(self.request, file.initiative)
         file.delete()
         return Response("Файл удален", 200)
 
@@ -1517,6 +1538,7 @@ class InitiativeFile(views.APIView):
         if not file:
             return Response("get file", 404)
         init_file = get_object_or_404(InitiativesFiles, id=id_init)
+        self.check_object_permissions(self.request, file.initiative)
         init_file.file = file
         init_file.file_name = str(file)
         file = init_file.save()

@@ -134,7 +134,16 @@ export type TTeamMember = {
       id: number,
       value:  string,
     }>;
-  }>; 
+  }>;
+  addfields: Array<{
+    id: number;
+    title: {
+        id: number;
+        title: string;
+        project: number;
+    };
+    value: string;
+  }>;
 }
 
 export type TUserRequest = {
@@ -177,6 +186,15 @@ export type TRequestTeamListItem<T> = {
       id: number;
       value: string;
     }>
+  }>;
+  addfields: Array<{
+    id: number;
+    title: {
+        id: number;
+        title: string;
+        project: number;
+    };
+    value: string;
   }>;
 }
 
@@ -250,7 +268,10 @@ export type TComponentsSettings = {
 export type TInitiativeInfo = {
   id: number;
   project: number;
-  author: number;
+  author: TUser & {
+    id: number;
+    is_superuser: boolean;
+  };
   name: string;
   current_state: string;
   reasons: string;
@@ -311,6 +332,7 @@ export type TInitiative = {
             title: {
               id: number,
               title: string,
+              is_community_activate: boolean;
             },
             values: Array<{
               id: number,
@@ -612,4 +634,20 @@ export type TInitiativeFiles = {
     initiative: number;
     title: number;
   },
+}
+
+export type TRolesAllocationModalMembersList = {
+  id: number,
+  active:
+  boolean,
+  user_name: string,
+  user: TUser & {id: number},
+  properties: Array<{
+    id: number;
+    title: string;
+    values: Array<{
+      id: number;
+      value: string;
+    }>;
+  }>
 }
