@@ -67,10 +67,10 @@ export default function Graphics() {
         className={`${styles.content}`}
       >
         {/* <GanttD3 data={ganttData} /> */}
-      {!diagramData?.graphics.length && (
+      {!diagramData?.graphics.length && !diagramData?.statusGraphics.length && (
         <div>Атрибуты инициатив отвутствуют</div>
       )}
-      {!!diagramData?.graphics.length && (
+      {(diagramData?.graphics.length || diagramData?.statusGraphics.length) && (
       <div>
         {/* <div>
           {graphics[currentPropertieIndex].propertieName}

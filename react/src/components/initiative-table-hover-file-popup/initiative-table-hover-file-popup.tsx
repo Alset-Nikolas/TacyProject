@@ -79,7 +79,7 @@ export const InitiativeTableHoverFilePopup:FC<TInitiativeTableHoverPopupProps> =
       {!!files.length && (
         <>
           <div
-            className={`${styles.tableHeader}`}
+            className={`${styles.tableHeader} ${styles.tableRow}`}
           >
             <div
               className={`${styles.name}`}

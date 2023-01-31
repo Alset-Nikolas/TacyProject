@@ -9,12 +9,15 @@ services:
     restart: always
     volumes:
       - .:/tacy_app
+      - ./tacy_app/tacy_app/media:/tacy_app/media
     ports:
       - "8000:8000"
     depends_on:
       - db
     env_file:
       - ./tacy_app/.env
+    expose:
+      - 8000
 
   db:
     container_name: "tacy_backend_postgres_container"

@@ -57,7 +57,11 @@ class GraficsProject(models.Model):
     @classmethod
     def get_by_project(cls, project):
         prop_list = PropertiesProject.objects.filter(project=project).all()
-        metrics_list = MetricsProject.objects.filter(project=project).all()
+        metrics_list = (
+            MetricsProject.objects.filter(project=project)
+            .filter(Q(is_aggregate=True))
+            .all()
+        )
         res = []
         for p in prop_list:
             item = {}
@@ -113,9 +117,11 @@ class GraficsProject(models.Model):
             .all()
         )
         for status in inits_status_inn_project:
-            for m_project in MetricsProject.objects.filter(
-                project=project
-            ).all():
+            for m_project in (
+                MetricsProject.objects.filter(project=project)
+                .filter(Q(is_aggregate=True))
+                .all()
+            ):
                 m_id = m_project.id
                 if m_id not in res:
                     res[m_id] = dict()
@@ -167,7 +173,6 @@ class GraficsProject(models.Model):
                         new_format = []
                         total_sum_value = 0
                         for x_name, y_value in grafic_item.items():
-                            print("x_name", x_name)
                             new_format.append(
                                 {
                                     "name": x_name.value,
@@ -189,6 +194,8 @@ class GraficsProject(models.Model):
                         new_format_res[v_id][m_id] = group_small_values(
                             new_format, quantity
                         )
+                if len(new_format_res[v_id]) == 1:
+                    new_format_res.pop(v_id)
 
         for m_id, grafic_item in status_grafic.items():
             # if m_id not in m_id_not_in_stat:  # только активные графики
@@ -242,14 +249,18 @@ class GraficsProject(models.Model):
                 for propertie_value_name in init_propertie_field.values.all():
                     grafic_enum = res[propertie_title_id]["enum"]
                     grafic_enum[propertie_value_name] += 1
-                    for init_metric_field in init.metric_fields.all():
+                    for init_metric_field in init.metric_fields.filter(
+                        Q(metric__is_aggregate=True)
+                    ).all():
                         metric_id = init_metric_field.metric.id
                         metric_value = init_metric_field.value
                         grafic_info = res[propertie_title_id][metric_id]
                         if not init.failure:
                             grafic_info[propertie_value_name] += metric_value
 
-            for init_metric_field in init.metric_fields.all():
+            for init_metric_field in init.metric_fields.filter(
+                Q(metric__is_aggregate=True)
+            ).all():
                 metric_id = init_metric_field.metric.id
                 metric_value = init_metric_field.value
                 res_status[metric_id][status_name] += metric_value

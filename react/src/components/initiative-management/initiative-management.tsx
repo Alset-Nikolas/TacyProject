@@ -82,10 +82,9 @@ export default function InitiativeManagement({ edit, editButton }: TInitiativeMa
                   {currentInitiative ? currentInitiative.initiative.name : 'Инициатива не выбрана'}
                   {/* Название инициативы */}
                 </div>
-                <div className={`${styles.initiativeNumber}`}>
-                  {/* Номер инициативы: {currentInitiative?.initiative.id} */}
+                {/* <div className={`${styles.initiativeNumber}`}>
                   Номер инициативы
-                </div>
+                </div> */}
               </div>
               <ol className={`${styles.paramsList}`}>
                 <li>
@@ -176,12 +175,11 @@ export default function InitiativeManagement({ edit, editButton }: TInitiativeMa
             {/* {currentInitiative.initiative.name} */}
             {/* Название инициативы */}
           </div>
-          {currentInitiative && (
+          {/* {currentInitiative && (
             <div className={`${styles.initiativeNumber}`}>
               Номер инициативы: {currentInitiative.initiative.id}
-              {/* Номер инициативы */}
             </div>
-          )}
+          )} */}
         </div>
         {currentInitiative && (
           <ol className={`${styles.paramsList}`}>

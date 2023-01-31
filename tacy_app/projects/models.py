@@ -424,7 +424,10 @@ class PropertiesItemsProject(models.Model):
         ids_not_delete = []
         for val in values:
             id = val.get("id")
-            value_short = val.get("value_short") or val.get("value")[:4] + "."
+            value_short = (
+                val.get("value_short")
+                or val.get("value")[: min(len(val.get("value")), 4)]
+            )
             if id and id > 0:
                 val_obj = cls.get_property_item_by_id(id)
                 val_obj.value = val.get("value")

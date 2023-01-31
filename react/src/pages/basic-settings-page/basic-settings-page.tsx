@@ -10,11 +10,13 @@ import { useGetProjectInfoQuery, usePostProjectMutation } from '../../redux/stat
 export default function BasicSettingsPage() {
   const dispatch = useAppDispatch();
   const {
-    // project,
+    project: {
+      currentId
+    },
     backupProjectState,
     projectForEdit,
   } = useAppSelector((store) => store.state);
-  const currentId = useAppSelector((store) => store.state.project.currentId);
+  // const currentId = useAppSelector((store) => store.state.project.currentId);
   const { data: project, refetch: refetchProjectInfo } = useGetProjectInfoQuery(currentId);
   useEffect(() => {
     dispatch(getProjectInfoThunk(currentId));
@@ -45,9 +47,10 @@ export default function BasicSettingsPage() {
     if (projectForEdit) dispatch(clearProjectForEdit());
   };
 
-  // useEffect(() => {
-  //   if (!project.value) dispatch(getProjectInfoThunk(project.currentId));
-  // }, [project.currentId]);
+  useEffect(() => {
+    // if (!project.value) dispatch(getProjectInfoThunk(project.currentId));
+    setIsEdit(false);
+  }, [currentId]);
 
   // useEffect(() => {
   //   if (isCreateSuccess && currentId) {

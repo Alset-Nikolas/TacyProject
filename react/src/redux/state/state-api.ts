@@ -470,7 +470,7 @@ export const stateApi = createApi({
               const metricUnits = metric?.units;
               const isPercent = metric?.is_percent;
               return {
-                metricName: metricName ? metricName : 'Сумма',
+                metricName: metricName ? metricName : 'Количество инициатив',
                 units: metricUnits,
                 isPercent: isPercent,
                 data: el[1],
@@ -487,7 +487,7 @@ export const stateApi = createApi({
           const graphicData = metricssEntries.map((el) => {
             const metricName = project.metrics.find((metric) => metric.id === +el[0])?.title;
             return {
-              metricName: metricName ? metricName : 'Сумма',
+              metricName: metricName ? metricName : 'Количество инициатив',
               data: el[1],
             };
           });
@@ -521,7 +521,7 @@ export const stateApi = createApi({
             const graphicData = metricssEntries.map((el) => {
               const metricName = project?.metrics.find((metric) => metric.id === +el[0])?.title;
               return {
-                metricName: metricName ? metricName : 'Сумма',
+                metricName: metricName ? metricName : 'Количество инициатив',
                 data: el[1],
               };
             });
@@ -536,7 +536,7 @@ export const stateApi = createApi({
           const graphicData = metricssEntries.map((el) => {
             const metricName = project.metrics.find((metric) => metric.id === +el[0])?.title;
             return {
-              metricName: metricName ? metricName : 'Сумма',
+              metricName: metricName ? metricName : 'Количество инициатив',
               data: el[1],
             };
           });

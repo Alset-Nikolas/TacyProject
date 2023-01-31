@@ -106,9 +106,9 @@ export default function InitiativeSettingsManagement({ edit, editButton, compone
                 <li>
                   Дата окончания
                 </li>
-                <li>
+                {/* <li>
                   Длителность инициативы
-                </li>
+                </li> */}
                 
               </ol>
             </div>
@@ -174,14 +174,12 @@ export default function InitiativeSettingsManagement({ edit, editButton, compone
             {/* {currentInitiative.initiative.name} */}
             Название инициативы
           </div>
-          {currentInitiative && (
+          {/* {currentInitiative && (
             <div className={`${styles.initiativeNumber}`}>
-              {/* Номер инициативы: {currentInitiative.initiative.id} */}
               Номер инициативы
             </div>
-          )}
+          )} */}
         </div>
-        {currentInitiative && (
           <ol className={`${styles.paramsList}`}>
             <li>
               <div>
@@ -227,17 +225,16 @@ export default function InitiativeSettingsManagement({ edit, editButton, compone
               Длителность инициативы
             </li> */}
             {/* {settings.initiative_addfields.map((addfield, index) => ( */}
-            {currentInitiative.addfields.map((addfield, index) => (
+            {settings.initiative_addfields.map((addfield, index) => (
               <li key={addfield.id}>
                 <div>
-                  <div>{addfield.title.title}</div>
+                  <div>{addfield.title}</div>
                   {/* <div>{currentInitiative.addfields[index].value}</div> */}
                 </div>
                 
               </li>
             ))}
           </ol>
-        )}
       </SectionContent>
       {editButton && (
         <div className={styles.editButton}>

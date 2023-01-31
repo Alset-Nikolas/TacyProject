@@ -70,6 +70,9 @@ export default function ComponentsSettingsEditPage() {
   // useEffect(() => {
   //   if (currentId === value?.id)dispatch(getInitiativesListThunk(currentId));
   // }, [currentId, value]);
+  // useEffect(() => {
+  //   navigate(paths.settings.components.absolute);
+  // }, [currentId]);
 
   useEffect(() => {
     if (updateComponentsRequestSuccess) {

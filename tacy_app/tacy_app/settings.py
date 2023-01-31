@@ -175,7 +175,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
 SITE_DOMAIN = "http://31.177.78.111"
-SITE_DOMAIN = "http://127.0.0.1:3000"
+# SITE_DOMAIN = "http://127.0.0.1:3000"
 SITE_FULL_NAME = "Site name"
 
 # if DEBUG:
