@@ -67,12 +67,17 @@ class AddFeldsRisksSerializer(serializers.ModelSerializer):
 
 class StatusInitiativeSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField()
-    value = serializers.IntegerField()
+    # value = serializers.IntegerField()
 
     class Meta:
         # depth = 1
         model = SettingsStatusInitiative
-        fields = ["id", "name", "value"]
+        fields = [
+            "id",
+            "name",
+            "value",
+        ]
+        read_only_feilds = ["value"]
 
     def validate_value(self, value):
         if value < 0:
@@ -638,13 +643,13 @@ class SettingsInitiativeSerializer(serializers.ModelSerializer):
 
     def validate_status(self, status):
 
-        if not (list(x["value"] for x in status) == list(range(len(status)))):
-            raise serializers.ValidationError(
-                {
-                    "status": "status list error",
-                    "msg": "У одного статуса значение должно быть 0, дальше увеличиваться на 1 (по весу)",
-                }
-            )
+        # if not (list(x["value"] for x in status) == list(range(len(status)))):
+        #     raise serializers.ValidationError(
+        #         {
+        #             "status": "status list error",
+        #             "msg": "У одного статуса значение должно быть 0, дальше увеличиваться на 1 (по весу)",
+        #         }
+        #     )
         return super().validate(status)
 
     def create_or_update(self, valid_data):
@@ -1004,6 +1009,9 @@ class EventSerializer(serializers.Serializer):
     addfields = AddFieldEventSerializer(many=True)
 
     def validate(self, attrs):
+        initiative = self.context.get("initiative")
+        if initiative.failure:
+            raise serializers.ValidationError("Инициатива отозвана!")
         return super().validate(attrs)
 
     def validate_metric_fields(self, metric_fields):

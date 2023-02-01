@@ -16,7 +16,11 @@ from .models import (
     TYPE_INITIATIVE_AGREED,
     TYPE_NEW_COMMENT,
 )
-from components.models import Initiatives
+from components.models import (
+    Initiatives,
+    InitiativesMetricsFields,
+    MetricsProject,
+)
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from django.core.mail import EmailMultiAlternatives
@@ -307,8 +311,16 @@ class Switch(views.APIView):
         text = "отозвана" if initiative.failure else "активна"
         if initiative.failure:
             Initiatives.get_status_failure(initiative)
+            for metric_obj in initiative.metric_fields.all():
+                metric_id = metric_obj.metric.id
+                delta = metric_obj.value
+                MetricsProject.add_delta_value(metric_id, -delta)
         else:
             Initiatives.get_status_start(initiative)
+            for metric_obj in initiative.metric_fields.all():
+                metric_id = metric_obj.metric.id
+                delta = metric_obj.value
+                MetricsProject.add_delta_value(metric_id, delta)
 
         return Response(
             f"Инициатива {text}",

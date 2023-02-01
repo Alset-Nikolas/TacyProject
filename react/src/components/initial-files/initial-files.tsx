@@ -134,16 +134,27 @@ export default function InitialFiles({
           <div>Список файлов пуст</div>
         )}
         {filesInfo?.map((item) => (
-          <div
-            key={item.id}
-          >
+          // <div
+          // >
             <a
+              key={item.id}
               className={`${styles.link}`}
               href={`${REACT_APP_BACKEND_BASE_URL}${item.file}`}
             >
               {item.file_name}
+
+              <div
+                style={{
+                  marginTop: 2,
+                }}
+              >
+                <Pictogram
+                  type="download"
+                  cursor="pointer"
+                />
+              </div>
             </a>
-          </div>
+          // </div>
         ))}
       </div>
     </div>

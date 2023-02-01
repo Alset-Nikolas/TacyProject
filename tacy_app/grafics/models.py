@@ -1,8 +1,8 @@
 from django.db import models
 from projects.models import Project, PropertiesProject, MetricsProject
+from components.models import SettingsStatusInitiative
 from components.models import (
     Initiatives,
-    MetricsProject,
     PropertiesProject,
     PropertiesItemsProject,
     SettingsStatusInitiative,
@@ -11,6 +11,63 @@ import copy
 from django.db.models import Q
 
 # Create your models here.
+
+
+class StatusGraficsProject(models.Model):
+    project = models.ForeignKey(
+        Project,
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True,
+        related_name="status_grafics",
+        help_text="Проект к которому относятся графики",
+        verbose_name="Проект",
+    )
+    metric = models.ForeignKey(MetricsProject, on_delete=models.CASCADE)
+    activate = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = "grafics_status_project"
+
+    @classmethod
+    def create_or_update_status_grafics_in_project(
+        cls, project, status_grafics: list
+    ):
+
+        for m_obj in status_grafics:
+            metric_id = m_obj["metric"]["id"]
+
+            graf_obj = (
+                cls.objects.filter(project=project)
+                .filter(metric_id=metric_id)
+                .first()
+            )
+            if not graf_obj:
+                graf_obj = cls.objects.create(
+                    project=project,
+                    metric_id=metric_id,
+                    activate=status_grafics.get("activate", False),
+                )
+            graf_obj.activate = m_obj.get("activate", False)
+            graf_obj.save()
+
+    @classmethod
+    def get_by_project(cls, project):
+        metrics_list = (
+            MetricsProject.objects.filter(project=project)
+            .filter(Q(is_aggregate=True))
+            .all()
+        )
+
+        res = []
+        for m in metrics_list:
+            graf_obj = (
+                cls.objects.filter(project=project).filter(metric=m).first()
+            )
+            if not graf_obj:
+                graf_obj = cls.objects.create(project=project, metric=m)
+            res.append(graf_obj)
+        return res
 
 
 class GraficsProject(models.Model):
@@ -156,7 +213,6 @@ class GraficsProject(models.Model):
         status_grafic = res["status_grafic"]
         new_format_res = copy.deepcopy(grafics)
         new_format_status_grafic = copy.deepcopy(status_grafic)
-        m_id_not_in_stat = set()
         if grafics:
             for v_id, m_dict in grafics.items():
                 for m_id, grafic_item in m_dict.items():
@@ -168,48 +224,54 @@ class GraficsProject(models.Model):
                         .exists()
                     ):
                         new_format_res[v_id].pop(m_id)
-                        m_id_not_in_stat.add(m_id)
-                    else:
-                        new_format = []
-                        total_sum_value = 0
-                        for x_name, y_value in grafic_item.items():
-                            new_format.append(
-                                {
-                                    "name": x_name.value,
-                                    "name_short": x_name.value_short,
-                                    "value": y_value,
-                                }
-                            )
-                            total_sum_value += y_value
-                        new_format.sort(
-                            key=lambda x: x.get("value"), reverse=True
-                        )
+                        continue
+                    new_format = []
+                    total_sum_value = 0
+                    for x_name, y_value in grafic_item.items():
                         new_format.append(
                             {
-                                "name": "Сумма",
-                                "name_short": "Сумма",
-                                "value": total_sum_value,
+                                "name": x_name.value,
+                                "name_short": x_name.value_short,
+                                "value": y_value,
                             }
                         )
-                        new_format_res[v_id][m_id] = group_small_values(
-                            new_format, quantity
-                        )
+                        total_sum_value += y_value
+                    new_format.sort(key=lambda x: x.get("value"), reverse=True)
+                    new_format.append(
+                        {
+                            "name": "Сумма",
+                            "name_short": "Сумма",
+                            "value": total_sum_value,
+                        }
+                    )
+                    new_format_res[v_id][m_id] = group_small_values(
+                        new_format, quantity
+                    )
                 if len(new_format_res[v_id]) == 1:
                     new_format_res.pop(v_id)
 
         for m_id, grafic_item in status_grafic.items():
-            # if m_id not in m_id_not_in_stat:  # только активные графики
+            # TODO ВЫНЕСТИ В отдельную функцию в другом классе
+            if m_id != "enum" and (
+                StatusGraficsProject.objects.filter(project=project)
+                .filter(activate=False)
+                .filter(metric_id=m_id)
+                .exists()
+            ):
+                new_format_status_grafic.pop(m_id)
+                continue
             new_format = []
             total_sum_value = 0
             for x_name, y_value in grafic_item.items():
-                new_format.append(
-                    {
-                        "name": x_name.name,
-                        "name_short": x_name.name,
-                        "value": y_value,
-                    }
-                )
-                total_sum_value += y_value
+                if x_name.value != -1:
+                    new_format.append(
+                        {
+                            "name": x_name.name,
+                            "name_short": x_name.name,
+                            "value": y_value,
+                        }
+                    )
+                    total_sum_value += y_value
             new_format.sort(key=lambda x: x.get("value"), reverse=True)
             new_format.append(
                 {
@@ -221,8 +283,6 @@ class GraficsProject(models.Model):
             new_format_status_grafic[m_id] = group_small_values(
                 new_format, quantity
             )
-        # else:
-        #     new_format_status_grafic.pop(m_id)
 
         return {
             "grafics": new_format_res,

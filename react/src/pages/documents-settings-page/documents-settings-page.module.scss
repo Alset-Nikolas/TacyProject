@@ -3,6 +3,7 @@
   flex-direction: column;
   width: 100%;
   box-sizing: border-box;
+  margin-bottom: 40px;
 }
 
 .buttonWrapper {
@@ -14,44 +15,81 @@
 
 .settingsWrapper {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 24px;
-  background-color: #F4F4F4;
-  border-radius: 10px;
   padding: 20px;
+  overflow-x: auto;
+  border: 1px solid #504F4F;
+  border-radius: 10px;
+}
 
-  div {
-    flex: 1 1;
-  }
+.settingsWrapperView {
+  display: flex;
+  flex-direction: row;
+  gap: 0px;
+  background-color: #F4F4F4;
+  padding: 0 0 20px 0;
+  overflow-x: auto;
 }
 
 .statusWrapper{ 
   display: flex;
   flex-direction: column;
   gap: 8px;
+  flex: 0 0 243px;
+}
+
+.statusWrapperView {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .statusHeader {
   display: flex;
+  justify-content: center;
   gap: 10px;
   margin-bottom: 8px;
 }
 
 .statusHeaderView {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-weight: 500;
   font-size: 16px;
   line-height: 24px;
   color: #17598C;
+  height: 39px;
+  padding: 0 0 0 20px;
 }
 
 .filesListView {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 16px;
+  // display: grid;
+  // grid-template-columns: repeat(6, 1fr);
+  display: flex;
+  flex-direction: column;
   color: #504F4F;
+  // height: 39px;
+}
+
+.oddRow {
+  background-color: #FFFFFF;
 }
 
 .fileInputWrapper {
   display: flex;
   gap: 10px;
+}
+
+.fileInputWrapperView {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0 0 20px;
+  height: 39px;
+  color: #504F4F;
 }

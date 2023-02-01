@@ -1,38 +1,26 @@
-import { Checkbox, MenuItem, Select, SelectChangeEvent } from '@mui/material';
 import { ChangeEvent, useEffect, useState } from 'react';
 import CustomizedButton from '../../components/button/button';
-import Graphics from '../../components/graphics/graphics';
 import ModalInfo from '../../components/modal-info/modal-info';
 import Pictogram from '../../components/pictogram/pictogram';
 import SectionHeader from '../../components/section/section-header/section-header';
-import SelectUnits from '../../components/select-units/select-units';
-import CustomizedSelect from '../../components/select/Select';
-import { getGraphicsSettingsThunk, updateGraphicsSettingsThunk } from '../../redux/graphics-slice';
-import { useGetFilesQuery, useGetFilesSettingsQuery, useGetProjectInfoQuery, usePostFilesMutation, usePostFilesSettingsMutation } from '../../redux/state/state-api';
+import {
+  useGetFilesSettingsQuery,
+  usePostFilesSettingsMutation
+} from '../../redux/state/state-api';
 import { openErrorModal } from '../../redux/state/state-slice';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
+import SectionContent from '../../components/section/section-content/section-content';
 
 // Styles
 import styles from './documents-settings-page.module.scss';
 import sectionStyles from '../../styles/sections.module.scss';
-import SectionContent from '../../components/section/section-content/section-content';
+import { TStatusField } from '../../types';
 
 export default function DocumentsSettingsPage() {
   const dispatch = useAppDispatch();
-  // const project = useAppSelector((store) => store.state.project.value);
   const { currentId } = useAppSelector((store) => store.state.project);
-  const { data: project } = useGetProjectInfoQuery(currentId);
   const modal = useAppSelector((store) => store.state.app.modal);
-  const graphicsSettings = useAppSelector((store) => store.graphics.settings);
-  const [newSettingState, setNewSettingState] = useState([...graphicsSettings]);
-  const initialSelectorValue = (settings: typeof graphicsSettings): Array<Array<string>> => {
-    const returnSelectorValue = settings.map((propertie) => {
-      const activeMetrics = propertie.metrics.filter((metric) => metric.activate)
-      return activeMetrics.map((el) => JSON.stringify(el.metric));
-    });
-    return returnSelectorValue;
-  };
-  const [selectorValue, setSelectorValue] = useState<Array<Array<string>>>(initialSelectorValue(newSettingState));
+  
   const { data: filesSettings } = useGetFilesSettingsQuery(currentId ? currentId : -1, {
     skip: !currentId,
   });
@@ -45,51 +33,7 @@ export default function DocumentsSettingsPage() {
     },
   ] = usePostFilesSettingsMutation();
   const [edit, setEdit] = useState(false);
-
-  const SelectStyle = {
-    minWidth: '223px',
-    height: '32px',
-    border: '1px solid #504F4F',
-    borderRadius: 0,
-    paddingBottom: 0,
-  };
-
-  const onSelectorChangeHandler = (e: SelectChangeEvent<Array<string>>, index: number) => {
-    // console.log(JSON.parse(e.target.value[0]));
-    const { value } = e.target;
-    if (value instanceof Array) {
-      const parsedValue = value.map((el) => JSON.parse(el));
-      // if (parsedValue[index]) parsedValue[index].activate = !parsedValue[index].activate;
-      const localState = [...newSettingState];
-      const currentPropertie = {...localState[index]};
-      const currentMetrics = [...currentPropertie.metrics];
-      const  handledMetrics = currentMetrics.map((el) => {
-        const elCopy = { ...el };
-        const selected = parsedValue.find((item) => item.id === elCopy.metric.id);
-        if (selected) {
-          elCopy.activate = true;
-        } else {
-          elCopy.activate = false;
-        }
-        return elCopy
-      });
-      currentPropertie.metrics = handledMetrics
-      localState[index] = currentPropertie;
-      setNewSettingState(localState);
-      setSelectorValue((prevState) => {
-        const tempState = [...prevState];
-        // tempState[index] = parsedValue.map((el) => JSON.stringify(el));
-        tempState[index] = value;
-        return tempState;
-      });
-    }
-  };
-
-  const handleRenderValue = (selected: Array<string>) => {
-    const parsedSelected = selected.map((el) => JSON.parse(el));
-    const titles = parsedSelected.map((el) => el.title);
-    return titles.join(', ');
-  }
+  const [renderFilesSetting, setRenderFilesSetting] = useState<Array<Array<{id: number; title: string}>>>([]);
 
   const onInputChangeHandler = (e: ChangeEvent<HTMLInputElement>, statusIndex: number, fileItemIndex: number) => {
     const value = e.target.value;
@@ -174,6 +118,66 @@ export default function DocumentsSettingsPage() {
   }, [filesSettings]);
 
   useEffect(() => {
+    if(tempFilesSettings.length) {
+      const newRenderFileSetting: Array<any> = [];
+      const entries = Object.entries(tempFilesSettings);
+
+      tempFilesSettings.forEach((el) => {
+        const entries = Object.entries(el);
+        entries.forEach((el) => {
+
+          const [key, value] = el;
+          
+          if (key === 'status') {
+            newRenderFileSetting.push([{
+              id: (value as TStatusField).id,
+              title: (value as TStatusField).name
+            }]);
+          }
+
+        })
+      })
+
+      tempFilesSettings.forEach((el,index) => {
+        const entries = Object.entries(el);
+        entries.forEach((el) => {
+
+          const [key, value] = el;
+
+          if (key === 'settings_file' && value instanceof Array) {
+            value.forEach((fileInfo) => {
+              newRenderFileSetting[index].push({
+                id: fileInfo.id,
+                title: fileInfo.title,
+              });
+            })
+          }
+        })
+      })
+
+      newRenderFileSetting.splice(0, 2);
+
+      let maxLength = 0;
+      newRenderFileSetting.forEach((el) => {
+        if (el.length > maxLength) maxLength = el.length;
+      });
+
+      newRenderFileSetting.forEach((el) => {
+        const addCount = maxLength - el.length;
+        for (let i = 0; i < addCount; i++) {
+          el.push({
+            id: `empty-${i}`,
+            title: '',
+          });
+        }
+      });
+
+      setRenderFilesSetting(newRenderFileSetting);
+    }
+
+  }, [tempFilesSettings])
+
+  useEffect(() => {
     if (postFilesSettingsSuccess) {
       setEdit(false);
     }
@@ -205,7 +209,7 @@ export default function DocumentsSettingsPage() {
                 {item.status.name}
                 <div>
                   <Pictogram
-                    type="add"
+                    type="add-filled"
                     cursor="pointer"
                     onClick={() => addFileSettings(index)}
                   />
@@ -222,7 +226,7 @@ export default function DocumentsSettingsPage() {
                   />
                   <div>
                     <Pictogram
-                      type="delete"
+                      type="delete-filled"
                       cursor="pointer"
                       onClick={() => removeFileSettings(index, fileItemIndex)}
                     />
@@ -268,14 +272,31 @@ export default function DocumentsSettingsPage() {
         />
       </SectionHeader>
       <SectionContent
-        className={`${styles.settingsWrapper}`}
+        className={`${styles.settingsWrapperView}`}
       >
-        {tempFilesSettings.map((item, index) => {
+        {renderFilesSetting.map((filesArray, index) => (
+          <div
+            key={`files-col-${index}`}
+            className={`${styles.statusWrapperView}`}
+          >
+            {filesArray.map((item, itemIndex) => {
+              return (
+                <div
+                  key={item.id}
+                  className={`${itemIndex === 0 ? styles.statusHeaderView : styles.fileInputWrapperView} ${itemIndex % 2 ? styles.oddRow : ''}`}
+                >
+                  {item.title}
+                </div>
+              )
+          })}
+          </div>
+        ))}
+        {/* {tempFilesSettings.map((item, index) => {
           if (item.status.value < 0) return null;
           return (
             <div
               key={item.status.id}
-              className={`${styles.statusWrapper}`}
+              className={`${styles.statusWrapperView}`}
             >
               <div
                 className={`${styles.statusHeaderView}`}
@@ -288,7 +309,7 @@ export default function DocumentsSettingsPage() {
                 {item.settings_file.map((fileItem, fileItemIndex) => (
                   <div
                     key={fileItem.id}
-                    className={`${styles.fileInputWrapper}`}
+                    className={`${styles.fileInputWrapperView} ${(fileItemIndex + 1) % 2 ? styles.oddRow : ''}`}
                   >
                     {fileItem.title}
                   </div>
@@ -296,7 +317,7 @@ export default function DocumentsSettingsPage() {
               </div>
             </div>
           );
-        })}
+        })} */}
       </SectionContent>
     </div>
   );

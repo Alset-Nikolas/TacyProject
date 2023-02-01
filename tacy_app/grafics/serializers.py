@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import GraficsProject
 from projects.models import PropertiesProject, MetricsProject
+from components.serializers import StatusInitiativeSerializer
 
 
 class MetricsSerializer(serializers.ModelSerializer):
@@ -80,3 +81,4 @@ class GraficsProjectInfoSerializerBigItem(serializers.Serializer):
 
 class GraficsProjectSerializer(serializers.Serializer):
     grafics = GraficsProjectInfoSerializerBigItem(many=True)
+    status_grafics = GraficsProjectInfoSerializerItem(many=True)

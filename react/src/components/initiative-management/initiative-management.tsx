@@ -93,24 +93,24 @@ export default function InitiativeManagement({ edit, editButton }: TInitiativeMa
                 <li>
                   Дата реистрации
                 </li>
-                <li>
+                {/* <li>
                   Текущее состояние
-                </li>
-                <li>
+                </li> */}
+                {/* <li>
                   Предпосылки инициативы
-                </li>
-                <li>
+                </li> */}
+                {/* <li>
                   Описание инициативы
-                </li>
+                </li> */}
                 <li>
                   Дата начала
                 </li>
                 <li>
                   Дата окончания
                 </li>
-                <li>
+                {/* <li>
                   Длителность инициативы
-                </li>
+                </li> */}
                 
               </ol>
             </SectionContent>
@@ -188,7 +188,9 @@ export default function InitiativeManagement({ edit, editButton }: TInitiativeMa
                 <div>
                   Автор:
                 </div>
-                <div>
+                <div
+                  className={`${styles.fieldsContent}`}
+                >
                   {`${currentInitiative.initiative.author.last_name} ${currentInitiative.initiative.author.first_name[0]}. ${currentInitiative.initiative.author.second_name[0]}.`}
                 </div>
               </div>
@@ -198,34 +200,50 @@ export default function InitiativeManagement({ edit, editButton }: TInitiativeMa
                 <div>
                   Дата регистрации:
                 </div>
-                <div>
+                <div
+                  className={`${styles.fieldsContent}`}
+                >
                   {/* {currentInitiative.initiative.date_registration} */}
                   {moment(new Date(currentInitiative.initiative.date_registration)).format('DD.MM.YYYY')}
                 </div>
               </div>
             </li>
-            <li>
+            {/* <li>
               <div>
                 <div>Текущее состояние:</div>
-                <div>{currentInitiative.initiative.current_state}</div>
+                <div
+                  className={`${styles.fieldsContent}`}
+                >
+                  {currentInitiative.initiative.current_state}
+                </div>
               </div>
-            </li>
-            <li>
+            </li> */}
+            {/* <li>
               <div>
                 <div>Предпосылки инициативы:</div>
-                <div>{currentInitiative.initiative.reasons}</div>
+                <div
+                  className={`${styles.fieldsContent}`}
+                >
+                  {currentInitiative.initiative.reasons}
+                </div>
               </div>
-            </li>
-            <li>
+            </li> */}
+            {/* <li>
               <div>
                 <div>Описание инициативы:</div>
-                <div>{currentInitiative.initiative.description}</div>
+                <div
+                  className={`${styles.fieldsContent}`}
+                >
+                  {currentInitiative.initiative.description}
+                </div>
               </div>
-            </li>
+            </li> */}
             <li>
               <div>
                 <div>Дата начала:</div>
-                <div>
+                <div
+                  className={`${styles.fieldsContent}`}
+                >
                   {/* {currentInitiative.initiative.date_start} */}
                   {moment(new Date(currentInitiative.initiative.date_start)).format('DD.MM.YYYY')}
                 </div>
@@ -234,7 +252,9 @@ export default function InitiativeManagement({ edit, editButton }: TInitiativeMa
             <li>
               <div>
                 <div>Дата окончания:</div>
-                <div>
+                <div
+                  className={`${styles.fieldsContent}`}
+                >
                   {/* {currentInitiative.initiative.date_end} */}
                   {moment(new Date(currentInitiative.initiative.date_end)).format('DD.MM.YYYY')}
                 </div>
@@ -248,7 +268,11 @@ export default function InitiativeManagement({ edit, editButton }: TInitiativeMa
               <li key={addfield.id}>
                 <div>
                   <div>{addfield.title.title}</div>
-                  <div>{currentInitiative.addfields[index].value}</div>
+                  <div
+                    className={`${styles.fieldsContent}`}
+                  >
+                    {currentInitiative.addfields[index].value}
+                  </div>
                 </div>
                 
               </li>

@@ -199,7 +199,7 @@ export default function EventsTable() {
               </table>
             </div>
           </div>
-          {(userRights?.user_is_author || user?.user.is_superuser) && (
+          {(userRights?.user_is_author || user?.user.is_superuser) && (initiative?.initiative.status?.value !== -2) && (
             <div
               className={`${styles.buttonWraper}`}
             >

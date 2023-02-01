@@ -91,7 +91,7 @@ export default function InitiativeSettingsManagement({ edit, editButton, compone
                 <li>
                   Дата регистрации
                 </li>
-                <li>
+                {/* <li>
                   Текущее состояние
                 </li>
                 <li>
@@ -99,7 +99,7 @@ export default function InitiativeSettingsManagement({ edit, editButton, compone
                 </li>
                 <li>
                   Описание инициативы
-                </li>
+                </li> */}
                 <li>
                   Дата начала
                 </li>
@@ -191,24 +191,21 @@ export default function InitiativeSettingsManagement({ edit, editButton, compone
                 </div> */}
               </div>
             </li>
-            <li>
+            {/* <li>
               <div>
                 <div>Текущее состояние</div>
-                {/* <div>{currentInitiative.initiative.current_state}</div> */}
               </div>
             </li>
             <li>
               <div>
                 <div>Предпосылки инициативы</div>
-                {/* <div>{currentInitiative.initiative.reasons}</div> */}
               </div>
             </li>
             <li>
               <div>
                 <div>Описание инициативы</div>
-                {/* <div>{currentInitiative.initiative.description}</div> */}
               </div>
-            </li>
+            </li> */}
             <li>
               <div>
                 <div>Дата начала</div>

@@ -1,15 +1,11 @@
 .wrapper {
   position: absolute;
-  // height: 100vh;
   width: 100%;
+  min-width: 1024px;
   left: 0;
   top: 0;
-
   box-sizing: border-box;
-  // margin: 80px 102px 0;
   padding: 122px 102px 0;
-
   display: flex;
-
   background: white;
 }

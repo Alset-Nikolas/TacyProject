@@ -602,12 +602,7 @@ export type TPersonalStats = {
 }
 
 export type TFilesSettings = {
-  status: {
-    id: number;
-    value: number;
-    name: string;
-    settings_project: number;
-  },
+  status: TStatusField,
   settings_file: Array<{
     id: number;
     settings_project: number;

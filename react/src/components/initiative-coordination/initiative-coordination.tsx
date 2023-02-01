@@ -96,9 +96,7 @@ export default function InitiativeCoordination() {
   });
   const isFilesUploaded = () => {
     let isUploaded = true;
-    if (initiativeFiles) {
-      console.log('test');
-    }
+
     initiativeFiles?.forEach((item) => {
       if (initiative?.initiative.status?.value && 
         item.title.status.value <= initiative?.initiative.status?.value &&
@@ -422,6 +420,7 @@ export default function InitiativeCoordination() {
                       //   initiative: initiative ? initiative?.initiative.id : -1,
                       //   failure: !userRights?.init_failure,
                       // });
+                      if (currentInitiativeId) localStorage.setItem('initiative-id', currentInitiativeId.toString());
                       switchInitiativeState({
                         initiative: initiative ? initiative?.initiative.id : -1,
                         failure: !userRights?.init_failure,

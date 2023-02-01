@@ -103,6 +103,7 @@ export const GanttD3XAxis = ({ data, itemsCount }: TGanttD3XAxisProps) => {
           title={`Дата: ${item.date} Мероприятие: ${item.title}`}
           placement="top"
         >
+        <g>
         <line
           x1={getCoordinate(item.date)}
           y1={40}
@@ -112,6 +113,7 @@ export const GanttD3XAxis = ({ data, itemsCount }: TGanttD3XAxisProps) => {
           stroke={BLACK}
           strokeDasharray={4}
         />
+        </g>
         {/* <text
           x={getCoordinate(item.date)}
           dx={dayWidth / 2}

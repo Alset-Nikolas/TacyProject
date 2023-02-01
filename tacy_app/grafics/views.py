@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import status, views
 from projects.models import Project
-from .models import GraficsProject
+from .models import GraficsProject, StatusGraficsProject
 from .serializers import GraficsProjectSerializer
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404, render
@@ -32,6 +32,9 @@ class UpdateGraficsProjectView(views.APIView):
         GraficsProject.create_or_update_grafics_in_project(
             project, request.data.get("grafics")
         )
+        StatusGraficsProject.create_or_update_status_grafics_in_project(
+            project, request.data.get("status_grafics")
+        )
         return Response(
             {"code": 200, "msg": "Параметры графиков обновлены"},
             status=status.HTTP_200_OK,
@@ -54,7 +57,10 @@ class UpdateGraficsProjectView(views.APIView):
             return Response({"msg": "id project not valid"}, 400)
 
         project = Project.get_project_by_id(id)
-        data = {"grafics": GraficsProject.get_by_project(project)}
+        data = {
+            "grafics": GraficsProject.get_by_project(project),
+            "status_grafics": StatusGraficsProject.get_by_project(project),
+        }
         serializer = GraficsProjectSerializer(instance=data)
         return Response(serializer.data, 200)
 

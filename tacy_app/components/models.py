@@ -66,7 +66,7 @@ class Initiatives(models.Model):
     )
     status = models.ForeignKey(
         "SettingsStatusInitiative",
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         blank=True,
         null=True,
         related_name="initiatives",
@@ -1082,9 +1082,8 @@ class SettingsStatusInitiative(models.Model):
 
     @classmethod
     def create_or_update(cls, settings_components, info):
-        print("settings_components", info)
         ids_not_delete = []
-        for el_info in info:
+        for value, el_info in enumerate(info):
             name_field = el_info.get("name")
             old_el = (
                 cls.objects.filter(settings_project_id=settings_components)
@@ -1093,9 +1092,10 @@ class SettingsStatusInitiative(models.Model):
             )
             if not old_el:
                 el_info["settings_project_id"] = settings_components
+                el_info["value"] = value
                 old_el = cls.objects.create(**el_info)
             else:
-                old_el.value = el_info.get("value")
+                old_el.value = value
                 old_el.save()
             ids_not_delete.append(old_el.id)
         for item in (
@@ -1104,7 +1104,16 @@ class SettingsStatusInitiative(models.Model):
             .all()
         ):
             if item.value >= 0:
+                inits = [
+                    x for x in Initiatives.objects.filter(status=item).all()
+                ]
                 item.delete()
+                for init in inits:
+                    start_status = SettingsStatusInitiative.get_start_statuses_by_id_initiative(
+                        init.id
+                    )
+                    init.status = start_status
+                    init.save()
 
 
 def add_field_create_or_update_base(cls, settings_components, info):

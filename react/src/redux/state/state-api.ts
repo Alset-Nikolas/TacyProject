@@ -30,6 +30,7 @@ export const stateApi = createApi({
     'personal-diagrams',
     'user-rights',
     'coordination-history',
+    'graphic-settings',
   ],
   endpoints: (builder) => ({
     getProjectInfo: builder.query<TProject, number | null>({
@@ -59,7 +60,7 @@ export const stateApi = createApi({
           console.log(err);
         }
       },
-      invalidatesTags: ['initiative', 'project', 'list', 'initiatives-list', 'components'],
+      invalidatesTags: ['initiative', 'project', 'list', 'initiatives-list', 'components', 'project-files-settings'],
     }),
     deleteProject: builder.mutation<any, number>({
       query(projectId) {
@@ -358,7 +359,7 @@ export const stateApi = createApi({
           dispatch(openErrorModal('При сохранении произошла ошибка'));
         }
       },
-    invalidatesTags: ['components', 'initiatives-list', 'initiative', 'team-list', 'project-files-settings'],
+    invalidatesTags: ['components', 'initiatives-list', 'initiative', 'team-list', 'project-files-settings', 'risks-list'],
     }),
     getTeamList: builder.query<Array<TTeamMember>, { id: number, project: TProject | null }>({
       query: ({ id }) => `/project/community/?id=${id}`,
@@ -566,7 +567,7 @@ export const stateApi = createApi({
           body,
         };
       },
-      invalidatesTags: ['initiative', 'initiatives-list', 'coordination-history'],
+      invalidatesTags: ['initiative', 'initiatives-list', 'coordination-history', 'user-rights'],
     }),
     authUser: builder.mutation<any, { email: string, password: string }>({
       query(credentials) {
@@ -625,6 +626,58 @@ export const stateApi = createApi({
       },
       invalidatesTags: ['coordination-history', 'user-rights', 'initiatives-list'],
     }),
+    getGraphicsSettings: builder.query<{
+      grafics: Array<{
+        propertie: { id: number, title: string };
+        metrics: Array<{ 
+          metric: {
+            id: number,
+            title: string,
+          },
+          activate: boolean,
+        }>
+      }>;
+      status_grafics: Array<{
+        metric: {
+          id: number,
+          title: string,
+        },
+        activate: boolean,
+      }>;
+    }, number>({
+      query: (projectId) => `grafics/settings/?id=${projectId}`,
+      
+      providesTags: () => ['graphic-settings'],
+    }),
+    updateGraphicsSettings: builder.mutation<any, {
+      projectId: number,
+      settings: Array<{
+        propertie: { id: number, title: string };
+        metrics: Array<{ 
+          metric: {
+            id: number,
+            title: string,
+          },
+          activate: boolean,
+        }>
+      }>,
+      statusSettings: Array<{ 
+        metric: {
+          id: number,
+          title: string,
+        },
+        activate: boolean,
+      }>,
+    }>({
+      query({ projectId, settings, statusSettings }) {
+        return {
+          url: `grafics/settings/?id=${projectId}`,
+          method: 'POST',
+          body: { grafics: settings, status_grafics: statusSettings },
+        };
+      },
+      invalidatesTags: ['graphic-settings', 'diagrams', 'personal-diagrams'],
+    }),
   }),
 });
 
@@ -674,4 +727,6 @@ export const {
   useCoordinateMutation,
   useSendForApprovalMutation,
   usePostCommentMutation,
+  useGetGraphicsSettingsQuery,
+  useUpdateGraphicsSettingsMutation,
 } = stateApi;

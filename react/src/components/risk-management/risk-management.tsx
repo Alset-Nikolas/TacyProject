@@ -79,9 +79,9 @@ export default function RiskManagement({ edit, editButton, isSettings, component
           </div>
           <div>
             <ol className={`${sectionStyles.sectionList}`}>
-              <li>
+              {/* <li>
                 №
-              </li>
+              </li> */}
               <li>
                 Название
               </li>
@@ -146,9 +146,9 @@ export default function RiskManagement({ edit, editButton, isSettings, component
         <ol
           className={`${styles.markedRisksList}`}
         >
-          <li>
+          {/* <li>
             №
-          </li>
+          </li> */}
           <li>
             Название
           </li>
@@ -190,7 +190,7 @@ export default function RiskManagement({ edit, editButton, isSettings, component
       <SectionContent
         className={`${styles.content}`}
       >
-        <ul 
+        <ol 
           className={`${styles.risksList}`}
         >
           {!risksList?.length && (
@@ -204,7 +204,7 @@ export default function RiskManagement({ edit, editButton, isSettings, component
                 key={risk.risk.id}
                 className={`${styles.riskElement}`}  
               >
-                {risk.risk.name}
+                {`${riskIndex+1}. ${risk.risk.name}`}
                 <ol>
                   {risk.addfields.map((addfield) => {
                     return (
@@ -233,7 +233,7 @@ export default function RiskManagement({ edit, editButton, isSettings, component
               {addfield.title}
             </li>
           ))} */}
-        </ul>
+        </ol>
       </SectionContent>
       {editButton && (
         <div className={styles.editButton}>

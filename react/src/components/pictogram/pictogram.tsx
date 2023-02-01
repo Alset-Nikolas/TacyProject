@@ -10,6 +10,7 @@ import showIconSrc from '../../images/icons/arrow.svg';
 import exportIconSrc from '../../images/icons/export.svg';
 import sendIconSrc from '../../images/icons/send.svg';
 import selectorArrowIconSrc from '../../images/icons/selector_arrow.svg';
+import downloadIconSrc from '../../images/icons/download.svg';
 import { MouseEventHandler } from 'react';
 
 type TPictogramProps = {
@@ -25,7 +26,8 @@ type TPictogramProps = {
     'close' |
     'export' |
     'send' |
-    'selector-arrow';
+    'selector-arrow' |
+    'download';
   cursor?: 'pointer' | 'default', 
   onClick?: MouseEventHandler<HTMLImageElement>;
 };
@@ -71,6 +73,9 @@ export default function Pictogram({ type, onClick, cursor = 'default' }: TPictog
     break;
     case 'selector-arrow':
       iconSrc = selectorArrowIconSrc;
+    break;
+    case 'download':
+      iconSrc = downloadIconSrc;
     break;
     default:
       iconSrc = settingsIconSrc;

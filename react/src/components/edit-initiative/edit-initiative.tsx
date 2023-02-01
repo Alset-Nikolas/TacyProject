@@ -227,7 +227,7 @@ export default function EditInitiative() {
                     readOnly
                   />
                 </label> */}
-                <label
+                {/* <label
                   className={`${styles.label}`}
                 >
                   <li>Текущее состояние</li>
@@ -236,8 +236,8 @@ export default function EditInitiative() {
                     value={newInitiativeState.initiative.current_state}
                     onChange={onInitiativeInputChange}
                   />
-                </label>
-                <label
+                </label> */}
+                {/* <label
                   className={`${styles.label}`}
                 >
                   <li>Предпосылки инициативы</li>
@@ -246,8 +246,8 @@ export default function EditInitiative() {
                     value={newInitiativeState.initiative.reasons}
                     onChange={onInitiativeInputChange}
                   />
-                </label>
-                <label
+                </label> */}
+                {/* <label
                   className={`${styles.label}`}
                 >
                   <li>Описание инициативы</li>
@@ -256,7 +256,7 @@ export default function EditInitiative() {
                     value={newInitiativeState.initiative.description}
                     onChange={onInitiativeInputChange}
                   />
-                </label>
+                </label> */}
                 {/* <label>
                   <li>Дата начала</li>
                   <input
