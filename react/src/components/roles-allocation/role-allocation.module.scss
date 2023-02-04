@@ -129,6 +129,9 @@
 
 .allocationModalWraper {
   padding: 10px 20px;
+  background-color: #F4F4F4;
+  border-radius: 30px;
+  border: none;
 }
 
 .modalContentWraper {
@@ -168,8 +171,9 @@
   display: flex;
 
   &.header {
-    margin-left: 45px;
+    margin-left: 48px;
     margin-bottom: 8px;
+    color: #504F4F;
   }
 }
 
@@ -182,7 +186,7 @@
 .modalButtonWrapper {
   display: flex;
   justify-content: flex-end;
-  margin-top: 17px;
+  margin: 17px 20px 20px 0;
 }
 
 .modalCell {
@@ -197,7 +201,6 @@
 }
 
 .modalHeaderCell {
-  background: #FFFFFF;
   width: 223px;
   margin-right: 24px;
   flex: 0 0 223px;

@@ -196,6 +196,15 @@ export default function DocumentsSettingsPage() {
       <div
         className={`${styles.settingsWrapper}`}
       >
+        {!tempFilesSettings.length && (
+          <div
+            style={{
+              padding: 20,
+            }}
+          >
+            Статусы отсутствуют
+          </div>
+        )}
         {tempFilesSettings.map((item, index) => {
           if (item.status.value < 0) return null;
           return (
@@ -274,6 +283,15 @@ export default function DocumentsSettingsPage() {
       <SectionContent
         className={`${styles.settingsWrapperView}`}
       >
+        {!renderFilesSetting.length && (
+          <div
+            style={{
+              padding: 20,
+            }}
+          >
+            Статусы отсутствуют
+          </div>
+        )}
         {renderFilesSetting.map((filesArray, index) => (
           <div
             key={`files-col-${index}`}

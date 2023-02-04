@@ -146,6 +146,12 @@ export default function IntermediateDates({
     }
   });
 
+  const oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
+  const startDate = project ? new Date(project.date_start) : new Date();
+  const endDate = project ? new Date(project.date_end) : new Date();
+
+  const diffDays = Math.round(Math.abs((startDate.getMilliseconds() - endDate.getMilliseconds()) / oneDay));
+
   return (
     <div className={`${styles.wrapper}`}>
       <SectionHeader>
@@ -162,6 +168,9 @@ export default function IntermediateDates({
         <GanttD3
           data={listForDiagram}
           intermediateDates={timeline}  
+          startDate={startDate}
+          endDate={endDate}
+          daysNumber={diffDays}
         />
       </div>
       {/* </SectionContent> */}

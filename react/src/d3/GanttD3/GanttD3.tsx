@@ -17,15 +17,22 @@ type TGantD3Props = {
     id: number;
   }>;
   intermediateDates?: Array<TIntermediateDate>;
+  startDate: Date;
+  endDate: Date;
+  daysNumber: number;
 };
 
-export function GanttD3({ data, intermediateDates }: TGantD3Props) {
+export function GanttD3({ data, intermediateDates, startDate, endDate, daysNumber }: TGantD3Props) {
   const { gantt, gantt__title, gantt__chart } = classes;
-  const { lineWidth, yAxisWidth, defaultTranslate, chartWidth } = chartConfig;
+  const { lineWidth, yAxisWidth, defaultTranslate } = chartConfig;
+  let chartWidth = chartConfig.dayWidth * daysNumber + chartConfig.lineWidth;
+  chartWidth = chartWidth < 862 ? 862 : chartWidth;
+  
 
   const ganttContainerRef = useRef(null);
   const svgRef = useRef(null);
   const scrollGroupRef = useRef(null);
+
 
   const scrollXDisabled = useRef(false);
   const startXRef = useRef(0);
@@ -67,7 +74,7 @@ export function GanttD3({ data, intermediateDates }: TGantD3Props) {
    * @param ganttContainer
    * @returns {null}
    */
-  const onScroll = (scrollGroup: any, ganttContainer: any) => {
+  const onScroll = (scrollGroup: any, ganttContainer: any, d3Zoom: any) => {
     const ganttContainerWidth = ganttContainer.getBoundingClientRect().width;
     const marginLeft = yAxisWidth + lineWidth;
     let transform = zoomTransform(scrollGroup.node());
@@ -76,7 +83,7 @@ export function GanttD3({ data, intermediateDates }: TGantD3Props) {
     // const maxEndTranslate = ganttContainerWidth - chartWidth / 2 - marginLeft;
 
     const maxX = marginLeft;
-    const minX = ganttContainerWidth - chartWidth;
+    const minX = ganttContainerWidth - chartWidth > maxX ? maxX : ganttContainerWidth - chartWidth;
 
     if (type === "wheel") {
       if (deltaY !== 0) return null;
@@ -89,18 +96,26 @@ export function GanttD3({ data, intermediateDates }: TGantD3Props) {
     // console.log(transform.applyX(Math.max(transform.x, maxEndTranslate)));
     // transform = transform.translate(Math.max(transform.x, maxEndTranslate), 0);
     // transform = transform.translate(Math.min(transform.x, maxStartTranslate), 0);
+    const t = zoomIdentity;
 
     if (transform.x > maxX) {
       transform = transform.translate(maxX - transform.x, 0);
+      select(ganttContainer).call(d3Zoom.transform, zoomIdentity.translate(transform.x, 0));
+
+      // t.translate(maxX - transform.x, 0);
     }
     if (transform.x < minX) {
       transform = transform.translate(minX - transform.x, 0);
+      // t.translate(minX - transform.x, 0);
+      select(ganttContainer).call(d3Zoom.transform, zoomIdentity.translate(transform.x, 0));
+
     }
     const translateX = transform.x;
     // if (translateX > maxStartTranslate) translateX = maxStartTranslate;
     // if (translateX < maxEndTranslate) translateX = maxEndTranslate;
 
     scrollGroup.attr("transform", `translate( ${translateX} , 0)`);
+
   };
 
   useEffect(() => {
@@ -109,7 +124,9 @@ export function GanttD3({ data, intermediateDates }: TGantD3Props) {
 
     const d3Zoom = zoom()
       .scaleExtent([1, 1])
-      .on("zoom", () => onScroll(scrollGroup, ganttContainer)) as any;
+      .on("zoom", (e, d) => {
+        onScroll(scrollGroup, ganttContainer, d3Zoom)
+      }) as any;
 
     select(ganttContainer)
       .call(d3Zoom)
@@ -123,10 +140,10 @@ export function GanttD3({ data, intermediateDates }: TGantD3Props) {
         true
       )
       .on("wheel.zoom", () => {
-        onScroll(scrollGroup, ganttContainer);
+        onScroll(scrollGroup, ganttContainer,d3Zoom);
       });
 
-    select(ganttContainer).call(d3Zoom.transform, zoomIdentity);
+    select(ganttContainer).call(d3Zoom.transform, zoomIdentity.translate(defaultTranslate, 0));
 
     scrollGroup.attr("transform", `translate(${defaultTranslate} , 0)`);
   });
@@ -141,8 +158,19 @@ export function GanttD3({ data, intermediateDates }: TGantD3Props) {
           className="scroll" 
           ref={scrollGroupRef}
         >
-          <GanttD3Bars data={data} />
-          <GanttD3XAxis data={intermediateDates} itemsCount={data.length} />
+          <GanttD3Bars
+            data={data}
+            chartWidth={chartWidth}
+            startDate={startDate}
+            endDate={endDate}
+          />
+          <GanttD3XAxis
+            data={intermediateDates}
+            itemsCount={data.length}
+            startDate={startDate}
+            endDate={endDate}
+            daysNumber={daysNumber}
+          />
         </g>
         <GanttD3YAxis data={data} itemsCount={data.length} />
       </svg>

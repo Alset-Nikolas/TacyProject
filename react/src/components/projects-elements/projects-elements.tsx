@@ -19,6 +19,7 @@ import { rights as rightsObj } from '../../consts';
 import styles from './projects-elements.module.scss';
 import inputStyles from '../../styles/inputs.module.scss';
 import sectionStyles from '../../styles/sections.module.scss';
+import Checkbox from '../ui/checkbox/checkbox';
 
 type TProjectsElementsProps = {
   // units: Array<any>;
@@ -204,17 +205,18 @@ export default function ProjectsElements({ roles, rights, edit }: TProjectsEleme
         <SectionContent>
           <div className={`${styles.valuesContainer}`}>
             <div
-              className={`${styles.roleWrapper} ${styles.first}`}
+              className={`${styles.roleWrapper} ${styles.header}`}
             >
+              <div/>
                <div
-                  className={`${styles.roleName}`}
+                  className={`${styles.rights}`}
                 >
-                  Роль
+                  {rightsObj.approve}
                 </div>
                 <div
                   className={`${styles.rights}`}
                 >
-                  Права
+                  {rightsObj.update}
                 </div>
             </div>
             {roles?.map((el, index) => (
@@ -228,18 +230,16 @@ export default function ProjectsElements({ roles, rights, edit }: TProjectsEleme
                   {el.name}
                 </div>
                 <div
-                  className={`${styles.rights}`}
                 >
-                  {el.is_approve && (
-                    <span>
-                      {rightsObj.approve}
-                    </span>
-                  )}
-                  {el.is_update && (
-                    <span>
-                      {rightsObj.update}
-                    </span>
-                  )}
+                  <Checkbox
+                    checked={el.is_approve}
+                  />
+                </div>
+                <div
+                >
+                  <Checkbox
+                    checked={el.is_update}
+                  />
                 </div>
               </div>
             ))}

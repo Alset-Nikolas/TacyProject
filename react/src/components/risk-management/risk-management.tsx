@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { paths } from "../../consts";
 import { getRisksListThunk } from "../../redux/risks-slice";
@@ -42,7 +42,8 @@ export default function RiskManagement({ edit, editButton, isSettings, component
   // const risksList = useAppSelector((store) => store.risks.list);
   const { data: risksList } = useGetRisksListQuery(currentInitiativeId ? currentInitiativeId : -1, {
     skip: !currentInitiativeId,
-  })
+  });
+  const [isShowAddfields, setIsShowAddfields] = useState<Array<boolean>>([]);
 
   const handleRiskEditClick = (riskIndex: number, riskId: number) => {
     navigate(`/${paths.registry}/risk-info/${riskId}`);
@@ -51,6 +52,10 @@ export default function RiskManagement({ edit, editButton, isSettings, component
   useEffect(() => {
     if (initiative?.initiative.id) dispatch(getRisksListThunk(initiative.initiative.id));
   }, [initiative?.initiative.id]);
+
+  useEffect(() => {
+    if (risksList) setIsShowAddfields(risksList.map(() => false));
+  }, [risksList])
 
   if (!components) return null;
 
@@ -202,18 +207,58 @@ export default function RiskManagement({ edit, editButton, isSettings, component
             return (
               <li
                 key={risk.risk.id}
-                className={`${styles.riskElement}`}  
+                className={`${styles.riskElement}`}
               >
-                {`${riskIndex+1}. ${risk.risk.name}`}
-                <ol>
-                  {risk.addfields.map((addfield) => {
-                    return (
-                      <li key={addfield.id}>
-                        {addfield.title.title}:&nbsp;{addfield.value}
-                      </li>
-                    )
-                  })}
-                </ol>
+                <div
+                  style={{
+                    position: 'relative',
+                    cursor: 'pointer',
+                  }}
+                  onClick={() => {
+                    setIsShowAddfields((prevState) => {
+                      const newState = [...prevState];
+                      newState[riskIndex] = !newState[riskIndex];
+
+                      return newState;
+                    });
+                  }}
+                >
+                  {`№${riskIndex+1}. `}
+                  &nbsp;
+                  {risk.risk.name}
+                  {/* <span className={`${styles.riskName}`}>{risk.risk.name}</span> */}
+                  {editButton && (
+                    <div
+                    style={{
+                      position: 'absolute',
+                      right: 0,
+                      top: 5,
+                      width: 16,
+                    }}
+                    >
+                    <Pictogram
+                      type="show"
+                      cursor="pointer"
+                      
+                    />
+                    </div>
+                  )}
+                </div>
+                {isShowAddfields[riskIndex] && (
+                  <ul>
+                    {risk.addfields.map((addfield, addfieldIndex) => {
+                      return (
+                        <li
+                          key={addfield.id}
+                          className={`${styles.riskAddfields}`}
+                        >
+                          {`${riskIndex+1}.${addfieldIndex+1} ${addfield.title.title}`}:&nbsp;{addfield.value}
+                        </li>
+                      )
+                    })}
+                  </ul>
+                )}
+                
                 {!editButton && (
                   <div
                     className={`${styles.editButtonWrapper}`}

@@ -71,16 +71,21 @@ export default function Metrics({
                 onClick={() => addPropertie(projectForEdit, 'metrics', dispatch)}
               />
             </div>
-            <div
-              className={`${styles.targetCell}`}
-            >
-              Целевой эффект
-            </div>
-            <div
-              className={`${styles.effectCell}`}
-            >
-              Эффект проекта
-            </div>
+            {!!projectForEdit.metrics.length && (
+              <>
+                <div
+                  className={`${styles.targetCell}`}
+                >
+                  Целевой эффект
+                </div>
+                
+                <div
+                  className={`${styles.effectCell}`}
+                >
+                  Эффект проекта
+                </div>
+              </>
+            )}
           </div>
         </SectionHeader>
         <div className={`${styles.content} ${styles.edit}`}>

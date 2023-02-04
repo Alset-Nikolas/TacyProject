@@ -129,7 +129,9 @@ class Project(models.Model):
             metrics_sorted = metrics_sorted.split(",")
             return sorted(
                 inits.all(),
-                key=lambda x: x.metric_fields.filter(metric=metrics_sorted[0])
+                key=lambda x: abs(
+                    x.metric_fields.filter(metric=metrics_sorted[0])
+                )
                 .first()
                 .value,
                 reverse=bool(int(metrics_sorted[1])),
@@ -213,7 +215,7 @@ class Project(models.Model):
             inits = inits.annotate(total=Count("id")).filter(
                 total=len(files_filter)
             )
-        # inits = inits.distinct("pk")
+        inits = inits.distinct("pk")
         return self.inits_sorted(data, inits)
 
 

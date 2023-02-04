@@ -1,8 +1,6 @@
 .wrapper {
   display: flex;
   flex-direction: column;
-  width: 60%;
-
   box-sizing: border-box;
 }
 
@@ -47,6 +45,7 @@
   display: flex;
   gap: 20px;
   justify-content: flex-end;
+  margin-bottom: 40px;
 }
 
 .settingsWrapper {
@@ -54,6 +53,10 @@
   flex-direction: column;
   gap: 24px;
   margin-bottom: 40px;
+  border: 1px solid #504F4F;
+  border-radius: 10px;
+  padding: 20px;
+  // width: 60%;
 
   div {
     flex: 1 1;

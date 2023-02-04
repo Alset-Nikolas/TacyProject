@@ -1,4 +1,4 @@
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import Pictogram from "../pictogram/pictogram";
 import SectionContent from "../section/section-content/section-content";
 import SectionHeader from "../section/section-header/section-header";
@@ -14,7 +14,7 @@ import {
   useGetUserRightsQuery,
   useGetComponentsQuery
 } from "../../redux/state/state-api";
-import { Checkbox, SelectChangeEvent } from "@mui/material";
+import Checkbox from '../ui/checkbox/checkbox';
 
 // Styles
 import styles from './role-allocation.module.scss';
@@ -22,6 +22,7 @@ import sectionStyles from '../../styles/sections.module.scss';
 import { TPropertie, TRole, TRolesAllocationModalMembersList, TTeamMember, TUser } from "../../types";
 import { closeModal, openRolesAllocationModal } from "../../redux/state/state-slice";
 import Modal from "../modal/modal";
+import RolesPopupContainer from "../roles-popup-container/roles-popup-container";
 
 
 export default function RolesAlloction() {
@@ -33,8 +34,11 @@ export default function RolesAlloction() {
   const {
     data: initiative,
     refetch: refetchInitiative,
-  } = useGetInitiativeByIdQuery(currentInitiativeId ? currentInitiativeId : -1);
+  } = useGetInitiativeByIdQuery(currentInitiativeId ? currentInitiativeId : -1, {
+    skip: !currentInitiativeId,
+  });
   const [roles, setRoles] = useState(initiative ? initiative.roles : []);
+  const [isShowRolePopup, setIsShowRolePopup] = useState(roles.map(() => false));
   const { currentId } = useAppSelector((store) => store.state.project);
   const { data: project } = useGetProjectInfoQuery(currentId ? currentId : -1);
   const { data: components } = useGetComponentsQuery(currentId ? currentId : -1);
@@ -68,6 +72,8 @@ export default function RolesAlloction() {
   const { data: userRights } = useGetUserRightsQuery(currentInitiativeId ? currentInitiativeId : -1, {
     skip: !currentInitiativeId,
   });
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const roleRefs = useRef<Array<HTMLDivElement | null>>([]);
 
   const addPersonToRole = (role: TRole & {project: number}, index: number) => {
     setModalMemberList(() => {
@@ -192,6 +198,16 @@ export default function RolesAlloction() {
     });
   };
 
+  const roleMouseEnterHandler = (index: number) => {
+    setIsShowRolePopup((prevState) => {
+      const newState = [...prevState];
+      newState[index] = !newState[index];
+      return newState;
+    });
+  }
+
+
+
   useEffect(() => {
     if (isSuccessSetRoles) {
       refetchInitiative();
@@ -207,7 +223,6 @@ export default function RolesAlloction() {
         const fullName = `${item.user.last_name} ${item.user.first_name} ${item.user.second_name}`;
         return member.name === fullName;
       });
-      console.log(memberIndex);
       if (memberIndex > -1) {
         newMemberList.splice(memberIndex, 1);
       }
@@ -220,6 +235,7 @@ export default function RolesAlloction() {
 
   useEffect(() => {
     setRoles(initiative ? initiative.roles : []);
+    setIsShowRolePopup(initiative ? initiative.roles.map(() => false) : []);
   }, [initiative])
 
   useEffect(() => {
@@ -241,6 +257,7 @@ export default function RolesAlloction() {
   return (
     <div
       className={`${styles.wrapper} ${sectionStyles.wrapperBorder}`}
+      ref={wrapperRef}
     >
       <SectionHeader>
         <div
@@ -263,7 +280,13 @@ export default function RolesAlloction() {
               className={`${styles.contentWrapper}`}
             >
               {!roles.length && (
-                <div>Отсутствуют роли для распределения</div>
+                <div
+                  style={{
+                    paddingLeft: 20,
+                  }}
+                >
+                  Отсутствуют роли для распределения
+                </div>
               )}
               {!!roles.length && (
                 <div
@@ -298,6 +321,7 @@ export default function RolesAlloction() {
                   </div>
                   {
                     roles.map((item, roleIndex) => {
+                      const roleRef = roleRefs.current[roleIndex];
                       return (
                         <div
                           key={item.role.id}
@@ -308,8 +332,18 @@ export default function RolesAlloction() {
                           >
                             <div
                               className={`${styles.cell}`}
+                              ref={el => roleRefs.current[roleIndex] = el}
+                              onMouseEnter={() => roleMouseEnterHandler(roleIndex)}
+                              onMouseLeave={() => roleMouseEnterHandler(roleIndex)}
                             >
                                 {item.role.name}
+                                {roleRef && wrapperRef.current && isShowRolePopup[roleIndex] && (
+                                  <RolesPopupContainer
+                                    role={item.role}
+                                    parent={wrapperRef.current}
+                                    element={roleRef}
+                                  />
+                                )}
                             </div>
                             {(userRights?.user_is_author || userRights?.user_is_superuser) && (
                               <div
@@ -415,10 +449,10 @@ export default function RolesAlloction() {
         )}
         {modal.isOpen && modal.type.rolesAllocation && (
         <Modal
+          className={`${styles.allocationModalWraper}`}
           closeModal={() => dispatch(closeModal())}
         >
           <div
-            className={`${styles.allocationModalWraper}`}
           >
             <div
               className={`${styles.modalContentWraper}`}

@@ -22,6 +22,7 @@
 
 .content {
   height: 100%;
+  padding-top: 0;
 }
 
 .addfieldsHeader {
@@ -36,13 +37,14 @@
 
 .editButton {
   position: absolute;
-  top: 66px;
+  top: 5px;
   right: 20px;
 }
 
 .risksList {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
 .markedRisksList {
@@ -51,12 +53,25 @@
 
 .riskElement {
   position: relative;
-  border-bottom: 0.5px solid #504F4F;
+  border-bottom: 0.5px solid #FFFFFF;
   font-weight: 400;
   font-size: 16px;
   line-height: 28px;
   color: #504F4F;
   padding: 10px 0;
+
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+}
+
+.riskName {
+  color: #17598C;
+}
+
+.riskAddfields {
+  color: #000;
 }
 
 .editButtonWrapper {

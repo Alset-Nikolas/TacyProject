@@ -7,11 +7,11 @@ import { chartConfig } from "./chartConfig";
  * @param date
  * @returns {number|*}
  */
-export const dateScale = date => {
-  const { startDate, endDate } = chartConfig;
+export const dateScale = (date, chartWidth, startDate, endDate) => {
+  // const { startDate, endDate } = chartConfig;
   const scale = scaleTime()
     .domain([startDate, endDate])
-    .range([0, chartConfig.chartWidth]);
+    .range([0, chartWidth]);
   return scale(date);
 };
 
@@ -21,8 +21,8 @@ export const dateScale = date => {
  * @param tripEndCoordinate
  * @returns {number|*}
  */
-export const setWidth = (tripStartCoordinate, tripEndCoordinate) => {
-  const { chartWidth, dayWidth } = chartConfig;
+export const setWidth = (tripStartCoordinate, tripEndCoordinate, chartWidth) => {
+  const { dayWidth } = chartConfig;
   let resultTripStart, resultTripEnd;
   const startChartCoordinate = 0;
   const endChartCoordinate = chartWidth;
@@ -46,8 +46,8 @@ export const setWidth = (tripStartCoordinate, tripEndCoordinate) => {
  * @param dateString
  * @returns {number|*}
  */
-export const getCoordinate = dateString =>
-  dateScale(Date.parse(dateString));
+export const getCoordinate = (dateString, chartWidth, startDate, endDate) =>
+  dateScale(Date.parse(dateString), chartWidth, startDate, endDate);
 
 /**
  * @description возвращает объект касания

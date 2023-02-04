@@ -10,20 +10,27 @@ import { Tooltip } from "@mui/material";
 type TGanttD3XAxisProps = {
   data?: Array<TIntermediateDate>;
   itemsCount?: number;
+  daysNumber: number;
+  startDate: Date;
+  endDate: Date;
 }
 
-export const GanttD3XAxis = ({ data, itemsCount }: TGanttD3XAxisProps) => {
+export const GanttD3XAxis = ({ data, itemsCount, daysNumber, startDate, endDate }: TGanttD3XAxisProps) => {
   const {
     marginTop,
     weekdays,
     months,
-    daysNumber,
-    startDate,
+    // daysNumber,
+    // startDate,
     chartHeight,
-    chartWidth,
+    // chartWidth,
     dayWidth,
     xAxisHeight
   } = chartConfig;
+  let chartWidth = chartConfig.dayWidth * daysNumber + chartConfig.lineWidth;
+  chartWidth = chartWidth < 862 ? 862 : chartWidth;
+
+
   const { WHITE, RED, PALE_WHITE, GREY, BLACK } = fills;
   const dateArray = [];
   for (let i = 0; i < daysNumber; i++)
@@ -46,7 +53,7 @@ export const GanttD3XAxis = ({ data, itemsCount }: TGanttD3XAxisProps) => {
   const axisLines = arrayDateForLine.map(date => {
     if (date.getDate() === 1) {
       const y1 = date.getDate() === 1 ? 0 : marginTop;
-      const x = dateScale(date);
+      const x = dateScale(date, chartWidth, startDate, endDate);
       return (
         <line
           key={+date}
@@ -68,7 +75,7 @@ export const GanttD3XAxis = ({ data, itemsCount }: TGanttD3XAxisProps) => {
         <text
           className="year"
           key={+date}
-          x={dateScale(date)}
+          x={dateScale(date, chartWidth, startDate, endDate)}
           dx={7}
           y={18}
           fill={BLACK}
@@ -85,7 +92,7 @@ export const GanttD3XAxis = ({ data, itemsCount }: TGanttD3XAxisProps) => {
         <text
           className="month"
           key={+date}
-          x={dateScale(date)}
+          x={dateScale(date, chartWidth, startDate, endDate)}
           dx={7}
           y={37}
           fill={BLACK}
@@ -97,17 +104,18 @@ export const GanttD3XAxis = ({ data, itemsCount }: TGanttD3XAxisProps) => {
   });
 
   const intermediateDatesLabels = data?.map((item) => {
+    const date = new Date(item.date);
     return (
       <g key={item.title+item.date}>
         <Tooltip
-          title={`Дата: ${item.date} Мероприятие: ${item.title}`}
-          placement="top"
+          title={`Дата: ${moment(date).format('DD.MM.YYYY')} Название: ${item.title}`}
+          placement="bottom"
         >
         <g>
         <line
-          x1={getCoordinate(item.date)}
+          x1={getCoordinate(item.date, chartWidth, startDate, endDate)}
           y1={40}
-          x2={getCoordinate(item.date)}
+          x2={getCoordinate(item.date, chartWidth, startDate, endDate)}
           y2={(32 * (itemsCount || 0) + 78)}
           strokeWidth={2}
           stroke={BLACK}
@@ -144,7 +152,7 @@ export const GanttD3XAxis = ({ data, itemsCount }: TGanttD3XAxisProps) => {
     return (
       <g key={+date}>
         <text
-          x={dateScale(date)}
+          x={dateScale(date, chartWidth, startDate, endDate)}
           dx={dayWidth / 2}
           y={42}
           textAnchor="middle"
@@ -154,7 +162,7 @@ export const GanttD3XAxis = ({ data, itemsCount }: TGanttD3XAxisProps) => {
           {weekdays[date.getDay()]}
         </text>
         <text
-          x={dateScale(date)}
+          x={dateScale(date, chartWidth, startDate, endDate)}
           dx={dayWidth / 2}
           y={60}
           fill={isWeekend ? RED : BLACK}
@@ -185,7 +193,7 @@ export const GanttD3XAxis = ({ data, itemsCount }: TGanttD3XAxisProps) => {
         <rect
           x={-200}
           y={(32 * (itemsCount || 0) + 73) - 19}
-          width={chartConfig.chartWidth + 300}
+          width={chartWidth + 300}
           height={85}
           fill={WHITE}
           

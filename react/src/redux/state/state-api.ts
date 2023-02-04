@@ -131,7 +131,11 @@ export const stateApi = createApi({
             dispatch(setCurrentInitiativeId(parseInt(cachedInitiativeId)));
             localStorage.removeItem('initiative-id');
           } else {
-            dispatch(setCurrentInitiativeId(initiativesList[0].initiative.id));
+            if (initiativesList.length) {
+              dispatch(setCurrentInitiativeId(initiativesList[0].initiative.id));
+            } else {
+              dispatch(setCurrentInitiativeId(null));
+            }
           }
         } catch (err) {
           console.log(err);
@@ -165,7 +169,7 @@ export const stateApi = createApi({
           method: 'DELETE',
         }
       },
-      invalidatesTags: ['initiatives-list'],
+      invalidatesTags: ['initiatives-list', 'initiative'],
     }),
     setRoles: builder.mutation<any, { initiativeId: number, body:  Array<{user: TUser & { id: number }, role: TRole}> }>({
       query({initiativeId, body}) {

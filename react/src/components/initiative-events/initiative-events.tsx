@@ -10,10 +10,13 @@ import SectionHeader from "../section/section-header/section-header";
 // styles
 import sectionStyles from '../../styles/sections.module.scss';
 import styles from './initiative-events.module.scss';
+import { useGetProjectInfoQuery } from "../../redux/state/state-api";
 
 export default function EventsDiagram() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { currentId } = useAppSelector((store) => store.state.project);
+  const { data: project } = useGetProjectInfoQuery(currentId);
   const { user, userRights } = useAppSelector((store) => store.auth);
   const initiative = useAppSelector((store) => store.initiatives.initiative);
   const eventsList = useAppSelector((store) => store.events.list);
@@ -29,6 +32,12 @@ export default function EventsDiagram() {
   useEffect(() => {
     if (initiative) dispatch(getEventsListThunk(initiative.initiative.id))
   }, [initiative]);
+
+  const oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
+  const startDate = project ? new Date(project.date_start) : new Date();
+  const endDate = project ? new Date(project.date_end) : new Date();
+
+  const diffDays = Math.round(Math.abs((startDate.getMilliseconds() - endDate.getMilliseconds()) / oneDay));
 
   return (
     <div
@@ -49,6 +58,9 @@ export default function EventsDiagram() {
       <div>
         <GanttD3
           data={listForDiagram}
+          startDate={startDate}
+          endDate={endDate}
+          daysNumber={diffDays}
         />
         {/* {(tasks.length !== 0) && <Gantt tasks={tasks} />} */}
         {/* <TimeLine data={listForDiagram} /> */}

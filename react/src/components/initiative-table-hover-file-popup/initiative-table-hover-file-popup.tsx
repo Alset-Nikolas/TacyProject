@@ -40,18 +40,21 @@ export const InitiativeTableHoverFilePopup:FC<TInitiativeTableHoverPopupProps> =
 
 
   let style: {
+    opacity: number;
     top: string | number,
     left: string | number,
     right: string | number,
   } = {
-    top: offesetHeight + (parentRect ? parentRect.top : 0),
+    opacity: popupWidth ? 1 : 0,
+    top: offesetHeight + (parent ? parent.offsetTop : 0), // (parentRect ? parentRect.top : 0),
     left: offesetLeft + (parentRect ? parentRect.left : 0),
     right: '',
   };
 
   if (parentRect && (offesetLeft + popupWidth + parentRect.left > parentRect.right)) {
     style = {
-      top: offesetHeight + (parentRect ? parentRect.top : 0),
+      opacity: popupWidth ? 1 : 0,
+      top: offesetHeight + (parent ? parent.offsetTop : 0), // (parentRect ? parentRect.top : 0),
       left: '',
       right: 0 + (parentRect ? parentRect.right : 0),
     }

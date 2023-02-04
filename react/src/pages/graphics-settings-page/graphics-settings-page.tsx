@@ -166,7 +166,7 @@ export default function GraphicsSettingsPage() {
           return (
             <div
               key={settingsItem.propertie.id}
-              style={{display: 'flex', alignItems: 'center', gap: '8px'}}
+              style={{display: 'flex', alignItems: 'center', gap: '8px', width: '60%'}}
             >
               <div>
                 По оси Х:
@@ -176,7 +176,6 @@ export default function GraphicsSettingsPage() {
                 </span>
               </div>
               <div
-                className={`${styles.buttonWrapper}`}
               >
                 По оси Y:
                 &nbsp;
@@ -204,7 +203,7 @@ export default function GraphicsSettingsPage() {
           );
         })}
         <div
-          style={{display: 'flex', alignItems: 'center', gap: '8px'}}
+          style={{display: 'flex', alignItems: 'center', gap: '8px', width: '60%'}}
         >
           <div>
             По оси Х:
@@ -214,7 +213,6 @@ export default function GraphicsSettingsPage() {
             </span>
           </div>
           <div
-            className={`${styles.buttonWrapper}`}
           >
             По оси Y:
             &nbsp;
@@ -239,6 +237,7 @@ export default function GraphicsSettingsPage() {
             </Select>
           </div>
         </div>
+        
       </div>
       {!!newSettingState.settings.length && (
         <div

@@ -13,9 +13,12 @@ type TGanttD3BarsProps = {
     end: string;
     id: number;
   }>;
+  chartWidth: number;
+  startDate: Date;
+  endDate: Date;
 }
 
-export const GanttD3Bars = ({ data }: TGanttD3BarsProps) => {
+export const GanttD3Bars = ({ data, chartWidth, startDate, endDate }: TGanttD3BarsProps) => {
   const { rectHeight, rowHeight } = chartConfig;
   const { RED, GREY, WHITE } = fills;
   const bars = data.map((stage, index) => {
@@ -34,7 +37,7 @@ export const GanttD3Bars = ({ data }: TGanttD3BarsProps) => {
           id={stage.id.toString()}
           x={0}
           y={y-10}
-          width={chartConfig.chartWidth}
+          width={chartWidth}
           height={32}
           fill={barBackground}
         />
@@ -45,9 +48,9 @@ export const GanttD3Bars = ({ data }: TGanttD3BarsProps) => {
         >
           <rect
             id={stage.id.toString()}
-            x={getCoordinate(stage.start) < 0 ? 0 : getCoordinate(stage.start)}
+            x={getCoordinate(stage.start, chartWidth, startDate, endDate) < 0 ? 0 : getCoordinate(stage.start, chartWidth, startDate, endDate)}
             y={y}
-            width={setWidth(getCoordinate(stage.start), getCoordinate(stage.end))}
+            width={setWidth(getCoordinate(stage.start, chartWidth, startDate, endDate), getCoordinate(stage.end, chartWidth, startDate, endDate), chartWidth)}
             height={rectHeight}
             fill={RED}
           />

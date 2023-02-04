@@ -606,7 +606,7 @@ class UpdateCommunityProjectSerializer(serializers.ModelSerializer):
                 )
                 NotificationsUser.create(
                     user=user,
-                    text=f"Вас пригласили в новый проект '{project.name}'",
+                    text=f"Вас пригласили в новый проект: '{project.name}'",
                 )
 
             user: User = User.create_or_update_user(project, user_info)
@@ -646,7 +646,7 @@ class UpdateCommunityProjectSerializer(serializers.ModelSerializer):
             )
             NotificationsUser.create(
                 user=del_person.user,
-                text=f"Спасибо что учавствовали в проекте {project.name}",
+                text=f"Спасибо, что учавствовали в проекте {project.name}",
             )
             StagesCoordinationInitiative.delete_user_in_project(
                 project, del_person.user

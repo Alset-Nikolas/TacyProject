@@ -13,9 +13,10 @@ type TModalProps = {
   title?: string;
   loader?: boolean;
   children: JSX.Element;
+  className?: string;
 };
 
-export default function Modal({ closeModal, title, loader, children}: TModalProps) {
+export default function Modal({ closeModal, title, loader, children, className }: TModalProps) {
   const portalDiv = document.getElementById('modal-root')!;
 
   useEffect(() => {
@@ -31,7 +32,7 @@ export default function Modal({ closeModal, title, loader, children}: TModalProp
 
   return ReactDOM.createPortal(
     <ModalOverlay closeModal={closeModal}>
-      <div className={loader ? '' : modalStyles.modalWrapper} id='modal-wrapper' onKeyDown={escapeButtonHandler} tabIndex={-1}>
+      <div className={loader ? '' : `${modalStyles.modalWrapper} ${className}`} id='modal-wrapper' onKeyDown={escapeButtonHandler} tabIndex={-1}>
         {/* <div
             className={`${modalStyles.closeButtonWrapper} mt-15 mr-10`}
             onClick={closeButtonClickHandler}

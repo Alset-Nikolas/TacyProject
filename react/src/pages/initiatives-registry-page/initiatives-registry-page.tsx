@@ -45,6 +45,8 @@ export default function InitiativesRegistryPage() {
   const {
     data: initiativesList,
     isFetching: isFetchingInitiativesList,
+    isSuccess: isFetchingInitiativesListSuccess,
+    isError: isFetchingInitiativesListFailed,
   } = useGetInitiativesListQuery(currentId ? currentId : -1, {
     skip: !currentId,
   });
@@ -54,6 +56,8 @@ export default function InitiativesRegistryPage() {
   const {
     data: initiative,
     isFetching: isFetchingInitiative,
+    isSuccess: isFetchingInitiativeSuccess,
+    isError: isFetchingInitiativeFailed,
   } = useGetInitiativeByIdQuery(currentInitiativeId ? currentInitiativeId : -1, {
     skip: !currentInitiativeId,
   });
@@ -100,6 +104,17 @@ export default function InitiativesRegistryPage() {
     isFetchingInitiativesList,
   ]);
 
+  // useEffect(() => {
+  //   if(isFetchingInitiativeSuccess || isFetchingInitiativeFailed || isFetchingInitiativesListSuccess || isFetchingInitiativesListFailed) {
+  //     dispatch(closeLoader());
+  //   }
+  // }, [
+  //   isFetchingInitiativeSuccess,
+  //   isFetchingInitiativeFailed,
+  //   isFetchingInitiativesListSuccess,
+  //   isFetchingInitiativesListFailed
+  // ]);
+
   useEffect(() => {
     if (!currentInitiativeId && initiativesList?.length) {
       if (location.state?.initiativeId) {
@@ -137,7 +152,7 @@ export default function InitiativesRegistryPage() {
           </div>
         )} */}
       </section>
-      {initiative && (
+      {initiative && !!initiativesList?.length && (
         <>
           <section
             style={{ display: 'flex', gap: '40px', margin: '40px 0', width: '100%'}}
@@ -198,6 +213,7 @@ export default function InitiativesRegistryPage() {
                 onClick={() => {
                   if (currentInitiativeId) {
                     deleteInitiative(currentInitiativeId);
+                    // dispatch(setCurrentInitiativeId(null));
                   }
                   dispatch(closeModal());
                 }}

@@ -44,21 +44,21 @@ class NotificationsUser(models.Model):
         for user in users:
             cls.objects.create(
                 user=user,
-                text=f"Новое сообщение в чате инициативы id:{initiative.id}, проект: {initiative.project.name}",
+                text=f"Новое сообщение в чате инициативы {initiative.name} в проекте {initiative.project.name}",
             )
 
     @classmethod
     def change_stage(cls, initiative, state_name):
         cls.objects.create(
             user=initiative.author,
-            text=f"Инициатива одобрена на очередном этапе id:{initiative.id}, статус инициативы стал {state_name} проект: {initiative.project.name}",
+            text=f"Инициатива {initiative.name} в проекте {initiative.project.name} одобрена на очередном этапе, статус инициативы стал {state_name}.",
         )
 
     @classmethod
     def init_approval(cls, initiative):
         cls.objects.create(
             user=initiative.author,
-            text=f"Инициатива согласована id:{initiative.id} проект: {initiative.project.name}",
+            text=f"Инициатива {initiative.name} согласована в проекте: {initiative.project.name}",
         )
 
     @classmethod
@@ -69,9 +69,9 @@ class NotificationsUser(models.Model):
         status_obj = info.get("status")
         cls.objects.create(
             user=author_obj,
-            text=f"Вы отправили инициативу id:{initiative_id} на согласование {coordinator_obj.email}, статус инициативы сейчас {status_obj.name} проект: {initiative.project.name}",
+            text=f"Вы отправили инициативу {initiative.name} на согласование {coordinator_obj.email} в проекте {initiative.project.name}. Статус инициативы сейчас {status_obj.name}",
         )
         cls.objects.create(
             user=coordinator_obj,
-            text=f"Вам отправили инициативу id:{initiative_id} на согласование {author_obj.email}, статус инициативы сейчас {status_obj.name} проект: {initiative.project.name}",
+            text=f"Вам отправили инициативу {initiative.name} на согласование {author_obj.email} в проекте {initiative.project.name}. Статус инициативы сейчас {status_obj.name}",
         )

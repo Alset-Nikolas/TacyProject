@@ -56,6 +56,12 @@ export default function ProjectTimeline({
     }
   });
 
+  const oneDay = 24 * 60 * 60 * 1000; // hours*minutes*seconds*milliseconds
+  const startDate = new Date(project.date_start)
+  const endDate = new Date(project.date_end);
+  // const a = startDate - endDate;
+  const diffDays = Math.round(Math.abs((startDate.getTime() - endDate.getTime()) / oneDay));
+
   return (
     <div className={`${styles.wrapper} ${sectionStyles.wrapperBorder}`}>
       <SectionHeader>
@@ -73,6 +79,9 @@ export default function ProjectTimeline({
           <GanttD3
             data={listForDiagram}
             intermediateDates={timeline}  
+            startDate={startDate}
+            endDate={endDate}
+            daysNumber={diffDays}
           />
         </div>
       ) : (

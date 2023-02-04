@@ -57,6 +57,7 @@ export type TPropertie = {
   items: Array<{
     id: number;
     value: string;
+    value_short: string;
     propertie: number;
   }>;
 };

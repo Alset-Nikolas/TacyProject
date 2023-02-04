@@ -178,17 +178,35 @@ export default function Properties({
           <SectionContent>Атрибуты инициатив отсутствуют</SectionContent>
         )}
         {project.properties.map((propertie) => (
-          <SectionContent
+          <div
             className={`${styles.propertieWrapper}`}
             key={propertie.id}
           >
             <div
               className={`${styles.propertieTitle}`}
             >
+              <div>
               {propertie.title}
+              </div>
             </div>
-            {propertie.items.map((item) => <div key={item.id}>{item.value}</div>)}
-          </SectionContent>
+            {propertie.items.map((item) => (
+              <div
+                key={item.id}
+                className={`${styles.propertyWrapper}`}
+              >
+                <span>
+                  {item.value}
+                </span>
+                <span
+                  style={{
+                    color: '#504F4F',
+                  }}
+                >
+                  {item.value_short}
+                </span>
+              </div>
+            ))}
+          </div>
         ))}
       </div>
     </section>
