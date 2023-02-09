@@ -89,6 +89,9 @@ export default function InitiativeSettingsManagement({ edit, editButton, compone
               </div>
               <ol className={`${styles.paramsList}`}>
                 <li>
+                  Автор
+                </li>
+                <li>
                   Дата регистрации
                 </li>
                 {/* <li>
@@ -181,6 +184,13 @@ export default function InitiativeSettingsManagement({ edit, editButton, compone
           )} */}
         </div>
           <ol className={`${styles.paramsList}`}>
+            <li>
+              <div>
+                <div>
+                  Автор
+                </div>
+              </div>
+            </li>
             <li>
               <div>
                 <div>

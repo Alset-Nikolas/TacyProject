@@ -12,7 +12,7 @@ class EmailManage:
             from_email=settings.EMAIL_HOST_USER,
             to=[user.email],
         )
-        msg.send()
+        msg.send(fail_silently=True)
 
     @staticmethod
     def send_invitation_new_project(user, context):
@@ -22,7 +22,8 @@ class EmailManage:
             from_email=settings.EMAIL_HOST_USER,
             to=[user.email],
         )
-        msg.send()
+        print("user.email", user.email)
+        msg.send(fail_silently=True)
 
     @staticmethod
     def send_removed_in_project(user, context):
@@ -33,16 +34,15 @@ class EmailManage:
             from_email=settings.EMAIL_HOST_USER,
             to=[user.email],
         )
-        msg.send()
+        msg.send(fail_silently=True)
 
     @staticmethod
     def send_msg_many_users(users, title, text):
         for user in users:
-
             msg = EmailMultiAlternatives(
                 subject=title,
                 body=text,
                 from_email=settings.EMAIL_HOST_USER,
                 to=[user.email],
             )
-            msg.send()
+            msg.send(fail_silently=True)

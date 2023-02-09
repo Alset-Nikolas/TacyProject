@@ -16,6 +16,11 @@
   line-height: 28px;
 }
 
+.addfieldInput {
+  resize: vertical;
+  min-width: 100%;
+}
+
 .buttonWrapper {
   display: flex;
   justify-content: flex-end;

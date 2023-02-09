@@ -1,17 +1,13 @@
-import { useEffect, useRef, useState } from "react";
-import { SelectChangeEvent, Tooltip } from "@mui/material";
+import { useEffect, useReducer, useRef, useState } from "react";
+import { Tooltip } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
-import SectionContent from "../section/section-content/section-content";
 import SectionHeader from "../section/section-header/section-header";
-import { TInitiative, TPropertie } from "../../types";
-import { getInitiativeByIdThunk, setCurrentInitiativeId } from "../../redux/initiatives-slice";
+import { TInitiative } from "../../types";
+import { setCurrentInitiativeId } from "../../redux/initiatives-slice";
 import {
   useGetComponentsQuery,
-  useGetExportUrlQuery,
   useGetFilesSettingsQuery,
-  useGetInitiativeFilesQuery,
   useGetProjectInfoQuery,
-  useGetSortedInitiativesQuery,
   useLazyGetExportUrlQuery,
   useLazyGetSortedInitiativesQuery
 } from "../../redux/state/state-api";
@@ -19,20 +15,15 @@ import Pictogram from "../pictogram/pictogram";
 import { paths, REACT_APP_BACKEND_BASE_URL } from "../../consts";
 import { InitiativeTableHoverPopup } from "../initiative-table-hover-popup/initiative-table-hover-popup";
 import { InitiativeTableHoverFilePopup } from "../initiative-table-hover-file-popup/initiative-table-hover-file-popup";
-import SelectUnits from "../select-units/select-units";
 import CustomizedButton from "../button/button";
-import CustomizedSelect from "../select/Select";
-import SelectRoles from "../select-roles/select-roles";
-import { useGetTeamListQuery } from "../../redux/state/state-api";
+import { useGetAuthInfoByIdQuery } from "../../redux/auth/auth-api";
+import { useNavigate } from "react-router-dom";
+import InitiativesFilter from "../initiatives-filter/initiatives-filter";
 
 // Styles
 import styles from './initiatives-table.module.scss';
 import sectionStyles from '../../styles/sections.module.scss';
-import inputStyles from '../../styles/inputs.module.scss';
-import SelectFiles from "../select-files/select-files";
-import { useGetAuthInfoByIdQuery } from "../../redux/auth/auth-api";
-import { useNavigate } from "react-router-dom";
-import InitiativesFilter from "../initiatives-filter/initiatives-filter";
+//
 
 type TInitiativesTableProps = {
   externalInitiativesList: Array<TInitiative>;
@@ -52,13 +43,10 @@ export default function InitiativesTable({ externalInitiativesList, addButton }:
   });
   const [filesList, setFilesList] = useState<Array<{id: number, title: string}>>([]);
   const [isShowFilter, setIsShowFilter] = useState(false);
-  const wrapperRef = useRef<HTMLDivElement>(null);
   
-  // const [isSortQuery, setIsSortQuery] = useState(false);
   const { data: user } = useGetAuthInfoByIdQuery(currentId ? currentId : -1, {
     skip: !currentId,
   });
-
   
   const [isShowFilteredList, setIsShowFilteredList] = useState(false);
   const [
@@ -156,10 +144,7 @@ export default function InitiativesTable({ externalInitiativesList, addButton }:
     setIsShowFilter(!isShowFilter);
   };
 
-  
-
   const onAddClickHandler = () => {
-    // dispatch(addInitiativeThunk());
     navigate(`/${paths.registry}/add`);
   };
 
@@ -175,10 +160,6 @@ export default function InitiativesTable({ externalInitiativesList, addButton }:
     })
     setFilesList(newFilesList);
   }, [filesSettings])
-
-  // useEffect(() => {
-  //   if (isSortQuerySuccess || isSortQueryFailed) setIsSortQuery(false);
-  // }, [isSortQuerySuccess, isSortQueryFailed])
 
   useEffect(() => {
     if (isUrlReady) {
@@ -215,7 +196,7 @@ export default function InitiativesTable({ externalInitiativesList, addButton }:
                 Фильтр
                 <div>
                   <Pictogram
-                    type="show"
+                    type={isShowFilter ? 'hide' : 'show'}
                     cursor="pointer"
                   />
                 </div>
@@ -261,7 +242,6 @@ export default function InitiativesTable({ externalInitiativesList, addButton }:
                   Статус
                 </th>
                 <th
-                  // className={`${styles.tableCol}`}
                   className={`${styles.filesStatusCell}`}
                 >
                   Статус файлов
@@ -307,17 +287,18 @@ export default function InitiativesTable({ externalInitiativesList, addButton }:
               </tr>
             </thead>
             <tbody>
-              {/* {!initiativesList.length && (
-                <div>
-                  Список инициатив пуст
-                </div>
-              )} */}
               {initiativesList.map((item, index) => {
                 const isActive = currentInitiativeId === item.initiative.id;
                 const isFilesUpload = () => {
                   let isUploaded = true;
                   item.files.forEach((el) => {
-                    if (!el.file) isUploaded = false;
+                    const fileStatus = components?.settings?.initiative_status.find((status) => status.id === el.title.id);
+                    if (!el.file &&
+                      item.initiative.status &&
+                      fileStatus &&
+                      item.initiative.status?.value > 0 &&
+                      item.initiative.status?.value > fileStatus?.value
+                    ) isUploaded = false;
                   });
                   return isUploaded;
                 };
@@ -330,7 +311,6 @@ export default function InitiativesTable({ externalInitiativesList, addButton }:
                     <td
                       className={`${styles.number}`}
                     >
-                      {/* {item.initiative.id} */}
                       {index+1}
                     </td>
                     <td
@@ -339,7 +319,6 @@ export default function InitiativesTable({ externalInitiativesList, addButton }:
                       {item.initiative.name}
                     </td>
                     <td>
-                      {/* {item.initiative.current_state} */}
                       {item.initiative.status?.name}
                     </td>
                     <td
@@ -371,22 +350,20 @@ export default function InitiativesTable({ externalInitiativesList, addButton }:
                         null
                       )
                     ))}
-                    {item.metric_fields.map((metric) => {
-                      const foundMetric = project ? project.metrics.find((item) => item.id === metric.metric.id) : undefined;
+                    {components && components.table_registry.metrics.map((metric) => {
+                      const foundMetric = item.metric_fields.find((el) => el.metric.id === metric.id);
+                      const metricFromProject = project ? project.metrics.find((el) => el.id === metric.id) : undefined;
+
                       return (
-                        metric.metric.initiative_activate && foundMetric?.is_aggregate ? (
-                          <td key={`${index}_${metric.metric.id}`}>
-                            {foundMetric.is_percent ? (
+                        metric.initiative_activate && metricFromProject?.is_aggregate ? (
+                          <td key={`${index}_${metric.id}`}>
+                            {metricFromProject.is_percent ? (
                               <>
-                                {(metric.value as number) * 100}
-                                {/* &nbsp; */}
-                                {/* % */}
+                                {(typeof foundMetric?.value === 'number') ? Math.round(foundMetric?.value * 100) : 'NaN'}
                               </>
                             ) : (
                               <>
-                                {metric.value}
-                                {/* &nbsp;
-                                {metric.metric.units !== 'бм' ? metric.metric.units : ''} */}
+                                {foundMetric?.value}
                               </>
                             )}
                           </td>
@@ -395,25 +372,22 @@ export default function InitiativesTable({ externalInitiativesList, addButton }:
                         )
                       );
                     })}
-                    {item.roles.map((item, roleIndex) => {
-                      const memberNames = item.community.map((el) => `${el.user_info?.user.last_name} ${el.user_info?.user.first_name[0]}. ${el.user_info?.user.second_name[0]}.`);
-                      if (!item.role.initiative_activate) return null;
+                    {components && components.table_registry.roles.map((role, roleIndex) => {
+                      const currentRole = item.roles.find((el) => el.role.id === role.id);
+                      const memberNames = currentRole?.community.map((el) => `${el.user_info?.user.last_name} ${el.user_info?.user.first_name[0]}. ${el.user_info?.user.second_name[0]}.`);
+                      if (!currentRole || !role.initiative_activate) return null;
                       return (
                       <td
-                        key={item.role.id}
+                        key={role.id}
                         className={`${styles.userRole}`}
                         id={`role-${index}-${roleIndex}`}
                         onMouseEnter={() => roleMouseEnterHandler(index, roleIndex)}
                         onMouseLeave={() => roleMouseLeaveHandler(index, roleIndex)}
                       >
-                        {/* <ModalHover onHover={<h3>Hello World</h3>}>
-                          <div> */}
-                            {memberNames.join('/')}
-                          {/* </div>
-                        </ModalHover> */}
+                        {memberNames?.join('/')}
                         {!!isShowPopup.length && !!isShowPopup[index] && !!isShowPopup[index].length && isShowPopup[index][roleIndex] && (
                           <InitiativeTableHoverPopup
-                            community={item.community}
+                            community={currentRole.community}
                             initiativeIndex={index}
                             roleIndex={roleIndex}
                             parent={tableWrapperRef.current}
@@ -428,7 +402,7 @@ export default function InitiativesTable({ externalInitiativesList, addButton }:
             </tbody>
           </table>
           {!initiativesList.length && (
-            <div style={{ textAlign: 'center', margin: '20px 0 0 0'}}>
+            <div style={{ textAlign: 'center', margin: '20px 0 20px 0'}}>
               Таблица пуста
             </div>
           )}

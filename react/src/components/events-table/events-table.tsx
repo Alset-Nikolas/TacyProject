@@ -69,7 +69,7 @@ export default function EventsTable() {
         >
           Мероприятия
           <Pictogram
-            type={isOpen ? 'close' : 'show'}
+            type={isOpen ? 'hide' : 'show'}
             cursor="pointer"
           />
         </div>

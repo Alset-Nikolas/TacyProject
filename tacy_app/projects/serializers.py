@@ -1,6 +1,5 @@
 from django.conf import settings
 from django.contrib.auth import authenticate, get_user_model
-from django.core.mail import EmailMultiAlternatives
 from rest_framework import serializers
 
 from .models import (
@@ -598,17 +597,6 @@ class UpdateCommunityProjectSerializer(serializers.ModelSerializer):
             user_info = community_obj["user"]
             user: User = User.get_user_by_email(user_info["email"])
             new_account = bool(not user)
-            if not new_account and (
-                project not in Project.get_user_projects(user)
-            ):
-                EmailManage.send_invitation_new_project(
-                    user=user, context={"project": project}
-                )
-                NotificationsUser.create(
-                    user=user,
-                    text=f"Вас пригласили в новый проект: '{project.name}'",
-                )
-
             user: User = User.create_or_update_user(project, user_info)
             if new_account:
                 EmailManage.send_invitation_new_account(
@@ -617,6 +605,14 @@ class UpdateCommunityProjectSerializer(serializers.ModelSerializer):
                 NotificationsUser.create(
                     user=user,
                     text=f"Добро пожаловать в приложение {settings.SITE_FULL_NAME}. Это ваш первый проект '{project.name}'",
+                )
+            else:
+                EmailManage.send_invitation_new_project(
+                    user=user, context={"project": project}
+                )
+                NotificationsUser.create(
+                    user=user,
+                    text=f"Вас пригласили в новый проект: '{project.name}'",
                 )
 
             community_item = (

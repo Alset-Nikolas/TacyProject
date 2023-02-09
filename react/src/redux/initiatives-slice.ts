@@ -2,11 +2,46 @@ import { AxiosResponse } from 'axios';
 import { AppDispatch, RootState } from './store';
 import { createSlice } from '@reduxjs/toolkit';
 import { getComponents, getInitiativesList, getRequest, postRequest } from '../utils/requests';
-import { TComponentsSettings, TInitiative } from '../types';
+import { TComponentsSettings, TInitiative, TPropertie } from '../types';
 
 type TState = {
   list: Array<TInitiative>;
   personalList: Array<TInitiative>;
+  filter: {
+    properties: Array<TPropertie & {
+      selectedItems: Array<{
+        id: number;
+        value: string;
+        propertie: number;
+      }>
+    }>,
+    metrics: {
+      metric: {
+        id: number;
+        name: string;
+      };
+      type: {
+        title: string;
+        value: number;
+      }
+    },
+    status: Array<{
+      id: number,
+      name: string,
+    }>,
+    initiative: string,
+    roles: Array<{
+      role: number,
+      items: Array<{
+        id: number,
+        item: string
+      }>
+    }>,
+    files: Array<{
+      title: string,
+      id: number
+    }>,
+  },
 
   initiative: TInitiative | null;
   currentInitiativeId: number | null;
@@ -31,6 +66,23 @@ type TState = {
 const initialState: TState = {
   list: [],
   personalList: [],
+  filter: {
+    properties: [],
+    metrics: {
+      metric: {
+        id: -1,
+        name: 'Не выбрано',
+      },
+      type: {
+        title: 'По возрастанию',
+        value: 0,
+      }
+    },
+    status: [],
+    initiative: '',
+    roles: [],
+    files: [],
+  },
 
   initiative: null,
   currentInitiativeId: null,
@@ -162,6 +214,24 @@ export const stateSlice = createSlice({
         addInitiativeRequestFailed: true,
       }
     },
+    setfilterProperties: (state, action) => {
+      state.filter.properties = action.payload;
+    },
+    setSortMetrics: (state, action) => {
+      state.filter.metrics = action.payload;
+    },
+    setStatusFilter: (state, action) => {
+      state.filter.status = action.payload;
+    },
+    setRolesFilter: (state, action) => {
+      state.filter.roles = action.payload;
+    },
+    setFilesFilter: (state, action) => {
+      state.filter.files = action.payload;
+    },
+    setInitiativeFilter: (state, action) => {
+      state.filter.initiative = action.payload;
+    },
   },
 });
 
@@ -182,7 +252,12 @@ export const {
   addInitiativeRequest,
   addInitiativeRequestSuccess,
   addInitiativeRequestFailed,
-
+  setfilterProperties,
+  setSortMetrics,
+  setStatusFilter,
+  setRolesFilter,
+  setFilesFilter,
+  setInitiativeFilter,
 } = stateSlice.actions;
 
 export default stateSlice.reducer;

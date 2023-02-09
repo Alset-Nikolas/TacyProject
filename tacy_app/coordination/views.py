@@ -69,7 +69,7 @@ class SentForApproval(views.APIView):
             from_email=settings.EMAIL_HOST_USER,
             to=[email],
         )
-        msg.send()
+        msg.send(fail_silently=True)
 
     def _get_status_initiative(self, id):
         init = Initiatives.get_by_id(id)
@@ -161,14 +161,18 @@ class InfoInitiativeRole(views.APIView):
 
 
 class AddComment(views.APIView):
-    def _send_email(self, email):
+    def _send_email(self, email, instace):
+        initiative = instace.get("initiative")
+        author = instace.get("author_text")
+        TEXT = f"Проект: {initiative.project.name}\nИнициатива: {initiative.name}\nАвтор сообщения: {author.last_name} {author.first_name} {author.second_name}\nСодержание: {instace.get('text')}\n"
         msg = EmailMultiAlternatives(
             subject=f"Новое сообщение в обсуждении инициативы в приложении '{settings.SITE_FULL_NAME}'",
-            body=f"Перейдите по ссылке {settings.SITE_DOMAIN}",
+            body=TEXT
+            + f"Для ответа перейдите по ссылке {settings.SITE_DOMAIN}",
             from_email=settings.EMAIL_HOST_USER,
             to=[email],
         )
-        msg.send()
+        msg.send(fail_silently=True)
 
     @swagger_auto_schema(
         operation_description="Добавить сообщение в чат.",
@@ -184,8 +188,6 @@ class AddComment(views.APIView):
         coordinators: list[
             StagesCoordinationInitiative
         ] = StagesCoordinationInitiative.get_coordinators(initiative)
-        for coordinator in coordinators:
-            self._send_email(email=coordinator.email)
 
         instace = {
             "initiative": initiative,
@@ -195,6 +197,8 @@ class AddComment(views.APIView):
             "text": request.data.get("text"),
             "action": TYPE_NEW_COMMENT,
         }
+        for coordinator in coordinators:
+            self._send_email(email=coordinator.email, instace=instace)
 
         CoordinationInitiativeHistory.create(instace)
         users = StagesCoordinationInitiative.get_coordinators(initiative)
@@ -213,7 +217,7 @@ class Approval(views.APIView):
             from_email=settings.EMAIL_HOST_USER,
             to=[email],
         )
-        msg.send()
+        msg.send(fail_silently=True)
 
     def _add_history_approval(self, request):
         initiative = Initiatives.get_by_id(request.data.get("initiative"))

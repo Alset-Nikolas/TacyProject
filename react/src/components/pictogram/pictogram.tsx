@@ -23,6 +23,7 @@ type TPictogramProps = {
     | 'add' |
     'add-filled' |
     'show' |
+    'hide' |
     'close' |
     'export' |
     'send' |
@@ -60,6 +61,7 @@ export default function Pictogram({ type, onClick, cursor = 'default' }: TPictog
       iconSrc = addFilledIconSrc;
     break;
     case 'show':
+    case 'hide':
       iconSrc = showIconSrc;
     break;
     case 'close':
@@ -86,7 +88,7 @@ export default function Pictogram({ type, onClick, cursor = 'default' }: TPictog
         src={iconSrc}
         style={{
           cursor,
-          transform: type === 'show' ? 'rotate(180deg)' : '',
+          transform: type === 'hide' ? 'rotate(180deg)' : '',
         }}
         onClick={onClick}
       />

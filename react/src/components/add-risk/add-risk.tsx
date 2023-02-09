@@ -100,6 +100,7 @@ export default function AddRisk({ setAddRisk }: TAddRiskProps) {
             >
               {addfieldName}
               <textarea
+                className={`${styles.addfieldInput}`}
                 value={addfield.value}
                 onChange={(e) => inputHandler(e.target.value, index)}
               />

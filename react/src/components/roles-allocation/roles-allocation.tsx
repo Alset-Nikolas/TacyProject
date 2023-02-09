@@ -183,6 +183,7 @@ export default function RolesAlloction() {
         }
       });
       setRolesMutation({ initiativeId: currentInitiativeId, body });
+      setIsEdit(false);
       
       dispatch(closeModal());
     } catch (e) {
@@ -254,6 +255,11 @@ export default function RolesAlloction() {
   //   });
   // }, [currentInitiativeId]);
 
+  const [isEdit, setIsEdit] = useState(false);
+  const editButtonClickHandler = () => {
+    setIsEdit(true);
+  };
+
   return (
     <div
       className={`${styles.wrapper} ${sectionStyles.wrapperBorder}`}
@@ -262,11 +268,35 @@ export default function RolesAlloction() {
       <SectionHeader>
         <div
           className={`${sectionStyles.hideContentHeader}`}
-          onClick={() => setIsOpen((prevState) => !prevState)}
+          onClick={(e) => {
+            console.log((e.target as Element).closest(`#edit`));
+            if (!(e.target as Element).closest(`#edit`)) {
+              setIsOpen((prevState) => !prevState)
+            }
+          }}
         >
-          Распределение ролей
+          <div
+            style={{
+              display: 'flex',
+              gap: 20,
+              alignItems: 'center',
+            }}
+          >
+            Распределение ролей
+            {(userRights?.user_is_author || userRights?.user_is_superuser) && (
+              <div
+                id="edit"
+              >
+                <Pictogram
+                  type="edit"
+                  cursor="pointer"
+                  onClick={editButtonClickHandler}
+                />
+              </div>
+            )}
+          </div>
           <Pictogram
-            type={isOpen ? 'close' : 'show'}
+            type={isOpen ? 'hide' : 'show'}
             cursor="pointer"
           />
         </div>
@@ -345,7 +375,7 @@ export default function RolesAlloction() {
                                   />
                                 )}
                             </div>
-                            {(userRights?.user_is_author || userRights?.user_is_superuser) && (
+                            {(userRights?.user_is_author || userRights?.user_is_superuser) && isEdit && (
                               <div
                                 className={`${styles.addMemberIcon}`}
                               >
@@ -373,7 +403,7 @@ export default function RolesAlloction() {
                                   <div
                                     className={`${styles.nameCell}`}
                                   >
-                                    {(userRights?.user_is_author || userRights?.user_is_superuser) && (
+                                    {(userRights?.user_is_author || userRights?.user_is_superuser) && isEdit && (
                                       <div
                                         className={`${styles.removeMemberIcon}`}
                                       >
@@ -436,15 +466,17 @@ export default function RolesAlloction() {
               )}
             </div>
           </SectionContent>
-          <div
-            className={`${styles.sectionFooter}`}
-          >
-            <CustomizedButton
-              color="blue"
-              value="Сохранить"
-              onClick={() => saveRoleHandler()}
-            />
-          </div>
+          {(userRights?.user_is_author || userRights?.user_is_superuser) && isEdit && (
+            <div
+              className={`${styles.sectionFooter}`}
+            >
+              <CustomizedButton
+                color="blue"
+                value="Сохранить"
+                onClick={() => saveRoleHandler()}
+              />
+            </div>
+          )}
         </>
         )}
         {modal.isOpen && modal.type.rolesAllocation && (

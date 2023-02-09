@@ -199,7 +199,11 @@ export default function RiskManagement({ edit, editButton, isSettings, component
           className={`${styles.risksList}`}
         >
           {!risksList?.length && (
-            <div>
+            <div
+              style={{
+                padding: '20px 0 0 0',
+              }}
+            >
                Список рисков пуст
             </div>
           )}
@@ -223,7 +227,7 @@ export default function RiskManagement({ edit, editButton, isSettings, component
                     });
                   }}
                 >
-                  {`№${riskIndex+1}. `}
+                  {`${riskIndex+1}. `}
                   &nbsp;
                   {risk.risk.name}
                   {/* <span className={`${styles.riskName}`}>{risk.risk.name}</span> */}
@@ -237,7 +241,7 @@ export default function RiskManagement({ edit, editButton, isSettings, component
                     }}
                     >
                     <Pictogram
-                      type="show"
+                      type={isShowAddfields[riskIndex] ? 'hide' : 'show'}
                       cursor="pointer"
                       
                     />

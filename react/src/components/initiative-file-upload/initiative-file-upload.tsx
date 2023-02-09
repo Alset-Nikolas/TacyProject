@@ -14,6 +14,7 @@ type TFileUploadProps = {
   file: {
     id:number;
     file: string | null;
+    file_name: string;
     initiative: number;
     title: number;
   };
@@ -53,14 +54,14 @@ const InitiativeFileUpload:FC<TFileUploadProps> = ({ fileUploadHandler, index, f
         htmlFor={`file-input-${index}`}
       >
         <img style={{marginRight: 8}} src={fileSrc} />
-        {fileName && (
+        {file.file_name && (
           <a
             href={`${REACT_APP_BACKEND_BASE_URL}${file.file}`}
           >
-            {fileName}
+            {file.file_name}
           </a>
         )}
-        {!fileName && (
+        {!file.file_name && (
           <span>
             Прикрепить файл
           </span>

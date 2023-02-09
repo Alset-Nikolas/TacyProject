@@ -71,7 +71,6 @@ class Project(models.Model):
 
     def update_community(self):
         for user_in_project in self.community_info.all():
-            print("user_in_project", user_in_project)
             user_in_project.update_user()
 
     @classmethod
@@ -215,7 +214,7 @@ class Project(models.Model):
             inits = inits.annotate(total=Count("id")).filter(
                 total=len(files_filter)
             )
-        inits = inits.distinct("pk")
+        # inits = inits.distinct("pk")
         return self.inits_sorted(data, inits)
 
 
@@ -636,7 +635,7 @@ class CommunityAddFields(models.Model):
         for field in addfields:
             cls.objects.update_or_create(
                 community=community,
-                title=field.get("title").get("id"),
+                title_id=field.get("title").get("id"),
                 defaults={"value": field.get("value")},
             )
 

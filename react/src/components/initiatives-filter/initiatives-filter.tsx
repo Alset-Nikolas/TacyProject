@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import ReactDOM from 'react-dom';
 import CustomizedButton from "../button/button";
 import SelectFiles from "../select-files/select-files";
@@ -9,9 +9,10 @@ import CustomizedSelect from "../select/Select";
 import styles from './initiatives-filter.module.scss';
 import inputStyles from '../../styles/inputs.module.scss';
 import { useGetComponentsQuery, useGetProjectInfoQuery, useGetTeamListQuery, useLazyGetSortedInitiativesQuery } from "../../redux/state/state-api";
-import { useAppSelector } from "../../utils/hooks";
+import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import { TPropertie } from "../../types";
 import { SelectChangeEvent } from "@mui/material";
+import { setFilesFilter, setfilterProperties, setInitiativeFilter, setRolesFilter, setSortMetrics, setStatusFilter } from "../../redux/initiatives-slice";
 
 type TInitiativesFilterProps = {
   setIsShowFilteredList: any;
@@ -23,6 +24,7 @@ type TInitiativesFilterProps = {
 
 const InitiativesFilter:FC<TInitiativesFilterProps> = ({ setIsShowFilteredList, filesList, sortInitiatives, parentElement, closeFilter }) => {
   const portalDiv = document.getElementById('modal-root')!;
+  const dispatch = useAppDispatch();
   const { currentId } = useAppSelector((store) => store.state.project);
   const { data: project } = useGetProjectInfoQuery(currentId);
   const { data: components } = useGetComponentsQuery(currentId ? currentId : -1);
@@ -58,43 +60,52 @@ const InitiativesFilter:FC<TInitiativesFilterProps> = ({ setIsShowFilteredList, 
     return queryParam;
   };
 
-  const [
-    filterProperties,
-    setfilterProperties
-  ] = useState<Array<TPropertie & {selectedItems: Array<{
-    id: number;
-    value: string;
-    propertie: number;
-  }>}>>(project ? project.properties.map((property) => {
-    return {
-      ...property,
-      selectedItems: [],
-    }
-  }) : []);
-  const [sortMetrics, setSortMetrics] = useState<{
-    metric: {
-      id: number;
-      name: string;
-    };
-    type: {
-      title: string;
-      value: number;
-    }
-  }>({
-    metric: {
-      id: -1,
-      name: 'Не выбрано',
-    },
-    type: {
-      title: 'По возрастанию',
-      value: 0,
-    }
-  });
-  const [statusFilter, setStatusFilter] = useState<Array<{id: number, name: string}>>([]);
-  const [isSortQuery, setIsSortQuery] = useState(false);
-  const [initiativeFilter, setInitiativeFilter] = useState('');
-  const [rolesFilter, setRolesFilter] = useState<Array<{role: number, items: Array<{id: number, item: string}>}>>(project ? project.roles.map((role) => {return {role: role.id, items: []}}) : []);
-  const [filesFilter, setFilesFilter] = useState<Array<{ title: string, id: number }>>([]);
+  const {
+    properties: filterProperties,
+    metrics: sortMetrics,
+    status: statusFilter,
+    initiative: initiativeFilter,
+    roles: rolesFilter,
+    files: filesFilter,
+   } = useAppSelector((store) => store.initiatives.filter);
+
+  // const [
+  //   filterProperties,
+  //   setfilterProperties
+  // ] = useState<Array<TPropertie & {selectedItems: Array<{
+  //   id: number;
+  //   value: string;
+  //   propertie: number;
+  // }>}>>(project ? project.properties.map((property) => {
+  //   return {
+  //     ...property,
+  //     selectedItems: [],
+  //   }
+  // }) : []);
+  // const [sortMetrics, setSortMetrics] = useState<{
+  //   metric: {
+  //     id: number;
+  //     name: string;
+  //   };
+  //   type: {
+  //     title: string;
+  //     value: number;
+  //   }
+  // }>({
+  //   metric: {
+  //     id: -1,
+  //     name: 'Не выбрано',
+  //   },
+  //   type: {
+  //     title: 'По возрастанию',
+  //     value: 0,
+  //   }
+  // });
+  // const [statusFilter, setStatusFilter] = useState<Array<{id: number, name: string}>>([]);
+  // const [isSortQuery, setIsSortQuery] = useState(false);
+  // const [initiativeFilter, setInitiativeFilter] = useState('');
+  // const [rolesFilter, setRolesFilter] = useState<Array<{role: number, items: Array<{id: number, item: string}>}>>(project ? project.roles.map((role) => {return {role: role.id, items: []}}) : []);
+  // const [filesFilter, setFilesFilter] = useState<Array<{ title: string, id: number }>>([]);
 
   const parentRect = parentElement?.getBoundingClientRect();
   const topOffset = parentRect ? parentRect.top : 0;
@@ -118,67 +129,61 @@ const InitiativesFilter:FC<TInitiativesFilterProps> = ({ setIsShowFilteredList, 
 
   const onPropertyFilterChange = (e: SelectChangeEvent<string[]>, propertyIndex: number) => {
     const value = e.target.value as string[];
-    setfilterProperties((prevState) => {
-      const newState = [...prevState];
-      const currentProperty = { ...newState[propertyIndex] };
-      const newSelectedItems = [] as typeof currentProperty.selectedItems;
-      value.forEach((el) => {
-        const foundItem = currentProperty.items.find((item) => item.value === el);
-        if (foundItem) newSelectedItems.push(foundItem);
-      });
-      currentProperty.selectedItems = newSelectedItems;
-      newState[propertyIndex] = currentProperty;
-      return newState;
-    })
+    const newState = [...filterProperties];
+    const currentProperty = { ...newState[propertyIndex] };
+    const newSelectedItems = [] as typeof currentProperty.selectedItems;
+    value.forEach((el) => {
+      const foundItem = currentProperty.items.find((item) => item.value === el);
+      if (foundItem) newSelectedItems.push(foundItem);
+    });
+    currentProperty.selectedItems = newSelectedItems;
+    newState[propertyIndex] = currentProperty;
     
+    dispatch(setfilterProperties(newState));
   };
 
   const onMetricSortChange = (e: SelectChangeEvent<string>) => {
-    setSortMetrics((prevState) => {
-      const newState ={...prevState};
-      const foundMetric = project?.metrics.find((metric) => metric.title === e.target.value);
-      if (foundMetric) {
-        newState.metric = {
-          id: foundMetric.id,
-          name: foundMetric.title,
-        };
-      } else {
-        newState.metric = {
-          id: -1,
-          name: 'Не выбрано',
-        };
-      }
-      return newState;
-    });
+    const newState ={...sortMetrics};
+    const foundMetric = project?.metrics.find((metric) => metric.title === e.target.value);
+    if (foundMetric) {
+      newState.metric = {
+        id: foundMetric.id,
+        name: foundMetric.title,
+      };
+    } else {
+      newState.metric = {
+        id: -1,
+        name: 'Не выбрано',
+      };
+    }
+    dispatch(setSortMetrics(newState));
   };
 
   const onMetricSortTypeChange = (e: SelectChangeEvent<string>) => {
-    setSortMetrics((prevState) => {
-      const newState ={...prevState};
-      newState.type = {
-        title: e.target.value,
-        value: e.target.value === 'По возрастанию' ? 0 : 1,
+    const newState ={...sortMetrics};
+    newState.type = {
+      title: e.target.value,
+      value: e.target.value === 'По возрастанию' ? 0 : 1,
       };
-      return newState;
-    });
+      dispatch(setSortMetrics(newState));
   };
 
   const onStatusFilterChange = (e: SelectChangeEvent<string[]>) => {
     const value = e.target.value as string[];
-      const newStatuses = value.map((statusName) => {
-        const foundStatus = components?.settings?.initiative_status.find((item) => item.name === statusName);
+    const newStatuses = value.map((statusName) => {
+      const foundStatus = components?.settings?.initiative_status.find((item) => item.name === statusName);
 
-        if (!foundStatus) return {
-          id: -1,
-          name: 'error',
-        }
+      if (!foundStatus) return {
+        id: -1,
+        name: 'error',
+      }
 
-        return {
-          id: foundStatus.id,
-          name: foundStatus.name,
-        }
-      })
-      setStatusFilter(newStatuses);
+      return {
+        id: foundStatus.id,
+        name: foundStatus.name,
+      }
+    });
+    dispatch(setStatusFilter(newStatuses));
   };
 
   const onRoleFilterChange = (e: SelectChangeEvent<string[]>, roleId: number) => {
@@ -190,13 +195,12 @@ const InitiativesFilter:FC<TInitiativesFilterProps> = ({ setIsShowFilteredList, 
         item,
       };
     })
-    setRolesFilter((prevState) => {
-      const newState = [...prevState];
-      const foundIndex = newState.findIndex((item) => item.role === roleId);
+    const newState = [...rolesFilter];
+    const foundIndex = newState.findIndex((item) => item.role === roleId);
 
-      if (foundIndex !== -1) newState[foundIndex] = { role: roleId, items: newValues };
-      return newState;
-    });
+    if (foundIndex !== -1) newState[foundIndex] = { role: roleId, items: newValues };
+    
+    dispatch(setRolesFilter(newState));
   };
 
   const onFileleFilterChange = (e: SelectChangeEvent<string[]>) => {
@@ -207,8 +211,12 @@ const InitiativesFilter:FC<TInitiativesFilterProps> = ({ setIsShowFilteredList, 
       return itemObject;
     });
 
-    setFilesFilter(newValues);
+    dispatch(setFilesFilter(newValues));
   }
+
+  useEffect(() => {
+    if (!rolesFilter.length) dispatch(setRolesFilter(project ? project.roles.map((role) => {return {role: role.id, items: []}}) : []));
+  }, [project]);
 
   return ReactDOM.createPortal(
     <div
@@ -232,7 +240,7 @@ const InitiativesFilter:FC<TInitiativesFilterProps> = ({ setIsShowFilteredList, 
             <input
               className={`${inputStyles.textInput}`}
               value={initiativeFilter}
-              onChange={(e) => setInitiativeFilter(e.target.value)}
+              onChange={(e) => dispatch(setInitiativeFilter(e.target.value))}
             />
           </div>
           <div

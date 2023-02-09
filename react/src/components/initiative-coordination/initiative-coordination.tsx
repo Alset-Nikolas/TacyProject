@@ -33,7 +33,7 @@ import {
 import Pictogram from "../pictogram/pictogram";
 import { MessageSeparator } from "../message-separator/message-separator";
 import Modal from "../modal/modal";
-import { openCoordinationModal, closeModal, openErrorModal } from "../../redux/state/state-slice";
+import { openCoordinationModal, closeModal, openErrorModal, showLoader, closeLoader } from "../../redux/state/state-slice";
 import { TUser } from "../../types";
 import InitiativeFileUpload from "../initiative-file-upload/initiative-file-upload";
 
@@ -135,8 +135,19 @@ export default function InitiativeCoordination() {
   // const [ closeInitiative, {
   //   isError: closeInitiativeRequestFailed,
   // } ] = useCloseInitiativeMutation();
-  const [ coordinate ] = useCoordinateMutation();
-  const [ sendForApproval ] = useSendForApprovalMutation();
+  const [
+    coordinate,
+    {
+      isError: isCoordinateError,
+      isLoading: isCoordinateInProgress,
+    }
+   ] = useCoordinateMutation();
+  const [
+    sendForApproval,
+    {
+      isError: isSendForApprovalError,
+      isLoading: isSendForApprovalInProgress,
+    } ] = useSendForApprovalMutation();
   const [ postComment ] = usePostCommentMutation();
 
   const inputChangeHandler = (e: ChangeEvent<HTMLTextAreaElement>) => {
@@ -188,6 +199,13 @@ export default function InitiativeCoordination() {
         text: '',
       }
     });
+  }
+
+  const sendForApproveHandler = () => {
+    sendForApproval({ ...coordinatorsState, initiative: currentInitiativeId ? currentInitiativeId : -1 });
+    if (currentInitiativeId) localStorage.setItem('initiative-id', currentInitiativeId.toString());
+
+    dispatch(closeModal());
   }
 
   const onSelectorChange = (e: SelectChangeEvent) => {
@@ -247,7 +265,20 @@ export default function InitiativeCoordination() {
 
   useEffect(() => {
     if (closeInitiativeRequestFailed) dispatch(openErrorModal('Ошибка при отзыве инициативы'));
-  }, [closeInitiativeRequestFailed])
+    if (isSendForApprovalError) dispatch(openErrorModal('Ошибка при отправке на согласование'));
+    if (isCoordinateError) dispatch(openErrorModal('Ошибка при согласовании'));
+    if (isCoordinateInProgress || isSendForApprovalInProgress) {
+      dispatch(showLoader());
+    } else {
+      dispatch(closeLoader());
+    }
+  }, [
+    closeInitiativeRequestFailed,
+    isSendForApprovalError,
+    isSendForApprovalInProgress,
+    isCoordinateError,
+    isCoordinateInProgress,
+  ])
 
   useEffect(() => {
     const currentStatusFilesList = filesSettings?.find((item) => item.status.id === initiative?.initiative.status?.id)?.settings_file;
@@ -265,7 +296,7 @@ export default function InitiativeCoordination() {
         >
           Согласование инициативы
           <Pictogram
-            type={isOpen ? 'close' : 'show'}
+            type={isOpen ? 'hide' : 'show'}
             cursor="pointer"
           />
         </div>
@@ -453,6 +484,8 @@ export default function InitiativeCoordination() {
                     <div
                       style={{
                         textAlign: 'center',
+                        padding: '0 0 20px 0',
+                        color: '#504F4F'
                       }}
                     >История пуста</div>
                   )}
@@ -605,25 +638,32 @@ export default function InitiativeCoordination() {
                       >
                         {item.role.name}
                       </div>
-                      <div
-                        className={`${styles.modalUserWrapper} ${styles.header}`}
-                      >
-                        <div className={`${styles.modalHeaderCell}`}>
-                          ФИО
-                        </div>
-                        {
-                          project?.properties.map((propertie) => (
-                            <div className={`${styles.modalHeaderCell}`} key={propertie.id}>
-                              {propertie.title}
-                            </div>
-                          ))
-                        }
-                      </div>
                       {!item.community.length && (
-                        <div>
+                        <div
+                          style={{
+                            paddingLeft: 47,
+                          }}
+                        >
                           Отсутствуют пользователи, назначенные на роль
                         </div>
                       )}
+                      {!!item.community.length && (
+                        <div
+                          className={`${styles.modalUserWrapper} ${styles.header}`}
+                        >
+                          <div className={`${styles.modalHeaderCell}`}>
+                            ФИО
+                          </div>
+                          {
+                            project?.properties.map((propertie) => (
+                              <div className={`${styles.modalHeaderCell}`} key={propertie.id}>
+                                {propertie.title}
+                              </div>
+                            ))
+                          }
+                        </div>
+                      )}
+                      
                       {item.community.map((member) => {
                         const foundMember = membersList?.find((item) => item.id === member.user_info?.user.id);
                         if ((user?.user.id === member.user_info?.user.id) || !member.user_info) return null;
@@ -673,11 +713,7 @@ export default function InitiativeCoordination() {
                     value="Согласовать"
                     color="blue"
                     disabled={!coordinatorsState.coordinators.length}
-                    onClick={() => {
-                      // dispatch(sendForApprovalThunk({ ...coordinatorsState, initiative: currentInitiativeId ? currentInitiativeId : -1 }));
-                      sendForApproval({ ...coordinatorsState, initiative: currentInitiativeId ? currentInitiativeId : -1 });
-                      dispatch(closeModal());
-                    }}
+                    onClick={sendForApproveHandler}
                   />
                 </div>
               </div>

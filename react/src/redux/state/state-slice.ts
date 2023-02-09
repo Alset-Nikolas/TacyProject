@@ -335,9 +335,10 @@ export const stateSlice = createSlice({
       state.app.modal.isOpen = true;
       state.app.modal.message = action.payload;
     },
-    openDeleteMemberModal: (state) => {
+    openDeleteMemberModal: (state, action) => {
       state.app.modal.isOpen = true;
       state.app.modal.type.deleteMember = true;
+      state.app.modal.data = { index: action.payload };
     },
     openDeleteInitiativeModal: (state) => {
       state.app.modal.isOpen = true;

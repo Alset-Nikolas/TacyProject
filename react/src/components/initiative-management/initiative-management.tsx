@@ -183,6 +183,19 @@ export default function InitiativeManagement({ edit, editButton }: TInitiativeMa
         </div>
         {currentInitiative && (
           <ol className={`${styles.paramsList}`}>
+            {currentInitiative.addfields.map((addfield, index) => (
+              <li key={addfield.id}>
+                <div>
+                  <div>{addfield.title.title}</div>
+                  <div
+                    className={`${styles.fieldsContent}`}
+                  >
+                    {currentInitiative.addfields[index].value}
+                  </div>
+                </div>
+                
+              </li>
+            ))}
             <li>
               <div>
                 <div>
@@ -264,19 +277,7 @@ export default function InitiativeManagement({ edit, editButton }: TInitiativeMa
               Длителность инициативы
             </li> */}
             {/* {settings.initiative_addfields.map((addfield, index) => ( */}
-            {currentInitiative.addfields.map((addfield, index) => (
-              <li key={addfield.id}>
-                <div>
-                  <div>{addfield.title.title}</div>
-                  <div
-                    className={`${styles.fieldsContent}`}
-                  >
-                    {currentInitiative.addfields[index].value}
-                  </div>
-                </div>
-                
-              </li>
-            ))}
+            
           </ol>
         )}
       </SectionContent>

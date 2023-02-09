@@ -13,6 +13,7 @@ import InitiativeManagement from "../../components/initiative-management/initiat
 import DateInput from "../../components/date-input/date-input";
 import { useAddEventMutation, useDeleteEventMutation, useGetComponentsQuery } from "../../redux/state/state-api";
 import Checkbox from '../../components/ui/checkbox/checkbox';
+import moment from "moment";
 
 export default function EventInfoPage() {
   const navigate = useNavigate();
@@ -33,7 +34,11 @@ export default function EventInfoPage() {
   if (!initiative || !currentEvent) return null;
 
   const [newEventState, setNewEventState] = useState({
-    event: currentEvent.event,
+    event: {
+      ...currentEvent.event,
+      date_start: moment(currentEvent.event.date_start).format('DD.MM.YYYY'),
+      date_end: moment(currentEvent.event.date_end).format('DD.MM.YYYY'),
+    },
     metric_fields: currentEvent.metric_fields.map((field) => {
       return {
         metric: field.metric,
@@ -75,16 +80,16 @@ export default function EventInfoPage() {
 
   const onInitiativeInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    const formatDate = (dateString: string) => {
-      const dateParts = dateString.split('.');
-      return `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
-    }
+    // const formatDate = (dateString: string) => {
+    //   const dateParts = dateString.split('.');
+    //   return `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+    // }
     setNewEventState((prevState) => {
       return {
         ...prevState,
         event: {
           ...prevState.event,
-          [name]: name.match('date') ? formatDate(value) : value,
+          [name]: value,
         }
       };
     })

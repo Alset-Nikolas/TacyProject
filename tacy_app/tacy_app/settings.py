@@ -175,12 +175,9 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
 SITE_DOMAIN = "http://31.177.78.111"
-# SITE_DOMAIN = "http://127.0.0.1:3000"
 SITE_FULL_NAME = "Site name"
 
 # if DEBUG:
 #     SITE_DOMAIN = "http://127.0.0.1:3000"
 #     EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
 #     EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
-EMAIL_HOST_USER = "Alset.Nikolas@gmail.com"
-EMAIL_HOST_PASSWORD = "mehwrdpkfcfrybgi"

@@ -1538,7 +1538,7 @@ class InitiativeFile(views.APIView):
         if not file:
             return Response("get file", 404)
         init_file = get_object_or_404(InitiativesFiles, id=id_init)
-        self.check_object_permissions(self.request, file.initiative)
+        self.check_object_permissions(self.request, init_file.initiative)
         init_file.file = file
         init_file.file_name = str(file)
         file = init_file.save()

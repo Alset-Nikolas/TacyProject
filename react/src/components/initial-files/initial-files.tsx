@@ -13,6 +13,7 @@ import { REACT_APP_BACKEND_BASE_URL } from '../../consts';
 import FileUpload from '../file-upload/file-upoad';
 import fileSrc from '../../images/icons/file.svg';
 import Pictogram from '../pictogram/pictogram';
+import { useLocation } from 'react-router';
 
 type TInitialFilesProps = {
   edit?: boolean;
@@ -33,6 +34,7 @@ export default function InitialFiles({
 }: TInitialFilesProps) {
   const dispatch = useAppDispatch();
   const { sectionHeaderText } = textStyles;
+  const location = useLocation();
   // const project = useAppSelector((store) => store.state.project.value);
   const { currentId } = useAppSelector((store) => store.state.project);
   const { data: project } = useGetProjectInfoQuery(currentId);
@@ -85,7 +87,7 @@ export default function InitialFiles({
         </SectionHeader>
         {/* </div> */}
         <div  className={`${styles.content} ${styles.edit}`}>
-          {tempFilesInfo?.map((el, index) => (
+          {!location.pathname.includes('create') && tempFilesInfo?.map((el, index) => (
             <div
               key={el.id}
               className={`${styles.fileWrapper}`}

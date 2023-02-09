@@ -33,7 +33,9 @@ type TTeamRowProps = {
 
 export default function TeamRow({ index, member, edit, header, removeMember, setList }: TTeamRowProps) {
   const { currentId } = useAppSelector((store) => store.state.project);
-  const { data: project } = useGetProjectInfoQuery(currentId ? currentId : -1);
+  const { data: project } = useGetProjectInfoQuery(currentId ? currentId : -1, {
+    skip: !currentId,
+  });
   const { data: components } = useGetComponentsQuery(currentId ? currentId : -1, {
     skip: !currentId,
   });
@@ -79,7 +81,7 @@ export default function TeamRow({ index, member, edit, header, removeMember, set
         })
       }
       {
-        project.properties.map((propertie, propIndex) => {
+        components?.table_community.properties.map((propertie, propIndex) => {
           if (!components?.table_community.properties[propIndex].is_community_activate) return null;
           return (
           <th className={`${styles.cellWrapper}`} key={propertie.id}>
@@ -98,11 +100,11 @@ export default function TeamRow({ index, member, edit, header, removeMember, set
   if (!member || typeof index === 'undefined') return null;
   const { name, phone, email, /* role, rights, */properties, is_create, is_superuser, addfields } = member;
 
-  const onRemoveClickHandler = () => {
-    dispatch(openDeleteMemberModal());
+  const onRemoveClickHandler = (index: number) => {
+    dispatch(openDeleteMemberModal(index));
   };
 
-  const onConfirmClickHandler = () => {
+  const onConfirmClickHandler = (index: number) => {
     // const newList = [...membersList];
     // newList.splice(index, 1);
     // dispatch(setList(newList));
@@ -373,7 +375,7 @@ export default function TeamRow({ index, member, edit, header, removeMember, set
             <Pictogram
               type="delete"
               cursor="pointer"
-              onClick={onRemoveClickHandler}
+              onClick={() => onRemoveClickHandler(index)}
             />
           </td>
         )}
@@ -389,7 +391,7 @@ export default function TeamRow({ index, member, edit, header, removeMember, set
               <CustomizedButton
                 className={`${styles.modalButton}`}
                 value="Да"
-                onClick={onConfirmClickHandler}
+                onClick={() => onConfirmClickHandler(modal.data.index)}
               />
               <CustomizedButton
                 className={`${styles.modalButton}`}

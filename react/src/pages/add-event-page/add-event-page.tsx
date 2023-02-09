@@ -246,6 +246,7 @@ export default function AddEventPage() {
                   {!newEventState.metric_fields.length && 'Список метрик пуст'}
                   {newEventState.metric_fields.map((field, index) => {
                     const foundMetric = project?.metrics.find((metric) => metric.id === field.metric.id);
+                    if (!foundMetric?.is_aggregate) return null;
                     return (
                       <label
                         key={field.metric.id}

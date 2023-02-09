@@ -938,11 +938,19 @@ class MainEventSerializer(serializers.ModelSerializer):
             "ready",
         ]
 
+    def __validate_dates(self, attrs):
+
+        if attrs.get("date_end") > attrs.get("date_start"):
+            raise serializers.ValidationError(
+                {"date_start": "date_start <= date_end"}
+            )
+
     def validate(self, attrs):
 
         id = attrs.get("id", None)
         initiative = self.context.get("initiative")
         e_name = Events.get_by_name(initiative.id, attrs.get("name"))
+        self.__validate_dates(attrs)
         if id < 0 and e_name:
             raise serializers.ValidationError(
                 {
