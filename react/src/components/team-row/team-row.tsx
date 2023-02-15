@@ -131,6 +131,11 @@ export default function TeamRow({ index, member, edit, header, removeMember, set
           value = phoneMatch ? phoneMatch[0] : '';
         }
 
+        // if (name === 'email') {
+        //   const emailMatch = value.match(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/g)
+        //   value = emailMatch ? emailMatch[0] : '';
+        // }
+
         newMemberState[name] = value;
         newList[index] = newMemberState;
 

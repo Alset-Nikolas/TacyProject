@@ -400,11 +400,20 @@ export default function InitiativeCoordination() {
                           {item.title.title}
                         </div>
                         <div>
-                          <InitiativeFileUpload
-                            index={index}
-                            fileUploadHandler={setFiles}
-                            file={item.file}
-                          />
+                          {userRights?.user_is_superuser || userRights?.user_is_author || userRights?.user_now_apprwed ? (
+                            <InitiativeFileUpload
+                              index={index}
+                              fileUploadHandler={setFiles}
+                              file={item.file}
+                            />
+                          ) : (
+                            <InitiativeFileUpload
+                              index={index}
+                              fileUploadHandler={setFiles}
+                              file={item.file}
+                              strict
+                            />
+                          )}
                         </div>
                       </div>
                     )
@@ -430,11 +439,21 @@ export default function InitiativeCoordination() {
                           {item.title.title}
                         </div>
                         <div>
-                          <InitiativeFileUpload
-                            index={index}
-                            fileUploadHandler={setFiles}
-                            file={item.file}
-                          />
+                          {userRights?.user_is_superuser || userRights?.user_is_author || userRights?.user_now_apprwed ? (
+                            <InitiativeFileUpload
+                              index={index}
+                              fileUploadHandler={setFiles}
+                              file={item.file}
+                            />
+                          ) : (
+                            <InitiativeFileUpload
+                              index={index}
+                              fileUploadHandler={setFiles}
+                              file={item.file}
+                              strict
+                            />
+                          )}
+                          
                         </div>
                       </div>
                     )

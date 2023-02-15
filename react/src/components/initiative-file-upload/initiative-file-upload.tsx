@@ -18,9 +18,10 @@ type TFileUploadProps = {
     initiative: number;
     title: number;
   };
+  strict?: boolean;
 }
 
-const InitiativeFileUpload:FC<TFileUploadProps> = ({ fileUploadHandler, index, file }) => {
+const InitiativeFileUpload:FC<TFileUploadProps> = ({ fileUploadHandler, index, file, strict }) => {
   const descRef = useRef<HTMLSpanElement>(null)
   const initiativeId = useAppSelector((store) => store.initiatives.currentInitiativeId);
   const [postFile] = usePostInitiativeFileMutation();
@@ -63,12 +64,12 @@ const InitiativeFileUpload:FC<TFileUploadProps> = ({ fileUploadHandler, index, f
         )}
         {!file.file_name && (
           <span>
-            Прикрепить файл
+            {strict ? 'Файл отсутствует' : 'Прикрепить файл'}
           </span>
         )}
         {!file}
       </label>
-      {file.file && (
+      {file.file && !strict && (
         <div>
           <Pictogram
             type="delete-filled"
@@ -77,7 +78,7 @@ const InitiativeFileUpload:FC<TFileUploadProps> = ({ fileUploadHandler, index, f
           />
         </div>
       )}
-      {!file.file && (
+      {!file.file && !strict && (
         <input
           className={`${styles.fileInput}`}
           type="file"

@@ -32,7 +32,9 @@ export default function CustomBarChart({ data }: TCustomBarChartProps) {
       <BarChart width={((100 * processedData.length) > 390) ? (100 * processedData.length) : 390} height={250} data={processedData}>
         {/* <CartesianGrid strokeDasharray="3 3" /> */}
         <XAxis dataKey="name_short" />
-        <YAxis />
+        <YAxis
+          domain={['auto', (dataMax: number) => (dataMax + dataMax * 0.1)]}
+        />
         <Tooltip
           labelFormatter={(label) => labelMap.get(label)}
         />

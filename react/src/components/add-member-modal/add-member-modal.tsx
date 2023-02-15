@@ -32,6 +32,7 @@ export default function AddMemberModal({ addMember }: TAddMemberProps) {
   });
   const [stage, setStage] = useState(1);
   const [isError, setIsError] = useState(false);
+  const [errorMessages, setErrorMessages] = useState<Array<string>>([]);
   const [name, setName] = useState({
     'first-name': '',
     'second-name': '',
@@ -99,6 +100,7 @@ export default function AddMemberModal({ addMember }: TAddMemberProps) {
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setIsError(false);
+    setErrorMessages([]);
     if (name === 'surname') {
       setName((prevState) => {
         return { ...prevState, [name]: value }
@@ -146,13 +148,64 @@ export default function AddMemberModal({ addMember }: TAddMemberProps) {
     let isValidated = true;
     switch (currentStage) {
       case 1:
-        if (!name['first-name']) isValidated = false;
-        if (!name['second-name']) isValidated = false;
-        if (!name.surname) isValidated = false;
+        if (!name['first-name']) {
+          isValidated = false;
+          setErrorMessages(prevState => {
+            const newState = [...prevState];
+            newState.push('Заполните имя');
+            return newState;
+          });
+        }
+        if (!name['second-name']) {
+          isValidated = false;
+          setErrorMessages(prevState => {
+            const newState = [...prevState];
+            newState.push('Заполните отчество');
+            return newState;
+          });
+        }
+        if (!name.surname) {
+          isValidated = false;
+          setErrorMessages(prevState => {
+            const newState = [...prevState];
+            newState.push('Заполните фамилию');
+            return newState;
+          });
+        }
         break;
       case 2:
-        if (!newMember.email.match(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/g)) isValidated = false;
-        if (!newMember.phone.match(/\d+/g)) isValidated = false;
+        if (!newMember.email.match(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/g)) {
+          isValidated = false;
+          if (!newMember.email) {
+            setErrorMessages(prevState => {
+              const newState = [...prevState];
+              newState.push('Заполните e-mail')
+              return newState;
+            });
+          } else {
+            setErrorMessages(prevState => {
+              const newState = [...prevState];
+              newState.push('Неверный формат e-mail')
+              return newState;
+            });
+          }
+        }
+        if (!newMember.phone.match(/\d+/g)) {
+          isValidated = false;
+          if (!newMember.phone) {
+            setErrorMessages(prevState => {
+              const newState = [...prevState];
+              newState.push('Заполните номер телефона')
+              return newState;
+            });
+          } else {
+            setErrorMessages(prevState => {
+              const newState = [...prevState];
+              newState.push('Номер телефона должен содержать только цифры')
+              return newState;
+            });
+          }
+        }
         break;
       case 3:
         if (!newMember.rights.length) isValidated = false;
@@ -168,6 +221,7 @@ export default function AddMemberModal({ addMember }: TAddMemberProps) {
   };
 
   const modalButtonHandler = () => {
+    setErrorMessages([]);
     const check = () => {
       if (validate(stage)) {
         setStage((prevStage) => prevStage + 1)
@@ -313,9 +367,18 @@ export default function AddMemberModal({ addMember }: TAddMemberProps) {
       } */}
       {isError && (
         <div
-          className={`${styles.error}`}
+          className={`${styles.error} ${styles.errorWrapper}`}
         >
-          Заполните обязательные поля
+          {!errorMessages.length && (
+            <span>Заполните обязательные поля</span>
+          )}
+          {errorMessages.map((message, index) => (
+            <span
+              key={`message-${index}`}
+            >
+              {message}
+            </span>
+          ))}
         </div>
       )}
       <CustomizedButton
