@@ -278,10 +278,9 @@ export default function InitiativesTable({ externalInitiativesList, addButton }:
                         key={`${index}_${metric.id}`}
                         className={`${styles.tableCol}`}
                       >
-                        {metric.title},
-                        &nbsp;
-                        {(!foundMetric?.is_percent && foundMetric?.units !== 'бм') ? foundMetric?.units : ''}
-                        {foundMetric?.is_percent && '%'}
+                        {metric.title}
+                        {(!foundMetric?.is_percent && foundMetric?.units !== 'бм') ? `, ${foundMetric?.units}` : ''}
+                        {foundMetric?.is_percent && ' %'}
                       </th>
                     ) : (
                       null
@@ -307,12 +306,12 @@ export default function InitiativesTable({ externalInitiativesList, addButton }:
                 const isFilesUpload = () => {
                   let isUploaded = true;
                   item.files.forEach((el) => {
-                    const fileStatus = components?.settings?.initiative_status.find((status) => status.id === el.title.id);
-                    if (!el.file ||
+                    const fileStatus = components?.settings?.initiative_status.find((status) => status.id === el.title.status);
+                    if (!el.file &&
                       (item.initiative.status &&
                       fileStatus &&
-                      item.initiative.status.value > 0 &&
-                      item.initiative.status.value > fileStatus.value)
+                      item.initiative.status.value > -1 &&
+                      item.initiative.status.value >= fileStatus.value)
                     ) isUploaded = false;
                   });
                   return isUploaded;

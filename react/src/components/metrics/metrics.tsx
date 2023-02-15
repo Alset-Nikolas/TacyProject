@@ -151,6 +151,7 @@ export default function Metrics({
                       <input
                         className={`${inputStyles.textInput} ${styles.unitsInput}`}
                         value={el.units}
+                        disabled={el.is_percent}
                         onChange={(e: ChangeEvent<HTMLInputElement>) => handlePropertieInutChange(index, projectForEdit, 'metrics', 'units', e.target.value, dispatch)}
                       />
                     </div>

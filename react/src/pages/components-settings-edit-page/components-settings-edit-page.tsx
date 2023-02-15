@@ -1,26 +1,27 @@
-import InitiativeManagement from '../../components/initiative-management/initiative-management';
 import EventManagement from '../../components/event-management/event-management';
-import Pictogram from '../../components/pictogram/pictogram';
 import { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
-import { getComponentsThunk, setComponentsState, updateComponentsThunk } from '../../redux/components-slice';
-import { getInitiativesListThunk } from '../../redux/initiatives-slice';
+import {
+  setComponentsState,
+} from '../../redux/components-slice';
 import RiskManagement from '../../components/risk-management/risk-management';
 import StatusManagement from '../../components/status-management/status-management';
-import InitiativesTable from '../../components/initiatives-table/initiatives-table';
 import CustomizedButton from '../../components/button/button';
 import { useNavigate } from 'react-router-dom';
 import { paths } from '../../consts';
-
-// Styles
-import styles from './components-settings-edit-page.module.scss';
 import InitiativesTableConfiguration from '../../components/initiatives-table-configuration/initiatives-table-configuration';
 import ModalInfo from '../../components/modal-info/modal-info';
-import RolesManagement from '../../components/roles-menagement/roles-menagement';
-import { useGetComponentsQuery, useUpdateComponentsMutation } from '../../redux/state/state-api';
+import {
+  useGetComponentsQuery,
+  useUpdateComponentsMutation,
+} from '../../redux/state/state-api';
 import TeamTableManagement from '../../components/team-table-management/team-table-management';
 import InitiativeSettingsManagement from '../../components/initiative-settings-management/initiative-settings-management';
 import { openErrorModal } from '../../redux/state/state-slice';
+
+// Styles
+import styles from './components-settings-edit-page.module.scss';
+//
 
 export default function ComponentsSettingsEditPage() {
   const navigate = useNavigate();

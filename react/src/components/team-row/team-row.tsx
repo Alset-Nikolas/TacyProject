@@ -122,12 +122,18 @@ export default function TeamRow({ index, member, edit, header, removeMember, set
 
       const newMemberState = { ...member };
       const name = e.target.name as keyof typeof newMemberState;
-      const value = e.target.value;
+      let value = e.target.value;
       const newList = [...membersList];
 
       if ((name === 'name' || name === 'email' || name === 'phone') && typeof index !== 'undefined') {
+        if (name === 'phone') {
+          const phoneMatch = value.match(/\d+/g);
+          value = phoneMatch ? phoneMatch[0] : '';
+        }
+
         newMemberState[name] = value;
         newList[index] = newMemberState;
+
         // dispatch(setList([
         //   ...newList,
         // ]));

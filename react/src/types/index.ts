@@ -358,6 +358,7 @@ export type TInitiative = {
         id: number;
         settings_project: number;
         title: string;
+        status: number;
       };
     }>
 }

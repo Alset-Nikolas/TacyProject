@@ -18,13 +18,8 @@ type TInitiativesTableConfigurationProps = {
 
 export default function InitiativesTableConfiguration({ edit, components }: TInitiativesTableConfigurationProps) {
   const dispatch = useAppDispatch();
-  // const project = useAppSelector((store) => store.state.project.value);
   const { currentId } = useAppSelector((store) => store.state.project);
   const { data: project } = useGetProjectInfoQuery(currentId);
-  // const components = useAppSelector((store) => store.components.value);
-
-  // const { data: components } = useGetComponentsQuery(currentId ? currentId : -1);
-  // const tableRegistry = components?.table_registry;
   const tableRegistry = components.table_registry;
 
   const handleCheckboxChange = (
@@ -37,13 +32,12 @@ export default function InitiativesTableConfiguration({ edit, components }: TIni
       const newArray = [ ...tableRegistry[key] ];
       const newItem = { ...newArray[index] };
 
-      newItem.initiative_activate = checked;
+      newItem.initiative_activate = !newItem.initiative_activate;
       newArray[index] = newItem;
 
       dispatch(updateTableRegistry({ key, array: newArray }));
     }
   };
-
   
   if (edit) return (
     <div

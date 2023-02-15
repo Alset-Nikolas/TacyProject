@@ -9,8 +9,6 @@ import { addNotExistingPropertie } from "../../redux/team-slice";
 import ModalInfo from "../modal-info/modal-info";
 import {
   useGetProjectInfoQuery,
-  useGetTeamListQuery,
-  usePostTeamListMutation
 } from "../../redux/state/state-api";
 import { TTeamMember } from "../../types";
 

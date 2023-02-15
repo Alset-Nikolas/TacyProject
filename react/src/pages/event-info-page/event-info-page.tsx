@@ -14,6 +14,7 @@ import DateInput from "../../components/date-input/date-input";
 import { useAddEventMutation, useDeleteEventMutation, useGetComponentsQuery } from "../../redux/state/state-api";
 import Checkbox from '../../components/ui/checkbox/checkbox';
 import moment from "moment";
+import { openErrorModal } from "../../redux/state/state-slice";
 
 export default function EventInfoPage() {
   const navigate = useNavigate();
@@ -28,7 +29,12 @@ export default function EventInfoPage() {
   const currentEvent = eventId ? eventsList.find((item) => item.event.id === Number.parseInt(eventId)) : null;
   const { addInitiativeRequestSuccess, initiative } = useAppSelector((store) => store.initiatives)
   // const { addEventRequestSuccess } = useAppSelector((store) => store.events);
-  const [ addEvent, { isSuccess: addEventRequestSuccess }] = useAddEventMutation();
+  const [
+    addEvent,
+    {
+      isSuccess: addEventRequestSuccess,
+      isError: addEventRequestError,
+    }] = useAddEventMutation();
   const [ deleteEvent, { isSuccess: isEventDeleteSuccess } ] = useDeleteEventMutation();
 
   if (!initiative || !currentEvent) return null;
@@ -143,14 +149,13 @@ export default function EventInfoPage() {
       if (currentInitiativeId) dispatch(getEventsListThunk(currentInitiativeId))
 
     }
-    return () => {
-      dispatch(setEventsState({
-        addEventRequest: false,
-        addEventRequestSuccess: false,
-        addEventRequestFailed: false,
-      }));
+    if (addEventRequestError) {
+      dispatch(openErrorModal('Ошибка при сохранении мероприятия'));
     }
-  }, [addEventRequestSuccess]);
+  }, [
+    addEventRequestSuccess,
+    addEventRequestError,
+  ]);
 
   useEffect(() => {
       if (isEventDeleteSuccess) navigate(`/${paths.registry}`);

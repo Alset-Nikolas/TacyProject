@@ -1,20 +1,26 @@
 import { SelectChangeEvent } from "@mui/material";
-import { setDefaultResultOrder } from "dns/promises";
-import { ChangeEvent, useState } from "react";
-import { useGetComponentsQuery, useGetProjectInfoQuery } from "../../redux/state/state-api";
+import {
+  ChangeEvent,
+  useState,
+} from "react";
+import {
+  useGetComponentsQuery,
+  useGetProjectInfoQuery,
+} from "../../redux/state/state-api";
 import { closeModal } from "../../redux/state/state-slice";
-import { addMember } from "../../redux/team-slice";
 import { TTeamMember } from "../../types";
-import { useAppDispatch, useAppSelector } from "../../utils/hooks";
+import {
+  useAppDispatch,
+  useAppSelector,
+} from "../../utils/hooks";
 import CustomizedButton from "../button/button";
-import SelectUnits from "../select-units/select-units";
-import CustomizedSelect from "../select/Select";
 
 // Styles
 import styles from './add-member-modal.module.scss';
+//
 
 type TAddMemberProps = {
-  addMember: any;
+  addMember: (newMember: TTeamMember) => void;
 };
 
 export default function AddMemberModal({ addMember }: TAddMemberProps) {
