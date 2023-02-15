@@ -154,7 +154,7 @@ class Initiatives(models.Model):
                     )
                     coordination_init = (
                         self.stages_coordination.filter(
-                            coordinator_stage=user_in_init.user
+                            coordinator_stage__user=user_in_init.user
                         )
                         .filter(status=self.status)
                         .first()
@@ -271,42 +271,21 @@ class Initiatives(models.Model):
     @classmethod
     def get_user_initiatievs(cls, user, project):
         list_inits = []
-        ids = set()
-
         query_role = reduce(
             operator.or_,
             (
                 Q(author=user),
                 operator.and_(
-                    Q(stages_coordination__coordinator_stage=user),
+                    Q(stages_coordination__coordinator_stage__user=user),
                     Q(stages_coordination__activate=True),
                 ),
             ),
         )
-
         list_inits = (
             cls.objects.filter(project=project)
             .filter(failure=False)
             .filter(query_role)
         )
-        # for init in (
-        #     cls.objects.filter(project=project).filter(failure=False).all()
-        # ):
-
-        #     if init.author == user:
-        #         if init.id not in ids:
-        #             ids.add(init.id)
-        #             list_inits.append(init)
-        #     elif any(
-        #         list(
-        #             info_coordination.coordinator_stage == user
-        #             and info_coordination.activate
-        #             for info_coordination in init.stages_coordination.all()
-        #         )
-        #     ):
-        #         if init.id not in ids:
-        #             ids.add(init.id)
-        #             list_inits.append(init)
         return list_inits
 
     def delete_node(self):
@@ -630,12 +609,12 @@ class Events(models.Model):
 
     class Meta:
         db_table = "events"
-        constraints = [
-            models.UniqueConstraint(
-                fields=["initiative", "name"],
-                name="unique event initiative name",
-            )
-        ]
+        # constraints = [
+        #     models.UniqueConstraint(
+        #         fields=["initiative", "name"],
+        #         name="unique event initiative name",
+        #     )
+        # ]
 
     @classmethod
     def get_by_id(cls, id):
@@ -808,9 +787,9 @@ class EventMetricsFields(models.Model):
                 delta = value
             else:
                 delta = value - m.value
-            m.value = value
+            m.value = round(value, 5)
             m.save()
-            metrics_delta[metric_id] = delta
+            metrics_delta[metric_id] = round(delta, 5)
             ids_not_delete.append(m.id)
 
         cls.objects.filter(event_id=event_id).exclude(

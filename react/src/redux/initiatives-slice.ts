@@ -31,11 +31,12 @@ type TState = {
     }>,
     initiative: string,
     roles: Array<{
-      role: number,
+      role: number;
       items: Array<{
         id: number,
         item: string
-      }>
+      }>;
+      isApproved: number;
     }>,
     files: Array<{
       title: string,

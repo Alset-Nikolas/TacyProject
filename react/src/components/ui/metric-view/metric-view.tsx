@@ -6,11 +6,12 @@ type TMetricProps = {
   title: string;
   units: string;
   is_percent?: boolean;
+  description: string;
 }
 
-export default function MetricView({ value, title, units, is_percent }: TMetricProps) {
+export default function MetricView({ value, title, units, is_percent, description }: TMetricProps) {
   return (
-    <Tooltip title={`${title}, ${(!is_percent && units !== 'бм') ? units : ''}${is_percent ? '%' : ''}`}>
+    <Tooltip title={`${title}, ${(!is_percent && units !== 'бм') ? units : ''}${is_percent ? '%' : ''}, Описание: ${description}`}>
       <div
         className={`${styles.singleMetricWrapper}`}
       >

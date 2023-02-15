@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { paths } from "../../consts";
 import { getRisksListThunk } from "../../redux/risks-slice";
-import { useGetComponentsQuery, useGetInitiativeByIdQuery, useGetRisksListQuery } from "../../redux/state/state-api";
+import { useGetComponentsQuery, useGetInitiativeByIdQuery, useGetRisksListQuery, useGetUserRightsQuery } from "../../redux/state/state-api";
 import { setInitiativeEdit } from "../../redux/state/state-slice";
 import { TComponentsSettings } from "../../types";
 import { addComponentItem, handleComponentInputChange, removeComponentItem } from "../../utils";
@@ -44,6 +44,9 @@ export default function RiskManagement({ edit, editButton, isSettings, component
     skip: !currentInitiativeId,
   });
   const [isShowAddfields, setIsShowAddfields] = useState<Array<boolean>>([]);
+  const { data: userRights } = useGetUserRightsQuery(currentInitiativeId ? currentInitiativeId : -1, {
+    skip: !currentInitiativeId,
+  });
 
   const handleRiskEditClick = (riskIndex: number, riskId: number) => {
     navigate(`/${paths.registry}/risk-info/${riskId}`);
@@ -284,7 +287,7 @@ export default function RiskManagement({ edit, editButton, isSettings, component
           ))} */}
         </ol>
       </SectionContent>
-      {editButton && (
+      {editButton && (userRights?.user_is_superuser || userRights?.user_is_author) && (
         <div className={styles.editButton}>
           <Pictogram
             type="edit"

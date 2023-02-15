@@ -23,17 +23,16 @@ type TGantD3Props = {
 };
 
 export function GanttD3({ data, intermediateDates, startDate, endDate, daysNumber }: TGantD3Props) {
-  const { gantt, gantt__title, gantt__chart } = classes;
-  const { lineWidth, yAxisWidth, defaultTranslate } = chartConfig;
-  let chartWidth = chartConfig.dayWidth * daysNumber + chartConfig.lineWidth;
-  chartWidth = chartWidth < 862 ? 862 : chartWidth;
-  
-
-  const ganttContainerRef = useRef(null);
+  const ganttContainerRef = useRef<HTMLDivElement>(null);
   const svgRef = useRef(null);
   const scrollGroupRef = useRef(null);
 
-
+  const { gantt, gantt__title, gantt__chart } = classes;
+  const { lineWidth, yAxisWidth, defaultTranslate } = chartConfig;
+  const  diagramVisiblePart = ganttContainerRef.current ? ganttContainerRef.current.getBoundingClientRect().width - yAxisWidth : 862;
+  let chartWidth = chartConfig.dayWidth * daysNumber + chartConfig.lineWidth;
+  chartWidth = chartWidth < diagramVisiblePart ? diagramVisiblePart : chartWidth;
+  
   const scrollXDisabled = useRef(false);
   const startXRef = useRef(0);
   const startYRef = useRef(0);
@@ -170,6 +169,7 @@ export function GanttD3({ data, intermediateDates, startDate, endDate, daysNumbe
             startDate={startDate}
             endDate={endDate}
             daysNumber={daysNumber}
+            diagramVisiblePart={diagramVisiblePart}
           />
         </g>
         <GanttD3YAxis data={data} itemsCount={data.length} />

@@ -62,8 +62,8 @@ class NotificationsUser(models.Model):
         )
 
     @classmethod
-    def sent_approval(cls, initiative, info):
-        initiative_id = info.get("initiative_id")
+    def sent_approval(cls, info):
+        initiative = info.get("initiative")
         coordinator_obj = info.get("coordinator")
         author_obj = info.get("author_text")
         status_obj = info.get("status")

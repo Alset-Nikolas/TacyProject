@@ -146,6 +146,50 @@ export default function RolesAlloction() {
     });
   }
 
+  const saveModalRoleHandler = (roleId?: number) => {
+    setRoles((prevState) => {
+      const newState = [...prevState];
+      const currentRoleIndex = newState.findIndex((item) => item.role.id === roleId);
+
+      if (currentRoleIndex > -1) {
+        const currentRole = {...newState[currentRoleIndex]};
+        const community = [] as typeof currentRole.community;
+        modalMembersLis.forEach((member) => {
+          if (member.active) {
+            community.push({
+              user_info: {
+                user: {
+                  id: member.user.id,
+                  first_name: member.user.first_name,
+                  last_name: member.user.last_name,
+                  second_name: member.user.second_name,
+                  email : member.user.email,
+                  phone: member.user.phone,
+                },
+                properties: member.properties.map((el) => {
+                  return {
+                    title: {
+                      id: el.id,
+                      title: el.title,
+                      is_community_activate: true,
+                    },
+                    values: el.values,
+                  };
+                }),
+              },
+              status: member.active,
+            });
+          }
+        });
+        currentRole.community = community;
+        newState[currentRoleIndex] = currentRole;
+    }
+
+      return newState;
+    });
+    dispatch(closeModal());
+  }
+
   const saveRoleHandler = (roleId?: number) => {
     try {
       if (!currentInitiativeId) throw new Error('Initiative is missing');
@@ -183,7 +227,7 @@ export default function RolesAlloction() {
         }
       });
       setRolesMutation({ initiativeId: currentInitiativeId, body });
-      setIsEdit(false);
+      // setIsEdit(false);
       
       dispatch(closeModal());
     } catch (e) {
@@ -228,7 +272,6 @@ export default function RolesAlloction() {
         newMemberList.splice(memberIndex, 1);
       }
     });
-    console.log(newMemberList);
 
     setMembersList(newMemberList);
 
@@ -283,7 +326,7 @@ export default function RolesAlloction() {
             }}
           >
             Распределение ролей
-            {(userRights?.user_is_author || userRights?.user_is_superuser) && (
+            {isOpen && (userRights?.user_is_author || userRights?.user_is_superuser) && (
               <div
                 id="edit"
               >
@@ -473,7 +516,10 @@ export default function RolesAlloction() {
               <CustomizedButton
                 color="blue"
                 value="Сохранить"
-                onClick={() => saveRoleHandler()}
+                onClick={() => {
+                  setIsEdit(false);
+                  saveRoleHandler();
+                }}
               />
             </div>
           )}

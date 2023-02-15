@@ -13,7 +13,7 @@ import styles from './initiative-management.module.scss';
 import sectionStyles from '../../styles/sections.module.scss';
 import { setInitiativeEdit } from "../../redux/state/state-slice";
 import CustomizedButton from "../button/button";
-import { useGetComponentsQuery, useGetInitiativeByIdQuery, useGetInitiativesListQuery } from "../../redux/state/state-api";
+import { useGetComponentsQuery, useGetInitiativeByIdQuery, useGetInitiativesListQuery, useGetUserRightsQuery } from "../../redux/state/state-api";
 import moment from "moment";
 
 type TInitiativeManagementProps = {
@@ -40,6 +40,9 @@ export default function InitiativeManagement({ edit, editButton }: TInitiativeMa
     data: currentInitiative,
     isFetching: isFetchingInitiative,
   } = useGetInitiativeByIdQuery(currentInitiativeId ? currentInitiativeId : -1, {
+    skip: !currentInitiativeId,
+  });
+  const { data: userRights } = useGetUserRightsQuery(currentInitiativeId ? currentInitiativeId : -1, {
     skip: !currentInitiativeId,
   });
 
@@ -281,7 +284,7 @@ export default function InitiativeManagement({ edit, editButton }: TInitiativeMa
           </ol>
         )}
       </SectionContent>
-      {editButton && (
+      {editButton && (userRights?.user_is_superuser || userRights?.user_is_author) && (
         <div className={styles.editButton}>
           <Pictogram
             type="edit"

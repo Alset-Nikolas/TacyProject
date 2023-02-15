@@ -9,6 +9,7 @@ import operator
 from django.db.models import Count
 from django.core.exceptions import ValidationError
 from django.conf import settings
+from django.db.utils import NotSupportedError
 
 User = get_user_model()
 
@@ -124,9 +125,10 @@ class Project(models.Model):
 
     def inits_sorted(self, data, inits):
         metrics_sorted = data.get("metrics")
+        inits = inits.distinct("pk")
         if metrics_sorted:
             metrics_sorted = metrics_sorted.split(",")
-            return sorted(
+            inits_res: list = sorted(
                 inits.all(),
                 key=lambda x: abs(
                     x.metric_fields.filter(metric=metrics_sorted[0])
@@ -135,7 +137,37 @@ class Project(models.Model):
                 .value,
                 reverse=bool(int(metrics_sorted[1])),
             )
-        return inits.all()
+        else:
+            inits_res: list = (
+                inits.order_by("pk", "-date_registration").distinct("pk").all()
+            )
+        return inits_res
+
+    def inits_filter_approved_roles(self, data, inits):
+        roles_approved_filter = data.get("role_approv")
+        if roles_approved_filter:
+            roles_approved_filter = [
+                item.split(",") for item in roles_approved_filter.split(";")
+            ]
+            if len(roles_approved_filter[-1]) == 1:
+                roles_approved_filter.pop()
+
+            for item in roles_approved_filter:
+                if len(item) == 2:
+                    query_properties = operator.and_(
+                        (
+                            Q(
+                                stages_coordination__coordinator_stage__role_id=int(
+                                    item[0]
+                                )
+                            )
+                        ),
+                        (Q(stages_coordination__activate=bool(int(item[1])))),
+                    )
+
+                    inits = inits.filter(query_properties)
+
+        return inits
 
     def get_list_inits_after_filters_and_sorted(self, data, inits=None):
         name_filter = data.get("name", "")
@@ -161,17 +193,14 @@ class Project(models.Model):
                         res[title] = []
                     res[title].append(val)
             for title, values in res.items():
-                query_role = reduce(
-                    operator.or_,
-                    (
-                        operator.and_(
-                            (Q(user_roles__user=title)),
-                            (Q(user_roles__role=value)),
-                        )
-                        for value in values
-                    ),
-                )
-                inits = inits.filter(query_role)
+                for value in values:
+
+                    query_role = operator.and_(
+                        (Q(user_roles__user=title)),
+                        (Q(user_roles__role=value)),
+                    )
+
+                    inits = inits.filter(query_role)
         if properties_filter:
             properties_filter = [
                 item.split(",") for item in properties_filter.split(";")
@@ -184,36 +213,27 @@ class Project(models.Model):
                         res[title] = []
                     res[title].append(val)
             for title, values in res.items():
-                query_properties = reduce(
-                    operator.or_,
-                    (
-                        operator.and_(
-                            (Q(properties_fields__title=title)),
-                            (Q(properties_fields__values=value)),
-                        )
-                        for value in values
-                    ),
-                )
-                inits = inits.filter(query_properties)
+                for value in values:
+                    query_properties = operator.and_(
+                        (Q(properties_fields__title=title)),
+                        (Q(properties_fields__values=value)),
+                    )
+
+                    inits = inits.filter(query_properties)
             inits = inits.filter(query_properties)
         if files_filter:
             files_filter = files_filter.split(",")
-            query_files = reduce(
-                operator.or_,
-                (
-                    operator.and_(
+            for item in files_filter:
+                if item != "":
+
+                    query_files = operator.and_(
                         (Q(files__title=item)),
                         (~Q(files__file__in=["", None])),
                     )
-                    for item in files_filter
-                    if item != ""
-                ),
-            )
 
-            inits = inits.filter(query_files)
-            inits = inits.annotate(total=Count("id")).filter(
-                total=len(files_filter)
-            )
+                    inits = inits.filter(query_files)
+
+        inits = self.inits_filter_approved_roles(data, inits)
         # inits = inits.distinct("pk")
         return self.inits_sorted(data, inits)
 

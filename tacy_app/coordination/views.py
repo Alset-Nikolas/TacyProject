@@ -62,10 +62,14 @@ class CoordinationHistory(views.APIView):
 
 
 class SentForApproval(views.APIView):
-    def _send_email(self, email):
+    def _send_email(self, email, info):
+        init = info.get("initiative")
+        author = info.get("author_text")
+        TEXT = f"Проект: {init.project.name}\nИнициатива: {init.name}\nАвтор сообщения: {author.last_name} {author.first_name} {author.second_name}\nСодержание: {info.get('text', '')}\n"
         msg = EmailMultiAlternatives(
             subject=f"Запрос на согласование инициативы в приложении {settings.SITE_FULL_NAME}",
-            body=f"Перейдите по ссылке {settings.SITE_DOMAIN}",
+            body=TEXT
+            + f"Для ответа перейдите по ссылке {settings.SITE_DOMAIN}",
             from_email=settings.EMAIL_HOST_USER,
             to=[email],
         )
@@ -88,21 +92,22 @@ class SentForApproval(views.APIView):
         serializer.is_valid(raise_exception=True)
         for user_info in serializer.data.get("coordinators"):
             coordinator_user = User.get_user_by_id(user_info.get("id"))
-            self._send_email(email=coordinator_user.email)
+
             initiative_id = serializer.data.get("initiative")
+            initiative = Initiatives.get_by_id(initiative_id)
             status = self._get_status_initiative(initiative_id)
 
             instace = {
-                "initiative_id": initiative_id,
+                "initiative": initiative,
                 "status": status,
                 "coordinator": coordinator_user,
                 "author_text": request.user,
                 "text": request.data.get("text"),
                 "action": TYPE_SEND_APPROVAL,
             }
+            self._send_email(email=coordinator_user.email, info=instace)
             CoordinationInitiativeHistory.create(instace)
-            initiative = Initiatives.get_by_id(initiative_id)
-            NotificationsUser.sent_approval(initiative, instace)
+            NotificationsUser.sent_approval(instace)
 
             instace = {
                 "initiative_id": initiative_id,
@@ -210,10 +215,12 @@ class AddComment(views.APIView):
 
 
 class Approval(views.APIView):
-    def _send_email(self, email):
+    def _send_email(self, email, initiative):
+        TEXT = f"Проект: {initiative.project.name}\nИнициатива: {initiative.name}\n"
         msg = EmailMultiAlternatives(
             subject=f"Ваша инициатива согласована'{settings.SITE_FULL_NAME}'",
-            body=f"Перейдите по ссылке {settings.SITE_DOMAIN}",
+            body=TEXT
+            + f"Для ответа перейдите по ссылке {settings.SITE_DOMAIN}",
             from_email=settings.EMAIL_HOST_USER,
             to=[email],
         )
@@ -272,7 +279,9 @@ class Approval(views.APIView):
         old_state_name = initiative.status.name
         if StagesCoordinationInitiative.check_update_status(initiative):
             initiative = Initiatives.get_by_id(request.data.get("initiative"))
-            self._send_email(email=initiative.author.email)
+            self._send_email(
+                email=initiative.author.email, initiative=initiative
+            )
             self._add_history_change_stage(request, old_state_name)
             if initiative.status.value == -1:
                 initiative.activate = True

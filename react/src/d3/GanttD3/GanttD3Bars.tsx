@@ -29,7 +29,9 @@ export const GanttD3Bars = ({ data, chartWidth, startDate, endDate }: TGanttD3Ba
     // console.log(getCoordinate(stage.date_start));
     return (
       
-      <>
+      <g
+        key={stage.id}
+      >
         <rect
           style={{
             zIndex: 1000,
@@ -55,7 +57,7 @@ export const GanttD3Bars = ({ data, chartWidth, startDate, endDate }: TGanttD3Ba
             fill={RED}
           />
         </Tooltip>
-      </>
+      </g>
       
     );
 

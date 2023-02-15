@@ -1,4 +1,4 @@
-import { createRef, MouseEvent } from "react";
+import { createRef, MouseEvent, useState } from "react";
 
 // Styles
 import modalOverlayStyles from './modal-overlay.module.scss';
@@ -10,9 +10,18 @@ type ModalOverlayProps = {
 
 export default function ModalOverlay({ closeModal, children }: ModalOverlayProps) {
   const modalOverlayRef = createRef<HTMLDivElement>();
+  const [isOverlayClicked, setIsOverlayClicked] = useState(false);
+
+  function onMouseDownHandler(e: MouseEvent<HTMLDivElement>) {
+    if(e.target === modalOverlayRef.current && closeModal) {
+      setIsOverlayClicked(true);
+    }
+  }
 
   function onClickHandler(e: MouseEvent<HTMLDivElement>) {
-    if(e.target === modalOverlayRef.current && closeModal) {
+    setIsOverlayClicked(false);
+
+    if(e.target === modalOverlayRef.current && closeModal && isOverlayClicked) {
       closeModal();
     }
   }
@@ -22,7 +31,8 @@ export default function ModalOverlay({ closeModal, children }: ModalOverlayProps
       id="modal-overlay"
       data-test-id="modal-overlay"
       ref={modalOverlayRef}
-      onClick={onClickHandler} 
+      onMouseUp={onClickHandler} 
+      onMouseDown={onMouseDownHandler}
     >
       {children}
     </div>

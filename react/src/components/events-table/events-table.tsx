@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { paths } from "../../consts";
 import { GanttD3 } from "../../d3/GanttD3/GanttD3";
 import { getEventsListThunk } from "../../redux/evens-slice";
@@ -20,6 +20,8 @@ import {
 import Pictogram from "../pictogram/pictogram";
 
 export default function EventsTable() {
+  const localion = useLocation();
+  const isPersonal = localion.pathname.includes('personal-stats');
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const [isOpen, setIsOpen] = useState(false);
@@ -180,14 +182,23 @@ export default function EventsTable() {
                           {addfield.value}
                         </td>
                       ))}
-                      {event.metric_fields.map((addfield) => {
-                        const foundMetric = project ? project.metrics.find((item) => item.id === addfield.metric.id) : undefined;
-                        return addfield.metric.initiative_activate && foundMetric?.is_aggregate ? (
+                      {components && components.table_registry.metrics.map((metric) => {
+                        const foundMetric = event.metric_fields.find((el) => el.metric.id === metric.id);
+                        const metricFromProject = project ? project.metrics.find((item) => item.id === metric.id) : undefined;
+                        return metric.initiative_activate && metricFromProject?.is_aggregate ? (
                           <td
-                            key={addfield.metric.id}
+                            key={foundMetric?.metric.id}
                             className={`${styles.additionalCol}`}
                           >
-                            {addfield.value}
+                            {metricFromProject.is_percent ? (
+                              <>
+                                {(typeof foundMetric?.value === 'number') ? Math.round(foundMetric?.value * 100) : 'NaN'}
+                              </>
+                            ) : (
+                              <>
+                                {foundMetric?.value}
+                              </>
+                            )}
                           </td>
                         ) : (
                           null
@@ -199,7 +210,7 @@ export default function EventsTable() {
               </table>
             </div>
           </div>
-          {(userRights?.user_is_author || user?.user.is_superuser) && (initiative?.initiative.status?.value !== -2) && (
+          {(userRights?.user_is_author || user?.user.is_superuser) && (initiative?.initiative.status?.value !== -2) && !isPersonal && (
             <div
               className={`${styles.buttonWraper}`}
             >

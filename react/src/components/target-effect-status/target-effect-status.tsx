@@ -41,6 +41,7 @@ export default function TargetEffectStatus() {
                 units={el.units}
                 is_percent={el.is_percent}
                 key={el.id}
+                description={el.description}
               />
             );
           })}

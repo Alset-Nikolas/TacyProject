@@ -13,9 +13,10 @@ type TGanttD3XAxisProps = {
   daysNumber: number;
   startDate: Date;
   endDate: Date;
+  diagramVisiblePart: number;
 }
 
-export const GanttD3XAxis = ({ data, itemsCount, daysNumber, startDate, endDate }: TGanttD3XAxisProps) => {
+export const GanttD3XAxis = ({ data, itemsCount, daysNumber, startDate, endDate, diagramVisiblePart }: TGanttD3XAxisProps) => {
   const {
     marginTop,
     weekdays,
@@ -28,7 +29,7 @@ export const GanttD3XAxis = ({ data, itemsCount, daysNumber, startDate, endDate 
     xAxisHeight
   } = chartConfig;
   let chartWidth = chartConfig.dayWidth * daysNumber + chartConfig.lineWidth;
-  chartWidth = chartWidth < 862 ? 862 : chartWidth;
+  chartWidth = chartWidth < diagramVisiblePart ? diagramVisiblePart : chartWidth;
 
 
   const { WHITE, RED, PALE_WHITE, GREY, BLACK } = fills;

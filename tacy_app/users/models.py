@@ -115,8 +115,10 @@ class User(AbstractBaseUser, PermissionsMixin):
         Поскольку мы не храним настоящее имя пользователя,
         мы возвращаем его имя пользователя.
         """
-        # return f"{self.last_name} {self.first_name} {self.second_name}"
-        return f"{self.pk}"
+        last_name = self.last_name or "Фамилия"
+        first_name = self.first_name or "Имя"
+        second_name = self.second_name or "Отчество"
+        return f"{last_name} {first_name[:1]} {second_name[:1]}"
 
     def get_short_name(self):
         """

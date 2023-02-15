@@ -1,5 +1,5 @@
 from django.db import models
-from projects.models import Project
+from projects.models import Project, RolesProject
 from components.models import (
     Initiatives,
     SettingsStatusInitiative,
@@ -96,20 +96,29 @@ class StagesCoordinationInitiative(models.Model):
         on_delete=models.CASCADE,
     )
     coordinator_stage = models.ForeignKey(
-        User,
+        # User,
+        RolesUserInInitiative,
         on_delete=models.CASCADE,
     )
     activate = models.BooleanField(default=False)
 
     @classmethod
     def add_stage(cls, info):
+        initiative: Initiatives = Initiatives.get_by_id(
+            info.get("initiative_id")
+        )
+        coordinator_stage = RolesUserInInitiative.objects.filter(
+            user=info.get("coordinator_stage"), initiative=initiative
+        ).first()
+
         stage = (
-            cls.objects.filter(initiative_id=info.get("initiative_id"))
-            .filter(coordinator_stage=info.get("coordinator_stage"))
+            cls.objects.filter(initiative=initiative)
+            .filter(coordinator_stage=coordinator_stage)
             .filter(status=info.get("status"))
             .first()
         )
         if not stage:
+            info["coordinator_stage"] = coordinator_stage
             return cls.objects.create(**info)
         return stage
 
@@ -134,18 +143,26 @@ class StagesCoordinationInitiative(models.Model):
 
     @classmethod
     def check_coordinator_status(cls, initiative_id, coordinator, status):
+        initiative: Initiatives = Initiatives.get_by_id(initiative_id)
+        coordinator_stage = RolesUserInInitiative.objects.filter(
+            user=coordinator, initiative=initiative
+        ).first()
         return (
             cls.objects.filter(initiative_id=initiative_id)
-            .filter(coordinator_stage=coordinator)
+            .filter(coordinator_stage=coordinator_stage)
             .filter(status=status)
             .first()
         )
 
     @classmethod
     def user_is_coordinator(cls, initiative_id, user) -> bool:
+        initiative: Initiatives = Initiatives.get_by_id(initiative_id)
+        coordinator_stage = RolesUserInInitiative.objects.filter(
+            user=user, initiative=initiative
+        ).first()
         return (
-            cls.objects.filter(initiative_id=initiative_id)
-            .filter(coordinator_stage_id=user.id)
+            cls.objects.filter(initiative=initiative)
+            .filter(coordinator_stage=coordinator_stage)
             .exists()
         )
 
@@ -158,22 +175,25 @@ class StagesCoordinationInitiative(models.Model):
         )
         if not items:
             return []
-        return [item.coordinator_stage for item in items]
+        return [item.coordinator_stage.user for item in items]
 
     @classmethod
     def get_coordinators_all_status(cls, initiative_id):
         items = cls.objects.filter(initiative_id=initiative_id).all()
         if not items:
             return []
-        return [item.coordinator_stage for item in items]
+        return [item.coordinator_stage.user for item in items]
 
     @classmethod
     def check_person_approval(cls, initiative_id, user):
         initiative: Initiatives = Initiatives.get_by_id(initiative_id)
+        coordinator_stage = RolesUserInInitiative.objects.filter(
+            user=user, initiative=initiative
+        ).first()
         return (
             cls.objects.filter(initiative=initiative)
             .filter(status=initiative.status)
-            .filter(coordinator_stage=user)
+            .filter(coordinator_stage=coordinator_stage)
             .exists()
         )
 
@@ -188,9 +208,12 @@ class StagesCoordinationInitiative(models.Model):
 
     @classmethod
     def delete_now_stage_null_coordinator(cls, initiative, user):
+        coordinator_stage = RolesUserInInitiative.objects.filter(
+            user=user, initiative=initiative
+        ).first()
         coordinmattor_info = (
             cls.objects.filter(initiative=initiative)
-            .filter(coordinator_stage=user)
+            .filter(coordinator_stage=coordinator_stage)
             .filter(activate=False)
             .first()
         )

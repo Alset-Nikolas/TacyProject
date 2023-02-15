@@ -98,7 +98,7 @@ export default function InitiativeCoordination() {
     let isUploaded = true;
 
     initiativeFiles?.forEach((item) => {
-      if (initiative?.initiative.status?.value && 
+      if (initiative?.initiative.status?.value !== undefined && 
         item.title.status.value <= initiative?.initiative.status?.value &&
         !item.file.file) {
         isUploaded = false;
@@ -191,6 +191,7 @@ export default function InitiativeCoordination() {
       // dispatch(sendForApprovalThunk({ ...commentState, coordinator: coordinatorId }))
     } else {
       // dispatch(coordinateThunk({...commentState, text: '1'}));
+      if (currentInitiativeId) localStorage.setItem('initiative-id', currentInitiativeId.toString());
       coordinate({...commentState, text: '1'});
     }
     setCommentState((prevState) => {
@@ -213,7 +214,7 @@ export default function InitiativeCoordination() {
   }
 
   const modalCheckboxHandler = (e: ChangeEvent<HTMLInputElement>, user: TUser & {id: number}) =>{
-    console.log(e);
+    // console.log(e);
     if (e.target.checked) {
       setCoordinatorsState((prevState) => {
         return {
@@ -249,6 +250,11 @@ export default function InitiativeCoordination() {
           ...prevState,
           initiative: currentInitiativeId,
         }
+      });
+      setCoordinatorsState({
+        text: '1',
+        initiative: currentInitiativeId ? currentInitiativeId : -1,
+        coordinators: [],
       });
     }
     if (project) {

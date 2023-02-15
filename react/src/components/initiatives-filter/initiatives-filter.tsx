@@ -49,6 +49,17 @@ const InitiativesFilter:FC<TInitiativesFilterProps> = ({ setIsShowFilteredList, 
 
     return queryParam;
   };
+
+  const getApprovedByRolesForQuery = () => {
+    let queryParam = '';
+    rolesFilter.forEach((role) => {
+        // queryParam += `${role.role},${item.id};`
+        if (role.isApproved > -1) queryParam += `${role.role},${role.isApproved};`
+    });
+
+    return queryParam;
+  }
+
   const getPropertiesForQuery = () => {
     let queryParam = '';
     filterProperties.forEach((property) => {
@@ -69,48 +80,15 @@ const InitiativesFilter:FC<TInitiativesFilterProps> = ({ setIsShowFilteredList, 
     files: filesFilter,
    } = useAppSelector((store) => store.initiatives.filter);
 
-  // const [
-  //   filterProperties,
-  //   setfilterProperties
-  // ] = useState<Array<TPropertie & {selectedItems: Array<{
-  //   id: number;
-  //   value: string;
-  //   propertie: number;
-  // }>}>>(project ? project.properties.map((property) => {
-  //   return {
-  //     ...property,
-  //     selectedItems: [],
-  //   }
-  // }) : []);
-  // const [sortMetrics, setSortMetrics] = useState<{
-  //   metric: {
-  //     id: number;
-  //     name: string;
-  //   };
-  //   type: {
-  //     title: string;
-  //     value: number;
-  //   }
-  // }>({
-  //   metric: {
-  //     id: -1,
-  //     name: 'Не выбрано',
-  //   },
-  //   type: {
-  //     title: 'По возрастанию',
-  //     value: 0,
-  //   }
-  // });
-  // const [statusFilter, setStatusFilter] = useState<Array<{id: number, name: string}>>([]);
-  // const [isSortQuery, setIsSortQuery] = useState(false);
-  // const [initiativeFilter, setInitiativeFilter] = useState('');
-  // const [rolesFilter, setRolesFilter] = useState<Array<{role: number, items: Array<{id: number, item: string}>}>>(project ? project.roles.map((role) => {return {role: role.id, items: []}}) : []);
-  // const [filesFilter, setFilesFilter] = useState<Array<{ title: string, id: number }>>([]);
-
   const parentRect = parentElement?.getBoundingClientRect();
   const topOffset = parentRect ? parentRect.top : 0;
   const leftOffset = parentRect ? parentRect.left : 0;
-  const rightOffset = parentRect ? parentRect?.right - parentRect?.width : 0
+  const rightOffset = parentRect ? parentRect?.right - parentRect?.width : 0;
+  const approveStates = new Map([
+    [1, 'Согласовал'],
+    [0, 'Не согласовал'],
+    [-1, 'Не выбрано'],
+  ]);
 
   const applyFilter = () => {
     sortInitiatives({
@@ -118,6 +96,7 @@ const InitiativesFilter:FC<TInitiativesFilterProps> = ({ setIsShowFilteredList, 
       name: initiativeFilter,
       status: statusFilter.map((el) => el.id),
       roles: getRolesForQuery(),
+      approvedByRoles: getApprovedByRolesForQuery(),
       properties: getPropertiesForQuery(),
       metrics: sortMetrics.metric.id !== -1 ?`${sortMetrics.metric.id},${sortMetrics.type.value}` : '',
       files: filesFilter.map((el) => el.id),
@@ -198,8 +177,21 @@ const InitiativesFilter:FC<TInitiativesFilterProps> = ({ setIsShowFilteredList, 
     const newState = [...rolesFilter];
     const foundIndex = newState.findIndex((item) => item.role === roleId);
 
-    if (foundIndex !== -1) newState[foundIndex] = { role: roleId, items: newValues };
+    if (foundIndex !== -1) newState[foundIndex] = { role: roleId, items: newValues, isApproved: -1 };
     
+    dispatch(setRolesFilter(newState));
+  };
+
+  const onRoleApproveStateChange = (value: string, roleId: number) => {
+    const newState = [...rolesFilter];
+    const foundIndex = newState.findIndex((item) => item.role === roleId);
+    let isApprovedState = -1;
+
+    if (value === 'Согласовал') isApprovedState = 1;
+    if (value === 'Не согласовал') isApprovedState = 0;
+
+    if (foundIndex !== -1) newState[foundIndex] = { ...newState[foundIndex], isApproved: isApprovedState };
+
     dispatch(setRolesFilter(newState));
   };
 
@@ -215,7 +207,13 @@ const InitiativesFilter:FC<TInitiativesFilterProps> = ({ setIsShowFilteredList, 
   }
 
   useEffect(() => {
-    if (!rolesFilter.length) dispatch(setRolesFilter(project ? project.roles.map((role) => {return {role: role.id, items: []}}) : []));
+    if (!rolesFilter.length) dispatch(setRolesFilter(project ? project.roles.map((role) => {return { role: role.id, items: [], isApproved: -1 }}) : []));
+    dispatch(setfilterProperties(project ? project.properties.map((property) => {
+      return {
+        ...property,
+        selectedItems: [],
+      }
+    }) : []));
   }, [project]);
 
   return ReactDOM.createPortal(
@@ -288,7 +286,7 @@ const InitiativesFilter:FC<TInitiativesFilterProps> = ({ setIsShowFilteredList, 
               Метрики
               <CustomizedSelect
                 value={sortMetrics.metric.name}
-                items={[...project.metrics.map(metric => metric.title), 'Не выбрано']}
+                items={[...project.metrics.filter(metric => metric.is_aggregate).map(metric => metric.title), 'Не выбрано']}
                 onChange={onMetricSortChange}
               />
             </div>
@@ -320,6 +318,11 @@ const InitiativesFilter:FC<TInitiativesFilterProps> = ({ setIsShowFilteredList, 
                 value={value ? value.items.map((el) => el.item) : []}
                 items={teamList}
                 onChange={(e) => onRoleFilterChange(e, item.id)}
+              />
+              <CustomizedSelect
+                value={approveStates.get(value?.isApproved !== undefined ? value.isApproved : -1)}
+                items={['Согласовал', 'Не согласовал', 'Не выбрано']}
+                onChange={(e) => onRoleApproveStateChange(e.target.value, item.id)}
               />
             </div>
           )

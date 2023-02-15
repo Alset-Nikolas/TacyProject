@@ -1,6 +1,12 @@
-import { useEffect, useReducer, useRef, useState } from "react";
-import { Tooltip } from "@mui/material";
-import { useAppDispatch, useAppSelector } from "../../utils/hooks";
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import {
+  useAppDispatch,
+  useAppSelector
+} from "../../utils/hooks";
 import SectionHeader from "../section/section-header/section-header";
 import { TInitiative } from "../../types";
 import { setCurrentInitiativeId } from "../../redux/initiatives-slice";
@@ -17,7 +23,7 @@ import { InitiativeTableHoverPopup } from "../initiative-table-hover-popup/initi
 import { InitiativeTableHoverFilePopup } from "../initiative-table-hover-file-popup/initiative-table-hover-file-popup";
 import CustomizedButton from "../button/button";
 import { useGetAuthInfoByIdQuery } from "../../redux/auth/auth-api";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import InitiativesFilter from "../initiatives-filter/initiatives-filter";
 
 // Styles
@@ -31,6 +37,8 @@ type TInitiativesTableProps = {
 };
 
 export default function InitiativesTable({ externalInitiativesList, addButton }: TInitiativesTableProps) {
+  const localion = useLocation();
+  const isPersonal = localion.pathname.includes('personal-stats');
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { currentInitiativeId } = useAppSelector((store) => store.initiatives);
@@ -57,7 +65,7 @@ export default function InitiativesTable({ externalInitiativesList, addButton }:
       data: sortedInitiatives,
     }
    ] = useLazyGetSortedInitiativesQuery();
-  const initiativesList = isShowFilteredList && sortedInitiatives ? sortedInitiatives.project_initiatives : externalInitiativesList;
+  const [initiativesList, setInitiativesList] = useState(isShowFilteredList && sortedInitiatives ? sortedInitiatives.project_initiatives : externalInitiativesList);
   const [isShowPopup, setIsShowPopup] = useState<Array<Array<boolean>>>(initiativesList ? initiativesList.map((initiative) => {
     const arrayOfRoleFlags = initiative.roles.map(() => false);
     return arrayOfRoleFlags;
@@ -173,7 +181,12 @@ export default function InitiativesTable({ externalInitiativesList, addButton }:
       return arrayOfRoleFlags;
     }) : []);
     setIsShowFileStatusPopup(initiativesList ? initiativesList.map(() => false) : []);
-  }, [initiativesList])
+  }, [initiativesList]);
+
+  useEffect(() => {
+    setInitiativesList(isShowFilteredList && sortedInitiatives ? sortedInitiatives.project_initiatives : externalInitiativesList);
+
+  }, [externalInitiativesList, sortedInitiatives]);
 
   return (
     <div
@@ -210,16 +223,18 @@ export default function InitiativesTable({ externalInitiativesList, addButton }:
                   closeFilter={() => setIsShowFilter(false)}
                 />
               )}
-              <Tooltip
-                title="Экспортировать"
-                placement="bottom-start"
-              >
-                <Pictogram
-                  type="export"
-                  cursor="pointer"
-                  onClick={exportHandler}
-                />
-              </Tooltip>
+              {!isPersonal && (
+                // <Tooltip
+                //   title="Экспортировать"
+                //   placement="bottom-start"
+                // >
+                  <Pictogram
+                    type="export"
+                    cursor="pointer"
+                    onClick={exportHandler}
+                  />
+                // </Tooltip>
+              )}
             </div>
         </SectionHeader>
         <div className={styles.tableWrapper}>
@@ -293,11 +308,11 @@ export default function InitiativesTable({ externalInitiativesList, addButton }:
                   let isUploaded = true;
                   item.files.forEach((el) => {
                     const fileStatus = components?.settings?.initiative_status.find((status) => status.id === el.title.id);
-                    if (!el.file &&
-                      item.initiative.status &&
+                    if (!el.file ||
+                      (item.initiative.status &&
                       fileStatus &&
-                      item.initiative.status?.value > 0 &&
-                      item.initiative.status?.value > fileStatus?.value
+                      item.initiative.status.value > 0 &&
+                      item.initiative.status.value > fileStatus.value)
                     ) isUploaded = false;
                   });
                   return isUploaded;
@@ -407,7 +422,7 @@ export default function InitiativesTable({ externalInitiativesList, addButton }:
             </div>
           )}
         </div>
-        {(user && user.user_flags_in_project?.is_create || user?.user.is_superuser) && (
+        {(user && user.user_flags_in_project?.is_create || user?.user.is_superuser) && !isPersonal && (
           <div style={{ display: 'flex', justifyContent: 'flex-end', padding: '16px 25px'}}>
             <CustomizedButton
               value="Добавить"

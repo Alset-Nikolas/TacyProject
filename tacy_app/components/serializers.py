@@ -36,6 +36,7 @@ from users.serializers import UserBaseSerializer
 import xlsxwriter
 import os
 from projects.serializers import ProperitsUserSerializer
+from coordination.models import TYPE_SERVICE_MESSAGE
 
 User = get_user_model()
 
@@ -471,12 +472,35 @@ class RolesUserInInitiativeSerializer(serializers.ModelSerializer):
         self.update_user_in_data(validated_data)
         self.update_role_in_data(validated_data)
         init = validated_data["initiative"] = self.context.get("init")
+        user = validated_data.get("user")
         instance = (
             RolesUserInInitiative.objects.filter(initiative=init)
-            .filter(user=validated_data.get("user"))
+            .filter(user=user)
             .first()
         )
         if instance:
+            new_role = validated_data.get("role")
+            coordinator_update = (
+                init.stages_coordination.filter(coordinator_stage=instance)
+                .filter(activate=False)
+                .first()
+            )
+            if (
+                instance.role.is_approve
+                and not new_role.is_approve
+                and coordinator_update
+            ):
+                instace = {
+                    "initiative": init,
+                    "status": init.status,
+                    "coordinator": None,
+                    "author_text": None,
+                    "text": f"У пользователя {user.get_full_name()} поменяли роль без прав на согласование. Он не сможет согласовать инициативу! ",
+                    "action": TYPE_SERVICE_MESSAGE,
+                }
+
+                init.history_coordination.create(**instace)
+                coordinator_update.delete()
             instance.role = validated_data.get("role")
             instance.save()
         else:
@@ -488,9 +512,30 @@ class RolesUserInInitiativeSerializer(serializers.ModelSerializer):
     def check_delete_person(cls, context):
         init = context.get("init")
         items_not_delete = context.get("items_not_delete")
-        RolesUserInInitiative.objects.filter(initiative=init).exclude(
-            id__in=items_not_delete
-        ).delete()
+        for role_in_init in (
+            RolesUserInInitiative.objects.filter(initiative=init)
+            .exclude(id__in=items_not_delete)
+            .all()
+        ):
+
+            coordinator_delete = (
+                init.stages_coordination.filter(coordinator_stage=role_in_init)
+                .filter(activate=False)
+                .first()
+            )
+            if coordinator_delete:
+                instace = {
+                    "initiative": init,
+                    "status": init.status,
+                    "coordinator": None,
+                    "author_text": None,
+                    "text": f"У пользователя {coordinator_delete.coordinator_stage.user.get_full_name()} удалили роль! Он не сможет согласовать инициативу ",
+                    "action": TYPE_SERVICE_MESSAGE,
+                }
+
+                init.history_coordination.create(**instace)
+                coordinator_delete.delete()
+            role_in_init.delete()
 
 
 class CommunityUserInInitiativeSerializer(serializers.ModelSerializer):
@@ -772,6 +817,11 @@ class ListInitiativeSerializer(serializers.Serializer):
             header += headers
 
         def get_column_roles(roles, line, header):
+            def create_status(status):
+                if status is None:
+                    return ""
+                return "Согл." if status else "Не согл."
+
             ans = []
             headers = []
             for roles_item in roles:
@@ -783,9 +833,10 @@ class ListInitiativeSerializer(serializers.Serializer):
                 for community_item in community:
                     user_info = community_item.get("user_info")
                     user = user_info.get("user")
+                    status = community_item.get("status")
                     user_in_roles = (
                         user_in_roles
-                        + f'{user.get("last_name")} {user.get("first_name")}.{user.get("second_name")}'
+                        + f'{user.get("last_name")} {user.get("first_name")}.{user.get("second_name")}: {create_status(status)}'
                         + "; "
                     )
                 ans.append(user_in_roles)
@@ -940,7 +991,7 @@ class MainEventSerializer(serializers.ModelSerializer):
 
     def __validate_dates(self, attrs):
 
-        if attrs.get("date_end") > attrs.get("date_start"):
+        if attrs.get("date_end") < attrs.get("date_start"):
             raise serializers.ValidationError(
                 {"date_start": "date_start <= date_end"}
             )
@@ -948,16 +999,7 @@ class MainEventSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
 
         id = attrs.get("id", None)
-        initiative = self.context.get("initiative")
-        e_name = Events.get_by_name(initiative.id, attrs.get("name"))
         self.__validate_dates(attrs)
-        if id < 0 and e_name:
-            raise serializers.ValidationError(
-                {
-                    "name": "name event exist",
-                    "msg": "Имя мероприятия уже используется у этой инициативы",
-                }
-            )
         if id > 0:
             e_id = Events.get_by_id(id)
             if not e_id:
@@ -965,13 +1007,6 @@ class MainEventSerializer(serializers.ModelSerializer):
                     {
                         "id": "id event not exist",
                         "msg": "Такого мероприятия нет для обновления",
-                    }
-                )
-            if e_name and e_name.id != id:
-                raise serializers.ValidationError(
-                    {
-                        "name": "name event exist",
-                        "msg": "Новое имя мероприятия уже используется",
                     }
                 )
 

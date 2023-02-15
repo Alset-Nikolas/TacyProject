@@ -60,7 +60,16 @@ export const stateApi = createApi({
           console.log(err);
         }
       },
-      invalidatesTags: ['initiative', 'project', 'list', 'initiatives-list', 'components', 'project-files-settings'],
+      invalidatesTags: [
+        'initiative',
+        'project',
+        'list',
+        'initiatives-list',
+        'components',
+        'project-files-settings',
+        'events-list',
+        'event'
+      ],
     }),
     deleteProject: builder.mutation<any, number>({
       query(projectId) {
@@ -191,7 +200,7 @@ export const stateApi = createApi({
           console.log(e);
         }
       },
-      invalidatesTags: ['initiatives-list', 'initiative'],
+      invalidatesTags: ['initiatives-list', 'initiative', 'coordination-history'],
     }),
     getRoles: builder.query<Array<{user: TUser & { id: number }, role: TRole & { project: number }}>, number>({
       query: (initiativeId) => `components/initiative/role/?id=${initiativeId}`,
@@ -225,7 +234,7 @@ export const stateApi = createApi({
           method: 'DELETE',
         }
       },
-      invalidatesTags: ['events-list'],
+      invalidatesTags: ['events-list', 'initiatives-list', 'initiative'],
     }),
     getFilesSettings: builder.query<Array<TFilesSettings>, number>({
       query: (projectId) => `components/settings/file/${projectId}`,
@@ -246,7 +255,7 @@ export const stateApi = createApi({
           body,
         };
       },
-      invalidatesTags: ['project-files-settings', 'initiatives-list'],
+      invalidatesTags: ['project-files-settings', 'initiatives-list', 'initiative-files'],
     }),
     getInitiativeFiles: builder.query<Array<TInitiativeFiles>, number>({
       query: (initiativeId) => `components/initiative/file/?id=${initiativeId}`,
@@ -276,6 +285,7 @@ export const stateApi = createApi({
       name?: string;
       status?: Array<number>;
       roles?: string;
+      approvedByRoles?: string;
       properties?: string;
       metrics?: string;
       files?: Array<number>;
@@ -285,6 +295,7 @@ export const stateApi = createApi({
         name,
         status,
         roles,
+        approvedByRoles,
         properties,
         metrics,
         files
@@ -293,6 +304,7 @@ export const stateApi = createApi({
         if (name) endpoint += `&name=${name}`;
         if (status && status.length) endpoint += `&status=${status}`;
         if (roles) endpoint += `&roles=${roles}`;
+        if (approvedByRoles) endpoint += `&role_approv=${approvedByRoles}`;
         if (properties) endpoint += `&properties=${properties}`;
         if (metrics) endpoint += `&metrics=${metrics}`;
         if (files && files.length) endpoint += `&files=${files}`;
@@ -608,7 +620,7 @@ export const stateApi = createApi({
           body,
         };
       },
-      invalidatesTags: ['coordination-history', 'user-rights'],
+      invalidatesTags: ['coordination-history', 'user-rights', 'initiative', 'initiatives-list'],
     }),
     sendForApproval: builder.mutation<any, { text: string, initiative: number, coordinators: Array<TUser & {id: number}> }>({
       query(body) {

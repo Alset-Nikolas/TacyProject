@@ -5,7 +5,7 @@ import ModalInfo from '../../components/modal-info/modal-info';
 import Modal from '../../components/modal/modal';
 import TeamTable from '../../components/team-table/team-table';
 import { useGetProjectInfoQuery, useGetTeamListQuery, usePostTeamListMutation } from '../../redux/state/state-api';
-import { openAddMemberModal, closeModal, openErrorModal } from '../../redux/state/state-slice';
+import { openAddMemberModal, closeModal, openErrorModal, showLoader, closeLoader } from '../../redux/state/state-slice';
 import { TRequestTeamListItem, TTeamMember, TUser } from '../../types';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 
@@ -18,7 +18,8 @@ export default function TeamSettingsPage() {
   const dispatch = useAppDispatch();
   const [
     postTeamList, {
-      isError: postTeamListError, 
+      isError: postTeamListError,
+      isLoading: postTeamListLoading,
     },
   ] = usePostTeamListMutation();
   const { currentId, value } = useAppSelector((store) => store.state.project);
@@ -118,7 +119,15 @@ export default function TeamSettingsPage() {
     if (postTeamListError) {
       dispatch(openErrorModal('Произошла ошибка. Проверьте заполнение полей'));
     }
-  }, [postTeamListError]);
+    if (postTeamListLoading) {
+      dispatch(showLoader());
+    } else {
+      dispatch(closeLoader());
+    }
+  }, [
+    postTeamListError,
+    postTeamListLoading,
+  ]);
 
   return (
     <TeamContext.Provider
