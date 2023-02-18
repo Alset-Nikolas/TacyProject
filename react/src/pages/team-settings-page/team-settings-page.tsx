@@ -74,9 +74,9 @@ export default function TeamSettingsPage() {
         listItem.is_superuser = member.is_superuser;
         listItem.properties = [];
         member.properties.forEach((el, index) => {
-          const foundPropertie = project.properties.find((propertie) => propertie.title === el.title);
+          const foundPropertie = project.properties.find((propertie) => propertie.id === el.id);
           
-          if (!foundPropertie) throw new Error('Propertie not found');
+          if (!foundPropertie) throw new Error('Property not found');
 
           listItem.properties.push({
             title: {
@@ -84,9 +84,17 @@ export default function TeamSettingsPage() {
               title: el.title,
             },
             values: el.values.map((value) => {
-              const foundValue = project.properties[index].items.find((item) => item.value === value.value);
+              const propertyIndex = project.properties.findIndex((item) => el.id === item.id);
+
+              if (propertyIndex < 0) {
+                throw new Error('Property index not found');
+              }
+
+              const foundValue = project.properties[propertyIndex].items.find((item) => item.value === value.value);
               
-              if (!foundValue) throw new Error('Value not found');
+              if (!foundValue) {
+                throw new Error('Value not found');
+              }
 
               return {
                 id: foundValue.id,

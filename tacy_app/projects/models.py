@@ -561,6 +561,7 @@ class СommunityProject(models.Model):
 
     class Meta:
         db_table = "community_tb"
+        ordering = ["date_create"]
 
     def __str__(self):
         return f"<СommunityProject project={self.project.name} person={self.user.email}>"
@@ -658,6 +659,9 @@ class CommunityAddFields(models.Model):
                 title_id=field.get("title").get("id"),
                 defaults={"value": field.get("value")},
             )
+
+    class Meta:
+        db_table = "community_addfields"
 
 
 class PropertiesСommunityProject(models.Model):
