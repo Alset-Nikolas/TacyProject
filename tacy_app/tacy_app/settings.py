@@ -182,6 +182,3 @@ SITE_FULL_NAME = "Site name"
 #     SITE_DOMAIN = "http://127.0.0.1:3000"
 #     EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
 #     EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")
-
-EMAIL_HOST_USER = "hvatovnikolaj804@gmail.com"
-EMAIL_HOST_PASSWORD = "sqerryyonexanbye"
