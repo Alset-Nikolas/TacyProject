@@ -116,7 +116,7 @@ export default function BasicFunctions({
         </SectionHeader>
         {/* </div> */}
         <div  className={`${styles.content}`}>
-          <div className={`${styles.leftBlock} ${styles.edit}`}>
+          {/* <div className={`${styles.leftBlock} ${styles.edit}`}> */}
             <div className={`${styles.textBlockEdit}`}>
               <label
                 className={`${styles.textBlockDescription}`}
@@ -125,7 +125,7 @@ export default function BasicFunctions({
                 {`${titles.purpose}:`}
               </label>
               <textarea
-                className={`${styles.purpose}`}
+                className={`${styles.textInput}`}
                 name="purpose"
                 value={projectForEdit.purpose}
                 onChange={onChangeHandler}
@@ -139,14 +139,14 @@ export default function BasicFunctions({
                 {`${titles.descripton}:`}
               </label>
               <textarea
-                className={`${styles.tasks}`}
+                className={`${styles.textInput}`}
                 name="description"
                 value={projectForEdit.description}
                 onChange={onChangeHandler}
               />
             </div>
-          </div>
-          <div className={`${styles.textBlockEdit}`}>
+          {/* </div> */}
+          <div className={`${styles.textBlockEdit} ${styles.tasks}`}>
             <label
               className={`${styles.textBlockDescription}`}
               htmlFor="tasks"
@@ -154,7 +154,7 @@ export default function BasicFunctions({
               {`${titles.tasks}:`}
             </label>
             <textarea
-              className={`${styles.descrition}`}
+              className={`${styles.textInput}`}
               name="tasks"
               value={projectForEdit.tasks}
               onChange={onChangeHandler}
@@ -174,7 +174,7 @@ export default function BasicFunctions({
         Основные функции
       </SectionHeader>
       <div  className={`${styles.content}`}>
-        <div className={`${styles.leftBlock}`}>
+        {/* <div className={`${styles.leftBlock}`}> */}
           <div className={`${styles.textBlock}`}>
             <span className={`${styles.textBlockDescription}`}>
               {`${titles.purpose}:`}
@@ -195,8 +195,8 @@ export default function BasicFunctions({
               </p>
             )}
           </div>
-        </div>
-        <div className={`${styles.textBlock} ${styles.description}`}>
+        {/* </div> */}
+        <div className={`${styles.textBlock} ${styles.tasks}`}>
           <span className={`${styles.textBlockDescription}`}>
             {`${titles.tasks}:`}
           </span>

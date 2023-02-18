@@ -32,7 +32,7 @@ export default function InitiativesTableConfiguration({ edit, components }: TIni
       const newArray = [ ...tableRegistry[key] ];
       const newItem = { ...newArray[index] };
 
-      newItem.initiative_activate = !newItem.initiative_activate;
+      newItem.initiative_activate = checked;
       newArray[index] = newItem;
 
       dispatch(updateTableRegistry({ key, array: newArray }));

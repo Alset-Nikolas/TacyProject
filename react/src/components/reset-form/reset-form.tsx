@@ -61,16 +61,12 @@ export default function ResetPasswordForm() {
             <span>*</span>
           </label>
           <input
-            className={`${styles.input}`}
+            className={`${styles.input} ${resetRequestFailed ? styles.inputError : ''}`}
             name="email"
             id="email"
             value={formData.email}
             onChange={onChangeHandler}
           />
-          <p className={`${styles.message}`}>
-            Введите свой электронный адрес для изменения пароля
-          </p>
-
           {resetRequestFailed && (
             <div
               className={`${styles.error}`}
@@ -78,12 +74,16 @@ export default function ResetPasswordForm() {
               {error?.message}
             </div>
           )}
+          <p className={`${styles.message}`}>
+            Введите свой электронный адрес для изменения пароля
+          </p>
           
-          <CustomizedButton
-            className={`${styles.buttonWrapper}`}
-            value="Отправить"
-            type="submit"
-          />
+            <CustomizedButton
+              className={`${styles.buttonWrapper}`}
+              value="Отправить"
+              type="submit"
+            />
+          
         </form>
       )}
       {resetRequestSuccess && (

@@ -151,7 +151,7 @@ export default function TeamRow({ index, member, edit, header, removeMember, set
     }
   };
 
-  const handleAddfieldInputChange = (e: ChangeEvent<HTMLInputElement>, addfieldIndex: number) => {
+  const handleAddfieldInputChange = (e: ChangeEvent<HTMLInputElement>, addfieldId: number) => {
     try {
       if (!membersList) throw new Error('Member list is not defined');
 
@@ -160,6 +160,9 @@ export default function TeamRow({ index, member, edit, header, removeMember, set
       const newList = [...membersList];
 
       const addfields = [...newMemberState.addfields];
+      const addfieldIndex = addfields.findIndex((el) => el.title.id === addfieldId);
+      if (addfieldIndex < 0) throw new Error('Member list is not defined');
+
       const currentAddfield = {...addfields[addfieldIndex]};
       currentAddfield.value = value;
       addfields[addfieldIndex] = currentAddfield;
@@ -213,7 +216,7 @@ export default function TeamRow({ index, member, edit, header, removeMember, set
     }
   };
 
-  const handlePropertieSelectorInput = (e: SelectChangeEvent<string | Array<string>>, propIndex: number) => {
+  const handlePropertieSelectorInput = (e: SelectChangeEvent<string | Array<string>>, propId: number) => {
     try {
       if (!membersList) throw new Error('Member list is not defined');
       
@@ -223,6 +226,8 @@ export default function TeamRow({ index, member, edit, header, removeMember, set
       const newList = [...membersList];
 
       const propertiesArray = [...newMemberState.properties]
+      const propIndex = propertiesArray.findIndex((el) => el.id === propId);
+      if (propIndex < 0) throw new Error('Property doesnt exist');
       const propertie = {...propertiesArray[propIndex]};
 
       if (value instanceof Array && typeof index !== 'undefined') {
@@ -329,23 +334,25 @@ export default function TeamRow({ index, member, edit, header, removeMember, set
             </div>
           )}
         </td>
-        {addfields.map((addfield, index) => {
+        {components?.table_community.settings_addfields_community.map((addfield, propIndex) => {
+        
+          const currentAddfield = addfields.find((el) => el.title.id === addfield.id);
 
           return   (
             <td
-              key={addfield.id}
+              key={currentAddfield?.id}
               className={`${styles.cell}`}
             >
               {edit ? (
                 <input
                   className={`${styles.input}`}
-                  value={addfield.value}
-                  onChange={(e) => handleAddfieldInputChange(e, index)}
+                  value={currentAddfield?.value}
+                  onChange={(e) => handleAddfieldInputChange(e, addfield.id)}
                   autoComplete="off"
                 />
               ) : (
                 <div className={`${styles.cell}`}>
-                  {addfield.value}
+                  {currentAddfield?.value}
                 </div>
               )}
             </td>
@@ -371,7 +378,7 @@ export default function TeamRow({ index, member, edit, header, removeMember, set
                   value={outputPropertie.values.map((item) => item.value)}
                   items={project.properties[propIndex].items.map((item) => item.value)}
                   style={selectStyle}
-                  onChange={(e) => handlePropertieSelectorInput(e, propIndex)}
+                  onChange={(e) => handlePropertieSelectorInput(e, propertie.id)}
                 />
               ) : (
                 <div className={`${styles.cell}`}>

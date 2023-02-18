@@ -83,7 +83,7 @@ export default function AddRisk({ setAddRisk }: TAddRiskProps) {
         <label
           className={`${styles.formElement}`}
         >
-          Название риска
+          Название риска*
           <input
             className={`${styles.formElement}`}
             value={newRiskState.risk.name}

@@ -1,19 +1,17 @@
 .wrapper {
   width: 24px;
   height: 24px;
-  left: 1257px;
-  top: 1150px;
   background: #FFF;
   border: 1px solid #504F4F;
   border-radius: 3px;
   display: flex;
   justify-content: center;
   align-items: center;
+  flex: 0 0 24px;
 }
 
 .checked {
   background: #8DB040;
-
 }
 
 .input {

@@ -6,8 +6,11 @@ import { getEventsListThunk } from "../../redux/evens-slice";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import CustomizedButton from "../button/button";
 import SectionHeader from "../section/section-header/section-header";
-import { useGetAuthInfoByIdQuery } from "../../redux/auth/auth-api";
-import { useGetComponentsQuery, useGetInitiativeByIdQuery } from "../../redux/state/state-api";
+import {
+  useGetComponentsQuery,
+  useGetInitiativeByIdQuery,
+  useGetAuthInfoByIdQuery,
+} from "../../redux/state/state-api";
 import moment from "moment";
 
 // styles
@@ -54,6 +57,7 @@ export default function EventsTable() {
 
   const onEventClickHandler = (eventId: number) => {
     navigate(`/${paths.events}/info/${eventId}`);
+    if (currentInitiativeId) localStorage.setItem('initiative-id', currentInitiativeId.toString());
   }
  
   useEffect(() => {

@@ -4,25 +4,20 @@ import { useLocation, useNavigate } from "react-router-dom";
 import CustomizedButton from "../../components/button/button";
 import EventsTable from "../../components/events-table/events-table";
 import InitiativeCoordination from "../../components/initiative-coordination/initiative-coordination";
-import EventsDiagram from "../../components/initiative-events/initiative-events";
 import InitiativeManagement from "../../components/initiative-management/initiative-management";
 import InitiativesTable from "../../components/initiatives-table/initiatives-table";
 import Modal from "../../components/modal/modal";
-import Pictogram from "../../components/pictogram/pictogram";
 import RiskManagement from "../../components/risk-management/risk-management";
 import RolesAlloction from "../../components/roles-allocation/roles-allocation";
-import { paths, REACT_APP_BACKEND_BASE_URL } from "../../consts";
-import { useGetAuthInfoByIdQuery } from "../../redux/auth/auth-api";
-import { getComponentsThunk } from "../../redux/components-slice";
 import { setCurrentInitiativeId } from "../../redux/initiatives-slice";
 import {
   useGetProjectInfoQuery,
   useGetInitiativeByIdQuery,
   useGetInitiativesListQuery,
-  useGetExportUrlQuery,
   useGetComponentsQuery,
   useDeleteInitiativeMutation,
-  useGetUserRightsQuery
+  useGetUserRightsQuery,
+  useGetAuthInfoByIdQuery,
 } from "../../redux/state/state-api";
 import { closeLoader, showLoader, openDeleteInitiativeModal, closeModal } from "../../redux/state/state-slice";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";

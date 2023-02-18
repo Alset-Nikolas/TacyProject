@@ -50,9 +50,10 @@ export default function RootPage() {
     // }
   }, []);
 
-  // useEffect(() => {
-  //   if (project.currentId) dispatch(getUserInfoByIdThunk(project.currentId));
-  // }, [project.currentId])
+  useEffect(() => {
+    window.scroll(0,0);
+
+  }, [location.pathname])
 
   return (
     <div className={`${styles.wrapper}`}>

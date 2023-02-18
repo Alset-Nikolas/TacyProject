@@ -1,13 +1,13 @@
 .wrapper {
-    display: flex;
-    width: 100%;
-    gap: 40px;
-    justify-content: space-between;
+  display: flex;
+  width: 100%;
+  gap: 40px;
+  justify-content: space-between;
 
-    div,
-    section {
-      flex: 1 1;
-    }
+  &>div,
+  &>section {
+    flex: 1 1;
+  }
 }
 
 .initiativeWrapper {

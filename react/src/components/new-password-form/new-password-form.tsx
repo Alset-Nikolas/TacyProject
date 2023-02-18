@@ -68,9 +68,12 @@ export default function NewPasswordForm() {
     } else {
       if (formData.password !== formData.confirmPassword) {
         dispatch(openErrorModal('Введенные пароли не совпадают'));
-      }
-      if (!passwordMatch) {
-        dispatch(openErrorModal('Пароль не удовлетворяет условиям'));
+      } else {
+        if (!formData.password) {
+          dispatch(openErrorModal('Введите пароль'));
+        } else if (!passwordMatch) {
+          dispatch(openErrorModal('Пароль не удовлетворяет условиям'));
+        }
       }
     }
   };
@@ -80,7 +83,7 @@ export default function NewPasswordForm() {
       navigate(`/${paths.login}`);
     }
     if (confirmRequestFailed) {
-      dispatch(openErrorModal('Ошибка при изменени пароля. Попрубуйте еще раз'));
+      dispatch(openErrorModal('Ошибка при изменении пароля. Попробуйте еще раз'));
       navigate(`/${paths.login}`);
     }
     return () => {

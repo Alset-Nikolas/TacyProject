@@ -1,6 +1,6 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 import { REACT_APP_BACKEND_URL } from '../../consts';
-import { TComponentsSettings, TCoordinationHistoryItem, TEvent, TFilesSettings, TInitiative, TInitiativeFiles, TProject, TProjectForEdit, TRequestTeamListItem, TRisk, TRole, TTeamMember, TUpdateComponents, TUser, TUserRequest, TUserRights } from '../../types';
+import { TAuthUser, TComponentsSettings, TCoordinationHistoryItem, TEvent, TFilesSettings, TInitiative, TInitiativeFiles, TProject, TProjectForEdit, TRequestTeamListItem, TRisk, TRole, TTeamMember, TUpdateComponents, TUser, TUserRequest, TUserRights } from '../../types';
 import { setCurrentInitiativeId } from '../initiatives-slice';
 import { openErrorModal, openMessageModal, setCurrentProjectId } from './state-slice';
 
@@ -31,6 +31,7 @@ export const stateApi = createApi({
     'user-rights',
     'coordination-history',
     'graphic-settings',
+    'auth',
   ],
   endpoints: (builder) => ({
     getProjectInfo: builder.query<TProject, number | null>({
@@ -694,6 +695,10 @@ export const stateApi = createApi({
       },
       invalidatesTags: ['graphic-settings', 'diagrams', 'personal-diagrams'],
     }),
+    getAuthInfoById: builder.query<TAuthUser, number>({
+      query: (projectId) => `auth/info/?id=${projectId}`,
+      providesTags: () => ['auth'],
+    }),
   }),
 });
 
@@ -745,4 +750,5 @@ export const {
   usePostCommentMutation,
   useGetGraphicsSettingsQuery,
   useUpdateGraphicsSettingsMutation,
+  useGetAuthInfoByIdQuery,
 } = stateApi;

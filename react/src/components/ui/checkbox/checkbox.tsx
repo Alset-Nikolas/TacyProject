@@ -23,6 +23,7 @@ const Checkbox: FC<TCheckboxProps> = ({ checked, name, onChange, id }) => {
         type="checkbox"
         name={name}
         id={id}
+        checked={checked}
         onChange={onChange}
       />
     </label>

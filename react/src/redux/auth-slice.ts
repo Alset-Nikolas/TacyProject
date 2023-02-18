@@ -308,7 +308,7 @@ export const resetPasswordThunk = (credentials: { email: string }) => (dispatch:
       dispatch(resetRequestSuccess());
     },
     (error: AxiosError<any>) => {
-      const message = error.response ? error.response.data.password : 'Неизвестная ошибка'
+      const message = error.response ? error.response.data.email : 'Неизвестная ошибка'
       dispatch(resetRequestFailed(message));
     }
   );

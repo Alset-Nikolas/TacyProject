@@ -18,6 +18,6 @@ export const authApi = createApi({
   }),
 });
 
-export const {
-  useGetAuthInfoByIdQuery,
-} = authApi;
+// export const {
+//   useGetAuthInfoByIdQuery,
+// } = authApi;

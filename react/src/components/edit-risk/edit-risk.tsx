@@ -8,23 +8,32 @@ import { useNavigate, useParams } from "react-router-dom";
 import sectionStyles from '../../styles/sections.module.scss'
 import styles from './edit-risk.module.scss';
 import { paths } from "../../consts";
-import { useAddRiskMutation, useDeleteRiskMutation, useGetComponentsQuery } from "../../redux/state/state-api";
-import { openErrorModal } from "../../redux/state/state-slice";
+import {
+  useAddRiskMutation,
+  useDeleteRiskMutation,
+  useGetComponentsQuery,
+  useGetRisksListQuery,
+} from "../../redux/state/state-api";
+import { closeLoader, openErrorModal, showLoader } from "../../redux/state/state-slice";
 
 export default function EditRisk() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   // const components = useAppSelector((store) => store.components.value);
   const { currentId } = useAppSelector((store) => store.state.project);
+  const { currentInitiativeId } = useAppSelector((store) => store.initiatives);
   const { data: components } = useGetComponentsQuery(currentId ? currentId : -1);
-  const riskList = useAppSelector((store) => store.risks.list);
+  const { data: riskList } = useGetRisksListQuery(currentInitiativeId ? currentInitiativeId : -1);
+  const [ errors, setErrors ] = useState({ name: false });
   const { riskId } = useParams();
-  const currentRisk = riskId ? riskList.find((risk) => risk.risk.id === Number.parseInt(riskId)) : null;
+  const currentRisk = riskId && riskList ? riskList.find((risk) => risk.risk.id === Number.parseInt(riskId)) : null;
   const [
     addRisk,
     {
       isError: addRiskError,
       isSuccess: addRiskSuccess,
+      isLoading: addRiskLoading,
+      error: addRiskErrorResponse,
     }
   ] = useAddRiskMutation();
   const [
@@ -57,13 +66,32 @@ export default function EditRisk() {
     navigate(`/${paths.registry}/edit`);
   }
 
+  const validate = (): boolean => {
+    let isValid = true;
+    if (!newRiskState.risk.name) {
+      isValid = false;
+      setErrors((prevState) => {
+        const newState = { ...prevState };
+        newState.name = true;
+        return newState;
+      });
+    }
+    return isValid;
+  }
+
   const submitHandler = (e: FormEvent) => {
     e.preventDefault();
+    validate();
     addRisk(newRiskState);
   }
 
   const permanentInputHandler = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target; 
+    setErrors((prevState) => {
+      const newState = { ...prevState };
+      newState.name = false;
+      return newState;
+    });
     setNewRiskState((prevState) => {
       const state = { ...prevState };
       const tempRisk = { ...state.risk };
@@ -92,13 +120,20 @@ export default function EditRisk() {
     }
     if (addRiskError) {
       dispatch(openErrorModal('Произошла ошибка. Проверьте заполнение полей'));
+      // console.log(addRiskErrorResponse);
     }
     if (deleteRiskError) {
       dispatch(openErrorModal('Произошла ошибка при удалении риска'));
     }
+    if (addRiskLoading) {
+      dispatch(showLoader());
+    } else {
+      dispatch(closeLoader());
+    }
   }, [
     addRiskError,
     addRiskSuccess,
+    addRiskLoading,
     deleteRiskError,
     deleteRiskSuccess,
   ])
@@ -114,9 +149,9 @@ export default function EditRisk() {
         <label
           className={`${styles.formElement}`}
         >
-          Название риска
+          Название риска*
           <input
-            className={`${styles.formElement}`}
+            className={`${styles.formElement} ${errors.name ? styles.error : ''}`}
             value={newRiskState.risk.name}
             name="name"
             onChange={permanentInputHandler}
@@ -145,15 +180,19 @@ export default function EditRisk() {
             color="transparent"
             onClick={onDeleteClickHandler}
           />
-          <CustomizedButton
-            value="Отмена"
-            color="blue"
-            onClick={onCancelClickHandler}
-          />
-          <CustomizedButton
-            value="Готово"
-            type="submit"
-          />
+          <div
+            className={`${styles.rightButtonBlock}`}
+          >
+            <CustomizedButton
+              value="Отмена"
+              color="blue"
+              onClick={onCancelClickHandler}
+            />
+            <CustomizedButton
+              value="Готово"
+              type="submit"
+            />
+          </div>
         </div>
       </form>
     </div>

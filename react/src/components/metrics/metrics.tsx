@@ -41,6 +41,11 @@ export default function Metrics({
       const currentMetric = { ...projectMetrics[index] };
       
       currentMetric[e.target.name] = e.target.checked;
+
+      if (e.target.name === 'is_percent' && e.target.checked) {
+        currentMetric.units = 'бм';        
+      }
+
       projectMetrics[index] = currentMetric;
 
       dispatch(updateProjectForEdit({

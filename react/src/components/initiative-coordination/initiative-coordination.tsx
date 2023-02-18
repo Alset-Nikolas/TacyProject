@@ -5,18 +5,10 @@ import SectionHeader from "../section/section-header/section-header";
 import CustomizedButton from "../button/button";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import {
-  closeInitiativeThunk,
-  coordinateThunk,
   getChatThunk,
-  postCommentThunk,
-  sendForApprovalThunk
 } from "../../redux/coordination-slice";
+import {  } from "../../redux/auth/auth-api";
 import {
-  getUserRightsThunk
-} from "../../redux/auth-slice";
-import { useGetAuthInfoByIdQuery } from "../../redux/auth/auth-api";
-import {
-  // useCloseInitiativeMutation,
   useCoordinateMutation,
   useGetChatQuery,
   useGetFilesSettingsQuery,
@@ -29,6 +21,7 @@ import {
   usePostCommentMutation,
   useSendForApprovalMutation,
   useSwitchInitiativeStateMutation,
+  useGetAuthInfoByIdQuery,
 } from "../../redux/state/state-api";
 import Pictogram from "../pictogram/pictogram";
 import { MessageSeparator } from "../message-separator/message-separator";
@@ -36,12 +29,12 @@ import Modal from "../modal/modal";
 import { openCoordinationModal, closeModal, openErrorModal, showLoader, closeLoader } from "../../redux/state/state-slice";
 import { TUser } from "../../types";
 import InitiativeFileUpload from "../initiative-file-upload/initiative-file-upload";
+import Checkbox from "../ui/checkbox/checkbox";
 
 //Styles
 import sectionStyles from '../../styles/sections.module.scss';
 import styles from './initiative-coordination.module.scss';
-import Checkbox from "../ui/checkbox/checkbox";
-
+//
 
 export default function InitiativeCoordination() {
   const dispatch = useAppDispatch();
@@ -205,7 +198,12 @@ export default function InitiativeCoordination() {
   const sendForApproveHandler = () => {
     sendForApproval({ ...coordinatorsState, initiative: currentInitiativeId ? currentInitiativeId : -1 });
     if (currentInitiativeId) localStorage.setItem('initiative-id', currentInitiativeId.toString());
-
+    setCoordinatorsState((prevState) => {
+      return {
+        ...prevState,
+        coordinators: [],
+      };
+    });
     dispatch(closeModal());
   }
 

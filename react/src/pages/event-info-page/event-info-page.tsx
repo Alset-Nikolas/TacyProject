@@ -1,20 +1,20 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { paths } from "../../consts";
-import { addInitiativeThunk, setInitiativesState } from "../../redux/initiatives-slice";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import CustomizedButton from "../../components/button/button";
-import CustomizedSelect from "../../components/select/Select";
-
-//Styles
-import styles from './event-info-page.module.scss';
-import { addEventThunk, getEventsListThunk, setEventsState } from "../../redux/evens-slice";
+import { getEventsListThunk } from "../../redux/evens-slice";
 import InitiativeManagement from "../../components/initiative-management/initiative-management";
 import DateInput from "../../components/date-input/date-input";
-import { useAddEventMutation, useDeleteEventMutation, useGetComponentsQuery } from "../../redux/state/state-api";
+import { useAddEventMutation, useDeleteEventMutation, useGetComponentsQuery, useGetEventsListQuery } from "../../redux/state/state-api";
 import Checkbox from '../../components/ui/checkbox/checkbox';
 import moment from "moment";
 import { openErrorModal } from "../../redux/state/state-slice";
+
+//Styles
+import styles from './event-info-page.module.scss';
+import { setCurrentInitiativeId } from "../../redux/initiatives-slice";
+//
 
 export default function EventInfoPage() {
   const navigate = useNavigate();
@@ -22,41 +22,38 @@ export default function EventInfoPage() {
   const { eventId } = useParams();
   const { currentId } = useAppSelector((store) => store.state.project);
   const { data: components } = useGetComponentsQuery(currentId ? currentId : -1);
-  const eventsList = useAppSelector((store) => store.events.list);
   const {
     currentInitiativeId
   } = useAppSelector((store) => store.initiatives);
-  const currentEvent = eventId ? eventsList.find((item) => item.event.id === Number.parseInt(eventId)) : null;
-  const { addInitiativeRequestSuccess, initiative } = useAppSelector((store) => store.initiatives)
-  // const { addEventRequestSuccess } = useAppSelector((store) => store.events);
+  const { data: eventsList } = useGetEventsListQuery(currentInitiativeId ? currentInitiativeId : -1);
+  const [ currentEvent, setCurrentEvent ] = useState(eventId && eventsList ? eventsList.find((item) => item.event.id === Number.parseInt(eventId)) : null);
   const [
     addEvent,
     {
       isSuccess: addEventRequestSuccess,
       isError: addEventRequestError,
-    }] = useAddEventMutation();
+    },
+  ] = useAddEventMutation();
   const [ deleteEvent, { isSuccess: isEventDeleteSuccess } ] = useDeleteEventMutation();
 
-  if (!initiative || !currentEvent) return null;
-
   const [newEventState, setNewEventState] = useState({
-    event: {
+    event: currentEvent ? {
       ...currentEvent.event,
       date_start: moment(currentEvent.event.date_start).format('DD.MM.YYYY'),
       date_end: moment(currentEvent.event.date_end).format('DD.MM.YYYY'),
-    },
-    metric_fields: currentEvent.metric_fields.map((field) => {
+    } : null,
+    metric_fields: currentEvent ? currentEvent.metric_fields.map((field) => {
       return {
         metric: field.metric,
         value: field.value.toString() as number | string,
       }
-    }),
-    addfields: currentEvent.addfields.map((field) => {
+    }) : null,
+    addfields: currentEvent ? currentEvent.addfields.map((field) => {
       return {
         id: field.title.id,
         value: field.value,
       }
-    }),
+    }) : null,
   });
 
   const onCancelClickHandler = () => {
@@ -72,7 +69,7 @@ export default function EventInfoPage() {
   const onSubmitHandler = (e: FormEvent) => {
     e.preventDefault();
     const tempEventState = {...newEventState};
-    const metrics = [...tempEventState.metric_fields];
+    const metrics = tempEventState.metric_fields ? [...tempEventState.metric_fields] : [];
     const convertedMetrics = metrics.map((item) => {
       return {
         ...item,
@@ -93,10 +90,10 @@ export default function EventInfoPage() {
     setNewEventState((prevState) => {
       return {
         ...prevState,
-        event: {
+        event: prevState.event ? {
           ...prevState.event,
           [name]: value,
-        }
+        } : prevState.event
       };
     })
   };
@@ -106,17 +103,17 @@ export default function EventInfoPage() {
     setNewEventState((prevState) => {
       return {
         ...prevState,
-        event: {
+        event: prevState.event ? {
           ...prevState.event,
           ready: checked,
-        }
+        } : prevState.event
       };
     })
   };
 
   const onAddfieldInputChange = (value: string, index: number) => {
     setNewEventState((prevState) => {
-      const addfieldsArray = [ ...prevState.addfields ];
+      const addfieldsArray = prevState.addfields ? [ ...prevState.addfields ] : [];
       const currentAddfield = { ...addfieldsArray[index] };
       currentAddfield.value = value;
       addfieldsArray[index] = currentAddfield;
@@ -129,7 +126,7 @@ export default function EventInfoPage() {
 
   const onMetricsInputChange = (value: string, index: number) => {
     setNewEventState((prevState) => {
-      const metricsArray = [ ...prevState.metric_fields ];
+      const metricsArray = prevState.metric_fields ? [ ...prevState.metric_fields ] : [];
       const currentMetric = { ...metricsArray[index] };
       const valueMatch = value.match(/-?[0-9]*[.,]?[0-9]*/);
       const valueNumber = valueMatch ? valueMatch[0] : '';
@@ -161,6 +158,47 @@ export default function EventInfoPage() {
       if (isEventDeleteSuccess) navigate(`/${paths.registry}`);
   }, [isEventDeleteSuccess]);
 
+  useEffect(() => {
+    if (!currentInitiativeId) {
+      const initiativeIdFromStorage = localStorage.getItem('initiative-id');
+      if (initiativeIdFromStorage) {
+        dispatch(setCurrentInitiativeId(Number.parseInt(initiativeIdFromStorage)));
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (eventId && eventsList) {
+      setCurrentEvent(eventsList.find((item) => item.event.id === Number.parseInt(eventId)));
+    }
+  }, [eventsList])
+
+  useEffect(() => {
+    if (currentEvent) {
+      setNewEventState({
+        event: {
+          ...currentEvent.event,
+          date_start: moment(currentEvent.event.date_start).format('DD.MM.YYYY'),
+          date_end: moment(currentEvent.event.date_end).format('DD.MM.YYYY'),
+        },
+        metric_fields: currentEvent.metric_fields.map((field) => {
+          return {
+            metric: field.metric,
+            value: field.value.toString() as number | string,
+          }
+        }),
+        addfields: currentEvent.addfields.map((field) => {
+          return {
+            id: field.title.id,
+            value: field.value,
+          }
+        }),
+      });
+    }
+  }, [currentEvent])
+
+  if (!currentEvent) return null;
+
   return (
     // <div className={`${styles.wrapper}`}>
       <div
@@ -188,7 +226,7 @@ export default function EventInfoPage() {
                   <div>Название мероприятия</div>
                   <input
                     name="name"
-                    value={newEventState.event.name}
+                    value={newEventState.event?.name}
                     onChange={onInitiativeInputChange}
                   />
                 </label>
@@ -198,7 +236,7 @@ export default function EventInfoPage() {
                   <div>Дата начала</div>
                   <DateInput
                     name="date_start"
-                    value={newEventState.event.date_start}
+                    value={newEventState.event ? newEventState.event.date_start : ''}
                     onChange={onInitiativeInputChange}
                   />
                 </label>
@@ -208,7 +246,7 @@ export default function EventInfoPage() {
                   <div>Дата окончания</div>
                   <DateInput
                     name="date_end"
-                    value={newEventState.event.date_end}
+                    value={newEventState.event ? newEventState.event.date_end : ''}
                     onChange={onInitiativeInputChange}
                   />
                 </label>
@@ -221,7 +259,7 @@ export default function EventInfoPage() {
                 >
                   Выполнено
                   <Checkbox
-                    checked={newEventState.event.ready}
+                    checked={newEventState.event?.ready}
                     onChange={onReadyCheckboxChange}
                   />
                 </div>
@@ -236,8 +274,8 @@ export default function EventInfoPage() {
                 <div
                   className={`${styles.section}`}
                 >
-                  {!newEventState.addfields.length && 'Список дополнительных полей пуст'}
-                  {newEventState.addfields.map((field, index) => (
+                  {!newEventState.addfields?.length && 'Список дополнительных полей пуст'}
+                  {newEventState.addfields?.map((field, index) => (
                     <label
                       className={`${styles.label}`}
                       key={field.id}
@@ -264,8 +302,8 @@ export default function EventInfoPage() {
                 <div
                   className={`${styles.section}`}
                 >
-                  {!newEventState.metric_fields.length && 'Список метрик пуст'}
-                  {newEventState.metric_fields.map((field, index) => (
+                  {!newEventState.metric_fields?.length && 'Список метрик пуст'}
+                  {newEventState.metric_fields?.map((field, index) => (
                     <div
                       key={field.metric.id}
                       className={`${styles.label}`}

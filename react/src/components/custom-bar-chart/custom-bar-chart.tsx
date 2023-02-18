@@ -34,6 +34,8 @@ export default function CustomBarChart({ data }: TCustomBarChartProps) {
         <XAxis dataKey="name_short" />
         <YAxis
           domain={['auto', (dataMax: number) => (dataMax + dataMax * 0.1)]}
+          tick={false}
+          width={0}
         />
         <Tooltip
           labelFormatter={(label) => labelMap.get(label)}

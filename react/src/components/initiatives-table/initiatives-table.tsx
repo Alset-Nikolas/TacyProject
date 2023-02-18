@@ -15,14 +15,14 @@ import {
   useGetFilesSettingsQuery,
   useGetProjectInfoQuery,
   useLazyGetExportUrlQuery,
-  useLazyGetSortedInitiativesQuery
+  useLazyGetSortedInitiativesQuery,
+  useGetAuthInfoByIdQuery,
 } from "../../redux/state/state-api";
 import Pictogram from "../pictogram/pictogram";
 import { paths, REACT_APP_BACKEND_BASE_URL } from "../../consts";
 import { InitiativeTableHoverPopup } from "../initiative-table-hover-popup/initiative-table-hover-popup";
 import { InitiativeTableHoverFilePopup } from "../initiative-table-hover-file-popup/initiative-table-hover-file-popup";
 import CustomizedButton from "../button/button";
-import { useGetAuthInfoByIdQuery } from "../../redux/auth/auth-api";
 import { useLocation, useNavigate } from "react-router-dom";
 import InitiativesFilter from "../initiatives-filter/initiatives-filter";
 

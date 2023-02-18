@@ -845,13 +845,16 @@ class ListInitiativeSerializer(serializers.Serializer):
 
         A_Z = [chr(x) for x in range(ord("A"), ord("Z") + 1)]
 
-        file_path = f"tacy_app/media/files/user/{user.id}/"
+        # file_path = f"tacy_app/media/files/user/{user.id}/"
+        file_path = f"media/files/user/{user.id}/"
         file_name = "reestr.xlsx"
         file_path_static = f"media/files/user/{user.id}/" + file_name
         full_name_file_url = file_path + file_name
         if not os.path.exists(file_path):
+            print("создаю", file_path)
             os.makedirs(file_path)
         if os.path.exists(full_name_file_url):
+            print("удаляю", full_name_file_url)
             os.remove(full_name_file_url)
 
         workbook = xlsxwriter.Workbook(full_name_file_url)

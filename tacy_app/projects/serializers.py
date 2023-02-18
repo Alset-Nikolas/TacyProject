@@ -607,13 +607,14 @@ class UpdateCommunityProjectSerializer(serializers.ModelSerializer):
                     text=f"Добро пожаловать в приложение {settings.SITE_FULL_NAME}. Это ваш первый проект '{project.name}'",
                 )
             else:
-                EmailManage.send_invitation_new_project(
-                    user=user, context={"project": project}
-                )
-                NotificationsUser.create(
-                    user=user,
-                    text=f"Вас пригласили в новый проект: '{project.name}'",
-                )
+                if project not in Project.get_user_projects(user):
+                    EmailManage.send_invitation_new_project(
+                        user=user, context={"project": project}
+                    )
+                    NotificationsUser.create(
+                        user=user,
+                        text=f"Вас пригласили в новый проект: '{project.name}'",
+                    )
 
             community_item = (
                 СommunityProject.create_or_update_user_in_community(

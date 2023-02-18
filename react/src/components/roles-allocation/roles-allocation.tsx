@@ -312,7 +312,6 @@ export default function RolesAlloction() {
         <div
           className={`${sectionStyles.hideContentHeader}`}
           onClick={(e) => {
-            console.log((e.target as Element).closest(`#edit`));
             if (!(e.target as Element).closest(`#edit`)) {
               setIsOpen((prevState) => !prevState)
             }
@@ -379,6 +378,16 @@ export default function RolesAlloction() {
                       >
                         ФИО
                       </div>
+                      {components?.table_community.settings_addfields_community.map((addfield) => {
+                        return (
+                          <div
+                            key={`${addfield.id}`}
+                            className={`${styles.propertyCell} ${styles.header}`}
+                          >
+                            {addfield.title}
+                          </div>
+                        );
+                      })}
                       {components?.table_community.properties.map((property) => {
                         if (!property.is_community_activate) return null;
                         return (
@@ -437,7 +446,7 @@ export default function RolesAlloction() {
                               let items: Array<string> = [notAllocated];
                               if (membersList) items = items.concat(membersList.map((el) => el.name));
                               if (member.user_info && member.user_info.user.id !== -1) items = items.concat([`${member.user_info?.user.last_name} ${member.user_info?.user.first_name} ${member.user_info?.user.second_name}`]);
-                              
+                              const foundMember = teamList?.find((listEl) => listEl.id === member.user_info?.user.id);
                               return (
                                 <div
                                   key={member.user_info ? member.user_info.user.id : `new_${userIndex}`}
@@ -467,6 +476,17 @@ export default function RolesAlloction() {
                                       {`${member.user_info?.user.last_name} ${member.user_info?.user.first_name[0]}. ${member.user_info?.user.second_name[0]}.`}
                                     </div>
                                   </div>
+                                  {components?.table_community.settings_addfields_community.map((addfield, index) => {
+                                    const currentAddfield = foundMember?.addfields.find((el) => el.title.id === addfield.id);
+                                    return   (
+                                      <div
+                                        key={currentAddfield?.id}
+                                        className={`${styles.propertyCell}`}
+                                      >
+                                        {currentAddfield?.value}
+                                      </div>
+                                    );
+                                  })}
                                   {member.user_info?.properties.map((propertie) => {
                                     if (!propertie.title.is_community_activate) return null;
                                     return (
@@ -555,6 +575,16 @@ export default function RolesAlloction() {
                   <div className={`${styles.modalHeaderCell}`}>
                     ФИО
                   </div>
+                  {components?.table_community.settings_addfields_community.map((addfield) => {
+                    return (
+                      <div
+                        key={`${addfield.id}`}
+                        className={`${styles.modalHeaderCell}`}
+                      >
+                        {addfield.title}
+                      </div>
+                    );
+                  })}
                   {
                     project?.properties.map((propertie) => (
                       <div className={`${styles.modalHeaderCell}`} key={propertie.id}>
@@ -567,6 +597,7 @@ export default function RolesAlloction() {
                   className={`${styles.modalGroupWrapper}`}
                 >
                   {modalMembersLis.map((item, index) => {
+                    const foundMember = teamList?.find((listEl) => listEl.id === item.user.id);
                     // if (item.id !== modal.data.role.id) return null;
                     // const membersProperties = teamList?.find((member) => member.id === item.id)?.properties;
                     return (
@@ -592,6 +623,17 @@ export default function RolesAlloction() {
                         >
                           {`${item.user_name}`}
                         </div>
+                        {components?.table_community.settings_addfields_community.map((addfield, index) => {
+                          const currentAddfield = foundMember?.addfields.find((el) => el.title.id === addfield.id);
+                          return   (
+                            <div
+                              key={currentAddfield?.id}
+                              className={`${styles.modalCell}`}
+                            >
+                              {currentAddfield?.value}
+                            </div>
+                          );
+                        })}
                         {item.properties.map((property) => (
                           <div
                             key={`${item.id}_${property.id}`}

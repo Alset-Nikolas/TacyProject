@@ -14,10 +14,25 @@
   font-weight: 400;
   font-size: 16px;
   line-height: 28px;
+  
+  input {
+    border: 1px solid #504F4F;
+  }
+}
+
+.error {
+  border-color: #B04040 !important;
 }
 
 .buttonWrapper {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   margin-top: 40px;
+  width: 100%;
+}
+
+.rightButtonBlock {
+  display: flex;
+  gap: 20px;
+  justify-content: flex-end;
 }
