@@ -2,15 +2,15 @@ import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CustomizedButton from "../../components/button/button";
 import SelectUnits from "../../components/select-units/select-units";
-import CustomizedSelect from "../../components/select/Select";
 import { paths } from "../../consts";
-import { addInitiativeThunk, setInitiativesState } from "../../redux/initiatives-slice";
+import { addInitiativeThunk, setInitiativeValidationErrors } from "../../redux/initiatives-slice";
 import {
   useGetProjectInfoQuery,
   useAddInitiativeMutation,
   useGetInitiativesListQuery,
   useGetComponentsQuery
 } from "../../redux/state/state-api";
+import { closeLoader, openErrorModal, showLoader } from "../../redux/state/state-slice";
 import {
   TInitiativeMetricsFields, 
   IRegistryPropertie
@@ -19,12 +19,14 @@ import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 
 // Styles
 import styles from './add-initiative-page.module.scss';
+import inputStyles from '../../styles/inputs.module.scss';
+//
 
 export default function AddInitiativePage() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const currentProjectId = useAppSelector((store) => store.state.project.currentId);
-  // const project = useAppSelector((store) => store.state.project.value);
+  const { validationErrors } = useAppSelector((store) => store.initiatives);
   const { data: project } = useGetProjectInfoQuery(currentProjectId);
   const { data: components } = useGetComponentsQuery(currentProjectId ? currentProjectId : -1);
   // const { addInitiativeRequestSuccess } = useAppSelector((store) => store.initiatives)
@@ -80,7 +82,14 @@ export default function AddInitiativePage() {
   const { refetch: refetchInitiativesList } = useGetInitiativesListQuery(currentProjectId ? currentProjectId : -1, {
     skip: !currentProjectId,    
   });
-  const [addInitiative, { isSuccess: addInitiativeRequestSuccess }] = useAddInitiativeMutation();
+  const [
+    addInitiative,
+    {
+      isSuccess: addInitiativeRequestSuccess,
+      isError: addInitiativeError,
+      isLoading: addInitiativeLoading,
+    },
+  ] = useAddInitiativeMutation();
 
   const onCancelClickHandler = () => {
     navigate(`/${paths.registry}`);
@@ -90,14 +99,27 @@ export default function AddInitiativePage() {
     dispatch(addInitiativeThunk(newInitiativeState));
   }
 
+  const validate = () => {
+    const validationErrorsTemp = { ...validationErrors };
+    if (!newInitiativeState.initiative.name) {
+      validationErrorsTemp.name = true;
+    }
+    dispatch(setInitiativeValidationErrors(validationErrorsTemp));
+  }
+
   const onSubmitHandler = (e: FormEvent) => {
     e.preventDefault();
     // dispatch(addInitiativeThunk(newInitiativeState));
+    validate();
     addInitiative(newInitiativeState);
   }
 
   const onInitiativeInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    dispatch(setInitiativeValidationErrors({
+      ...validationErrors,
+      [name]: false,
+    }));
     setNewInitiativeState((prevState) => {
       return {
         ...prevState,
@@ -168,6 +190,14 @@ export default function AddInitiativePage() {
       refetchInitiativesList();
       navigate(`/${paths.registry}`);
     }
+    if (addInitiativeError) {
+      dispatch(openErrorModal('Произошла ошибка при создании инициативы'));
+    }
+    if (addInitiativeLoading) {
+      dispatch(showLoader());
+    } else {
+      dispatch(closeLoader());
+    }
     // return () => {
     //   dispatch(setInitiativesState({
     //     addInitiativeRequest: false,
@@ -175,7 +205,11 @@ export default function AddInitiativePage() {
     //     addInitiativeRequestFailed: false,
     //   }));
     // }
-  }, [addInitiativeRequestSuccess]);
+  }, [
+    addInitiativeRequestSuccess,
+    addInitiativeError,
+    addInitiativeLoading,
+  ]);
 
   return (
     <div
@@ -196,6 +230,7 @@ export default function AddInitiativePage() {
               >
                 <div>Название инициативы*</div>
                 <input
+                  className={`${validationErrors.name ? inputStyles.error : ''}`}
                   name="name"
                   value={newInitiativeState.initiative.name}
                   onChange={onInitiativeInputChange}
@@ -273,7 +308,7 @@ export default function AddInitiativePage() {
                     className={`${styles.label}`}
                     key={field.title.id}
                   >
-                    <li>{`${field.title.title}*`}</li>
+                    <li>{`${field.title.title}`}</li>
                     <input
                       value={field.value}
                       onChange={(e) => onAddfieldInputChange(e.target.value, index)}

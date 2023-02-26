@@ -25,7 +25,7 @@ export type TMetrica = {
   id: number;
   title: string;
   value: number;
-  target_value: number;
+  target_value: number | '';
   active: boolean;
   description: string;
   is_aggregate: boolean;
@@ -86,6 +86,66 @@ export type TProject = {
   properties: Array<TPropertie>;
   roles: Array<TRole>;
   rights: Array<TRight>;
+};
+
+export type TFieldValidationErrors = {
+  id: number;
+  index: number;
+  isError: boolean;
+}
+
+export type TMetricValidationError = {
+  id: number;
+  index: number;
+  title: boolean;
+  units: boolean;
+  description: boolean;
+  target_value: boolean;
+}
+
+export type TPropertyValidationError = {
+  id: number;
+  index: number;
+  title: boolean;
+  values: Array<{
+    id: number;
+    index: number;
+    value: boolean;
+  }>;
+}
+
+export type TRoleValidationErrors = {
+  id: number;
+  index: number;
+  name: boolean;
+}
+
+export type TIntermediateDateValidationErrors = {
+  index: number;
+  title: boolean;
+  date: boolean;
+}
+
+export type TStageValidationErrors = {
+  index: number;
+  name_stage: boolean;
+  date_start: boolean;
+  date_end: boolean;
+}
+
+export type TProjectValidationErrors = {
+  name: boolean;
+  date_start: boolean;
+  date_end: boolean;
+  purpose: boolean;
+  tasks: boolean;
+  description: boolean;
+  intermediate_dates: Array<TIntermediateDateValidationErrors>;
+  stages: Array<TStageValidationErrors>;
+  metrics: Array<TMetricValidationError>;
+  properties: Array<TPropertyValidationError>;
+  roles: Array<TRoleValidationErrors>;
+  rights: Array<TFieldValidationErrors>;
 };
 
 export type TProjectForEdit = {

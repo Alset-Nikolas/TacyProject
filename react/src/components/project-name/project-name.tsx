@@ -5,15 +5,18 @@ import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import { handleInputChange } from '../../utils';
 import DateInput from '../date-input/date-input';
 import { useGetProjectInfoQuery } from '../../redux/state/state-api';
+import { TProjectValidationErrors } from '../../types';
 
 // Styles
 import styles from './project-name.module.scss';
 import sectionStyles from '../../styles/sections.module.scss';
+import inputStyles from '../../styles/inputs.module.scss';
+import { setProjectValidationErrors } from '../../redux/state/state-slice';
 
 type TProjectNameProps = {
   edit?: boolean;
   create?: boolean;
-  error?: any;
+  error?: TProjectValidationErrors;
 }
 
 export default function ProjectName({
@@ -28,7 +31,10 @@ export default function ProjectName({
   const { data: project } = useGetProjectInfoQuery(currentId);
 
   const onChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
-    if (projectForEdit) handleInputChange(e, projectForEdit, dispatch);
+    if (projectForEdit) {
+      handleInputChange(e, projectForEdit, dispatch);
+      dispatch(setProjectValidationErrors({ ...error, [e.target.name]: false }));
+    }
   };
 
   if (edit) {
@@ -59,7 +65,7 @@ export default function ProjectName({
               Дата начала
             </label>
             <DateInput
-              className={`${styles.input}`}
+              className={`${styles.input} ${error?.name ? styles.error : ''}`}
               id="date_start"
               name="date_start"
               value={projectForEdit.date_start}
@@ -74,7 +80,7 @@ export default function ProjectName({
               Дата окончания
             </label>
             <DateInput
-              className={`${styles.input}`}
+              className={`${styles.input} ${error?.name ? styles.error : ''}`}
               id="date_end"
               name="date_end"
               value={projectForEdit.date_end}
@@ -98,7 +104,7 @@ export default function ProjectName({
             Название проекта
           </label>
           <input
-            className={`${styles.input} ${error?.name ? styles.error : ''}`}
+            className={`${styles.input} ${error?.name ? inputStyles.error : ''}`}
             id="name"
             name="name"
             value={projectForEdit.name}
@@ -114,7 +120,7 @@ export default function ProjectName({
               Дата начала
             </label>
             <DateInput
-              className={`${styles.input} ${error?.date_start ? styles.error : ''}`}
+              className={`${styles.input} ${error?.date_start ? inputStyles.error : ''}`}
               id="date_start"
               name="date_start"
               value={projectForEdit.date_start}
@@ -129,7 +135,7 @@ export default function ProjectName({
               Дата окончания
             </label>
             <DateInput
-              className={`${styles.input} ${error?.date_end ? styles.error : ''}`}
+              className={`${styles.input} ${error?.date_end ? inputStyles.error : ''}`}
               id="date_end"
               name="date_end"
               value={projectForEdit.date_end}

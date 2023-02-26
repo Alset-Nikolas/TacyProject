@@ -1,5 +1,4 @@
 import SectionHeader from '../section/section-header/section-header';
-import SectionContent from '../section/section-content/section-content';
 
 // Styles
 import styles from './project-stages.module.scss';
@@ -8,19 +7,21 @@ import TimelineTableRow from '../timeline-table-row/timeline-table-row';
 import TimelineStageRow from '../timeline-stage-row/timeline-stage-row';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import { GanttD3 } from '../../d3/GanttD3/GanttD3';
-import { addPropertie, isStage } from '../../utils';
+import { addPropertie } from '../../utils';
 import CustomizedButton from '../button/button';
 import { useGetProjectInfoQuery } from '../../redux/state/state-api';
-import IntermediateDates from '../intermediate-dates/intermediate-dates';
+import { TProjectValidationErrors } from '../../types';
 
 type TProjectStagesProps = {
   edit?: boolean;
   create?: boolean;
+  error?: TProjectValidationErrors;
 }
 
 export default function ProjectStages({
   edit,
   create,
+  error,
 }: TProjectStagesProps) {
   const dispatch = useAppDispatch();
   const { currentId } = useAppSelector((store) => store.state.project);
@@ -72,14 +73,19 @@ export default function ProjectStages({
             </div>
           )}
           
-          {projectForEdit.stages?.map((el: any, index: number) => (
-            <TimelineStageRow
-              item={el}
-              index={index}
-              pictogramType={index === projectForEdit.stages.length - 1 ? 'add' : 'delete'}
-              key={index}
-            />
-          ))}
+          {projectForEdit.stages?.map((el: any, index: number) => {
+            const currentError = error?.stages.find((error) => error.index === index);
+            
+            return (
+              <TimelineStageRow
+                item={el}
+                index={index}
+                pictogramType={index === projectForEdit.stages.length - 1 ? 'add' : 'delete'}
+                key={index}
+                error={currentError}
+              />
+            );
+          })}
         </div>
       </section>
     );

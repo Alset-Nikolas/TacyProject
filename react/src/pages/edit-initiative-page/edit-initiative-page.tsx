@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AddRisk from "../../components/add-risk/add-risk";
 import CustomizedButton from "../../components/button/button";
@@ -11,6 +11,7 @@ import { useAppSelector } from "../../utils/hooks";
 
 // Styles
 import styles from './edit-initiative-page.module.scss';
+//
 
 export default function EditInitiativePage() {
   const navigate = useNavigate();

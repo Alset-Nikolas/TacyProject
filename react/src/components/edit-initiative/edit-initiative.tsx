@@ -1,25 +1,23 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { paths } from "../../consts";
-import { addInitiativeThunk, setInitiativesState } from "../../redux/initiatives-slice";
 import { useAddInitiativeMutation, useDeleteInitiativeMutation, useGetComponentsQuery, useGetInitiativeByIdQuery, useGetProjectInfoQuery } from "../../redux/state/state-api";
-import { openErrorModal } from "../../redux/state/state-slice";
+import { closeLoader, openErrorModal, showLoader } from "../../redux/state/state-slice";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import CustomizedButton from "../button/button";
 import SelectUnits from "../select-units/select-units";
-import CustomizedSelect from "../select/Select";
 import { TInitiativeInfo } from '../../types';
+import { setInitiativeValidationErrors } from "../../redux/initiatives-slice";
 
 //Styles
 import styles from './edit-initiative.module.scss';
+import inputStyles from '../../styles/inputs.module.scss';
+//
 
 export default function EditInitiative() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  // const currentProjectId = useAppSelector((store) => store.state.project.currentId);
-  // const project = useAppSelector((store) => store.state.project.value);
-  // const components = useAppSelector((store) => store.components.value);
-  // const { addInitiativeRequestSuccess/*, initiative*/ } = useAppSelector((store) => store.initiatives)
+  const { validationErrors } = useAppSelector((store) => store.initiatives);
   const { currentId } = useAppSelector((store) => store.state.project);
   const { data: components } = useGetComponentsQuery(currentId ? currentId : -1);
   const { data: project } = useGetProjectInfoQuery(currentId ? currentId : -1);
@@ -28,7 +26,6 @@ export default function EditInitiative() {
   } = useAppSelector((store) => store.initiatives);
   const {
     data: initiative,
-    // isSuccess: isFetchingInitiative,
   } = useGetInitiativeByIdQuery(currentInitiativeId ? currentInitiativeId : -1, {
     skip: !currentInitiativeId,
   });
@@ -37,6 +34,7 @@ export default function EditInitiative() {
     {
       isError: addInitiativeRequestError,
       isSuccess: addInitiativeRequestSuccess,
+      isLoading: addInitiativeLoading,
     }
   ] = useAddInitiativeMutation();
   const [
@@ -72,8 +70,17 @@ export default function EditInitiative() {
     }
   }
 
+  const validate = () => {
+    const validationErrorsTemp = { ...validationErrors };
+    if (!newInitiativeState.initiative.name) {
+      validationErrorsTemp.name = true;
+    }
+    dispatch(setInitiativeValidationErrors(validationErrorsTemp));
+  }
+
   const onSubmitHandler = (e: FormEvent) => {
     e.preventDefault();
+    validate();
     // dispatch(addInitiativeThunk(newInitiativeState));
     const tempInitiativeState = {...newInitiativeState};
     const { author, ...initiative } = tempInitiativeState.initiative;
@@ -93,6 +100,10 @@ export default function EditInitiative() {
 
   const onInitiativeInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    dispatch(setInitiativeValidationErrors({
+      ...validationErrors,
+      [name]: false,
+    }));
     setNewInitiativeState((prevState) => {
       return {
         ...prevState,
@@ -189,9 +200,15 @@ export default function EditInitiative() {
     if (addInitiativeRequestError) {
       dispatch(openErrorModal('Произошла ошибка. Проверьте заполнение полей'));
     }
+    if (addInitiativeLoading) {
+      dispatch(showLoader());
+    } else {
+      dispatch(closeLoader());
+    }
   }, [
     addInitiativeRequestSuccess,
     addInitiativeRequestError,
+    addInitiativeLoading,
     deleteInitiativeRequestError,
     deleteInitiativeRequestSuccess]);
 
@@ -213,8 +230,9 @@ export default function EditInitiative() {
                 <label
                   className={`${styles.label}`}
                 >
-                  <div>Название инициативы</div>
+                  <div>Название инициативы*</div>
                   <input
+                    className={`${validationErrors.name ? inputStyles.error : ''}`}
                     name="name"
                     value={newInitiativeState.initiative.name}
                     onChange={onInitiativeInputChange}

@@ -11,7 +11,9 @@ import {
   clearProjectForEdit,
   closeModal,
   openErrorModal,
+  projectValidationErrorInitialState,
   setProjectForEdit,
+  setProjectValidationErrors,
 } from '../../redux/state/state-slice';
 import ModalInfo from '../modal-info/modal-info';
 import { useDeleteFilesMutation, useGetProjectInfoQuery, usePostFilesMutation, usePostProjectMutation } from '../../redux/state/state-api';
@@ -21,7 +23,7 @@ import ProjectStages from '../project-stages/project-stages';
 
 // Syles
 import styles from './basic-settings-edit.module.scss';
-import { TIntermediateDate, TMetrica, TPropertieEdit } from '../../types';
+import { TIntermediateDate, TIntermediateDateValidationErrors, TMetrica, TPropertieEdit, TPropertyValidationError, TRole, TRoleValidationErrors, TStageEdit, TStageValidationErrors } from '../../types';
 
 type TBasicSettingsEditProps = {
   // onSaveClick: MouseEventHandler<HTMLButtonElement>;
@@ -32,7 +34,7 @@ type TBasicSettingsEditProps = {
 export default function BasicSettingsEdit({ onCancelClick, setIsEdit }: TBasicSettingsEditProps) {
   const dispatch = useAppDispatch();
   // const project = useAppSelector((store) => store.state.project.value);
-  const { currentId } = useAppSelector((store) => store.state.project);
+  const { project: { currentId }, validationErrors } = useAppSelector((store) => store.state);
   const { data: project, refetch: refetchProjectInfo } = useGetProjectInfoQuery(currentId);
   const modal = useAppSelector((store) => store.state.app.modal);
   const [files, setFiles] = useState<Array<any>>([null]);
@@ -66,45 +68,197 @@ export default function BasicSettingsEdit({ onCancelClick, setIsEdit }: TBasicSe
   const [ isSamePropNames, setIsSamePropNames ] = useState(false);
 
   const validateEmptyInputs = () => {
+    const validationErrorsTemp = { ...projectValidationErrorInitialState };
     let isValid = true;
     const projectEntries = Object.entries(projectForEdit ? projectForEdit : {});
     if (!projectEntries.length) return false;
 
     projectEntries.forEach((el) => {
-      const key = el[0];
+      const key = el[0] as keyof typeof validationErrorsTemp;
       const value = el[1];
       if (typeof value === 'string') {
         if (!value) {
           isValid = false;
-          setValidationError((prevState) => ({ ...prevState, [key]: true }));
-        } else {
-          setValidationError((prevState) => ({ ...prevState, [key]: false }));
+          if (key === 'name' ||
+            key === 'date_start' ||
+            key === 'date_end' ||
+            key === 'purpose' ||
+            key === 'tasks' ||
+            key === 'description'
+          ) {
+            validationErrorsTemp[key] = true;
+          }
         }
       }
       if (key === 'metrics' && (value instanceof Array)) {
-        value.forEach((metric) => {
-          if (!(metric as TMetrica).title) isValid = false;
-        })
+        (value as Array<TMetrica>).forEach((metric, metricIndex) => {
+          const metricValidationState = {
+            id: metric.id as number,
+            index: metricIndex,
+            title: false,
+            units: false,
+            description: false,
+            target_value: false,
+          };
+          if (!metric.title) {
+            isValid = false;
+            metricValidationState.title = true;
+          }
+          if (!metric.units) {
+            isValid = false;
+            metricValidationState.units = true;
+          }
+          if (!metric.description) {
+            isValid = false;
+            metricValidationState.description = true;
+          }
+          if (metric.target_value === '') {
+            isValid = false;
+            metricValidationState.target_value = true;
+          }
+    
+          if (metricValidationState.title ||
+            metricValidationState.units ||
+            metricValidationState.description ||
+            metricValidationState.target_value
+          ) {
+            const currentMetricValidation = [...validationErrorsTemp[key]];
+            currentMetricValidation.push(metricValidationState);
+            validationErrorsTemp[key] = currentMetricValidation;
+          }
+        });
       }
       if (key === 'intermediate_dates' && (value instanceof Array)) {
-        value.forEach((dateEl) => {
-          if (!(dateEl as TIntermediateDate).title) isValid = false;
-          if (!(dateEl as TIntermediateDate).date) isValid = false;
+        (value as Array<TIntermediateDate>).forEach((dateEl, dateIndex) => {
+          let isIntermediateDateValid = true;
+          const intermediateDateValidationState: TIntermediateDateValidationErrors = {
+            index: dateIndex,
+            title: false,
+            date: false,
+          };
+          if (!dateEl.title) {
+            isValid = false;
+            isIntermediateDateValid = false;
+            intermediateDateValidationState.title = true;
+          }
+          if (!dateEl.date) {
+            isValid = false;
+            isIntermediateDateValid = false;
+            intermediateDateValidationState.date = true;
+          }
+
+          if (!isIntermediateDateValid) {
+            const currentIntermediateDateValidation = [...validationErrorsTemp[key]];
+            currentIntermediateDateValidation.push(intermediateDateValidationState);
+            validationErrorsTemp[key] = currentIntermediateDateValidation;
+          }
+        })
+      }
+      if (key === 'stages' && (value instanceof Array)) {
+        (value as Array<TStageEdit>).forEach((stage, stageIndex) => {
+          let isStageValid = true;
+          const stageValidationState: TStageValidationErrors = {
+            index: stageIndex,
+            name_stage: false,
+            date_start: false,
+            date_end: false,
+          };
+          if (!stage.name_stage) {
+            isValid = false;
+            isStageValid = false;
+            stageValidationState.name_stage = true;
+          }
+          if (!stage.date_start) {
+            isValid = false;
+            isStageValid = false;
+            stageValidationState.date_start = true;
+          }
+          if (!stage.date_end) {
+            isValid = false;
+            isStageValid = false;
+            stageValidationState.date_end = true;
+          }
+
+          if (!isStageValid) {
+            const currentStageValidation = [...validationErrorsTemp[key]];
+            currentStageValidation.push(stageValidationState);
+            validationErrorsTemp[key] = currentStageValidation;
+          }
         })
       }
       if (key === 'properties' && (value instanceof Array)) {
-        value.forEach((propEl, elIndex) => {
-          value.forEach((el, index) => {
+        (value as Array<TPropertieEdit>).forEach((propEl, elIndex) => {
+          (value as Array<TPropertieEdit>).forEach((el, index) => {
             if (index !== elIndex) {
-              if ((el as TPropertieEdit).title === (propEl as TPropertieEdit).title) {
+              if (el.title === propEl.title) {
                 isValid = false;
                 setIsSamePropNames(true);
               }
             }
           });
+        });
+
+        (value as Array<TPropertieEdit>).forEach((propEl, elIndex) => {
+          let isPropertyValid = true;
+          const propertyValidationState: TPropertyValidationError = {
+            id: propEl.id as number,
+            index: elIndex,
+            title: false,
+            values: propEl.values.map((item, itemIndex) => {
+              return {
+                id: item.id,
+                index: itemIndex,
+                value: false,
+              }
+            })
+          };
+
+          if (!propEl.title) {
+            isValid = false;
+            isPropertyValid = false;
+            propertyValidationState.title = true;
+          }
+
+          propEl.values.forEach((item, itemIndex) => {
+            if (!item.value) {
+              isValid = false;
+              isPropertyValid = false;
+              propertyValidationState.values[itemIndex].value = true;
+            }
+          });
+
+          if (!isPropertyValid) {
+            const currentPropertyValidation = [...validationErrorsTemp[key]];
+            currentPropertyValidation.push(propertyValidationState);
+            validationErrorsTemp[key] = currentPropertyValidation;
+          }
+        });
+      }
+      if (key === 'roles' && (value instanceof Array)) {
+        (value as Array<TRole>).forEach((role, roleIndex) => {
+          let isRoleValid = true;
+          const roleValidationState: TRoleValidationErrors = {
+            id: role.id,
+            index: roleIndex,
+            name: false,
+          };
+
+          if (!role.name) {
+            isValid = false;
+            isRoleValid = false;
+            roleValidationState.name = true;
+          }
+
+          if (!isRoleValid) {
+            const currentRoleValidation = [...validationErrorsTemp[key]];
+            currentRoleValidation.push(roleValidationState);
+            validationErrorsTemp[key] = currentRoleValidation;
+          }
         })
       }
     });
+
+    dispatch(setProjectValidationErrors(validationErrorsTemp));
 
     return isValid;
   };
@@ -167,6 +321,7 @@ export default function BasicSettingsEdit({ onCancelClick, setIsEdit }: TBasicSe
     <div className={`${styles.wrapper}`}>
       <ProjectName
         edit
+        error={validationErrors}
       />
       {/* <ProjectTimeline
         edit
@@ -174,7 +329,10 @@ export default function BasicSettingsEdit({ onCancelClick, setIsEdit }: TBasicSe
       <div
         className={`${styles.middleSectionWrapper}`}
       >
-        <IntermediateDates edit />
+        <IntermediateDates
+          edit
+          error={validationErrors}  
+        />
         <InitialFiles
           edit
           filesListForEdit={files}
@@ -182,14 +340,19 @@ export default function BasicSettingsEdit({ onCancelClick, setIsEdit }: TBasicSe
           setDeleteFiles={setDeleteFilesArray}
         />
       </div>
-      <ProjectStages edit />
+      <ProjectStages
+        edit
+        error={validationErrors}  
+      />
 
       <BasicFunctions
         edit
+        error={validationErrors}
       />
       <section className={`${styles.middleSectionWrapper}`}>
         <Metrics
           edit
+          error={validationErrors}
         />
         {/* <TargetEffect
           edit
@@ -212,6 +375,7 @@ export default function BasicSettingsEdit({ onCancelClick, setIsEdit }: TBasicSe
           : */}
           <Properties
             edit
+            error={validationErrors}
           />
         {/* } */}
       </section>
@@ -219,6 +383,7 @@ export default function BasicSettingsEdit({ onCancelClick, setIsEdit }: TBasicSe
         roles={project.roles}
         rights={project.rights}
         edit
+        error={validationErrors}
       />
       {/* <section>
         <Roles

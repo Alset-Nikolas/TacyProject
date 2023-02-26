@@ -151,7 +151,7 @@ export default function EditRisk() {
         >
           Название риска*
           <input
-            className={`${styles.formElement} ${errors.name ? styles.error : ''}`}
+            className={`${styles.formElement} ${styles.inputBorder} ${errors.name ? styles.error : ''}`}
             value={newRiskState.risk.name}
             name="name"
             onChange={permanentInputHandler}

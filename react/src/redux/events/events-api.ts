@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import { REACT_APP_BACKEND_URL } from '../../consts';
+import REACT_APP_BACKEND_URL from '../../consts';
 import { TEvent, TInitiative } from '../../types';
 import { setCurrentInitiativeId } from '../initiatives-slice';
 
@@ -17,22 +17,22 @@ export const eventsApi = createApi({
     getEventsList: builder.query<Array<TEvent>, number>({
       query: (initiativeId) => `components/event/info/list/?id=${initiativeId}`,
       transformResponse: (response: { initiative_events: Array<TEvent> }) => response.initiative_events,
-    //   async onQueryStarted(voidArg, { dispatch, queryFulfilled }) {
-    //     try {
-    //       const { data: initiativesList } = await queryFulfilled;
-    //       // `onSuccess` side-effect
-    //       // const savedProjectId = localStorage.getItem('project-id');
-    //       // if (savedProjectId && projectsList.find((item) => item.id === parseInt(savedProjectId))) {
-    //       //   dispatch(setCurrentProjectId(parseInt(savedProjectId)));
-    //       // } else if (projectsList.length) {
-    //       //   dispatch(setCurrentProjectId(projectsList[0].id));
-    //         dispatch(setCurrentInitiativeId(initiativesList[0].initiative.id));
-    //       // }
-    //     } catch (err) {
-    //       // `onError` side-effect
-    //       console.log(err);
-    //     }
-    //   },      
+      //   async onQueryStarted(voidArg, { dispatch, queryFulfilled }) {
+      //     try {
+      //       const { data: initiativesList } = await queryFulfilled;
+      //       // `onSuccess` side-effect
+      //       // const savedProjectId = localStorage.getItem('project-id');
+      //       // if (savedProjectId && projectsList.find((item) => item.id === parseInt(savedProjectId))) {
+      //       //   dispatch(setCurrentProjectId(parseInt(savedProjectId)));
+      //       // } else if (projectsList.length) {
+      //       //   dispatch(setCurrentProjectId(projectsList[0].id));
+      //         dispatch(setCurrentInitiativeId(initiativesList[0].initiative.id));
+      //       // }
+      //     } catch (err) {
+      //       // `onError` side-effect
+      //       console.log(err);
+      //     }
+      //   },      
     }),
     // getPersonalInitiativesList: builder.query<Array<TInitiative>, number>({
     //   query: (id) => `components/initiative/info/list/user/?id=${id}`,
@@ -65,7 +65,7 @@ export const eventsApi = createApi({
       //   } catch (e) {
       //     console.log(e);
       //   }
-    //   },
+      //   },
       invalidatesTags: ['list'],
     })
   }),

@@ -4,6 +4,7 @@ import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 //Styles
 import sectionStyles from '../../styles/sections.module.scss'
 import styles from './add-risk.module.scss';
+import inputStyles from '../../styles/inputs.module.scss';
 import { addRiskRequest, addRiskThunk } from "../../redux/risks-slice";
 import CustomizedButton from "../button/button";
 import { useAddRiskMutation, useGetComponentsQuery, useGetInitiativeByIdQuery } from "../../redux/state/state-api";
@@ -43,10 +44,25 @@ export default function AddRisk({ setAddRisk }: TAddRiskProps) {
     }),
   });
   const [ addRisk, { isSuccess: addRiskSuccess, isError: addRiskError } ] = useAddRiskMutation();
+  const [ errors, setErrors ] = useState({ name: false });
+
+  const validate = (): boolean => {
+    let isValid = true;
+    if (!newRiskState.risk.name) {
+      isValid = false;
+      setErrors((prevState) => {
+        const newState = { ...prevState };
+        newState.name = true;
+        return newState;
+      });
+    }
+    return isValid;
+  }
 
   const submitHandler = (e: FormEvent) => {
     e.preventDefault();
     // dispatch(addRiskThunk(newRiskState));
+    validate();
     addRisk(newRiskState);
   }
 
@@ -85,7 +101,7 @@ export default function AddRisk({ setAddRisk }: TAddRiskProps) {
         >
           Название риска*
           <input
-            className={`${styles.formElement}`}
+            className={`${styles.formElement} ${errors.name ? inputStyles.error : ''}`}
             value={newRiskState.risk.name}
             name="name"
             onChange={permanentInputHandler}

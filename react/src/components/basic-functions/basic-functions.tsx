@@ -1,17 +1,21 @@
 import { ChangeEvent } from 'react';
 import SectionHeader from '../section/section-header/section-header';
+import { useAppDispatch, useAppSelector } from '../../utils/hooks';
+import { handleInputChange } from '../../utils';
+import { useGetProjectInfoQuery } from '../../redux/state/state-api';
+import { TProjectValidationErrors } from '../../types';
+
 // Styles
 import styles from './basic-functions.module.scss';
 import textStyles from '../../styles/text.module.scss';
 import sectionStyles from '../../styles/sections.module.scss';
-import { useAppDispatch, useAppSelector } from '../../utils/hooks';
-import { handleInputChange } from '../../utils';
-import { useGetProjectInfoQuery } from '../../redux/state/state-api';
+import inputStyles from '../../styles/inputs.module.scss';
+import { setProjectValidationErrors } from '../../redux/state/state-slice';
 
 type TBasicFunctionsProps = {
   edit?: boolean;
   create?: boolean;
-  error?: any;
+  error?: TProjectValidationErrors;
   setFile?: any;
 }
 
@@ -37,6 +41,7 @@ export default function BasicFunctions({
     if (projectForEdit) {
       if (e.target.name !== 'file') {
         handleInputChange(e, projectForEdit, dispatch);
+        dispatch(setProjectValidationErrors({ ...error, [e.target.name]: false }));
       } else {
         const files = (e.target as HTMLInputElement).files;
         setFile(files ? files[0] : null);
@@ -125,7 +130,7 @@ export default function BasicFunctions({
                 {`${titles.purpose}:`}
               </label>
               <textarea
-                className={`${styles.textInput}`}
+                className={`${styles.textInput} ${error?.purpose ? inputStyles.error : ''}`}
                 name="purpose"
                 value={projectForEdit.purpose}
                 onChange={onChangeHandler}
@@ -139,7 +144,7 @@ export default function BasicFunctions({
                 {`${titles.descripton}:`}
               </label>
               <textarea
-                className={`${styles.textInput}`}
+                className={`${styles.textInput} ${error?.description ? inputStyles.error : ''}`}
                 name="description"
                 value={projectForEdit.description}
                 onChange={onChangeHandler}
@@ -154,7 +159,7 @@ export default function BasicFunctions({
               {`${titles.tasks}:`}
             </label>
             <textarea
-              className={`${styles.textInput}`}
+              className={`${styles.textInput} ${error?.tasks ? inputStyles.error : ''}`}
               name="tasks"
               value={projectForEdit.tasks}
               onChange={onChangeHandler}

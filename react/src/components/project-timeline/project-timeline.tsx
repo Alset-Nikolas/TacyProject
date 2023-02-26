@@ -1,25 +1,23 @@
 import SectionHeader from '../section/section-header/section-header';
-import SectionContent from '../section/section-content/section-content';
 
 // Styles
 import styles from './project-timeline.module.scss';
 import sectionStyles from '../../styles/sections.module.scss';
-import TimelineTableRow from '../timeline-table-row/timeline-table-row';
-import TimelineStageRow from '../timeline-stage-row/timeline-stage-row';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import { GanttD3 } from '../../d3/GanttD3/GanttD3';
-import { addPropertie, isStage } from '../../utils';
-import CustomizedButton from '../button/button';
 import { useGetProjectInfoQuery } from '../../redux/state/state-api';
 import IntermediateDates from '../intermediate-dates/intermediate-dates';
 import ProjectStages from '../project-stages/project-stages';
+import { TProjectValidationErrors } from '../../types';
 
 type TProjectTimelineProps = {
   edit?: boolean;
+  error?: TProjectValidationErrors;
 }
 
 export default function ProjectTimeline({
   edit,
+  error,
 }: TProjectTimelineProps) {
   const dispatch = useAppDispatch();
   const { currentId } = useAppSelector((store) => store.state.project);
@@ -35,10 +33,16 @@ export default function ProjectTimeline({
       <section className={`${styles.editWrapper}`}>
         <div className={`${styles.table}`}>
           <div className={`${styles.tableCol}`}>
-            <IntermediateDates edit />
+            <IntermediateDates
+              edit
+              error={error}
+            />
           </div>
           <div className={`${styles.tableCol}`}>
-            <ProjectStages edit />
+            <ProjectStages
+              edit
+              error={error}
+            />
           </div>
         </div>
       </section>

@@ -1,7 +1,7 @@
 /* eslint-disable arrow-body-style */
 import { createSlice } from '@reduxjs/toolkit';
 import { AxiosError, AxiosResponse } from 'axios';
-import { TProject, TProjectForEdit } from '../../types';
+import { TProject, TProjectForEdit, TProjectValidationErrors } from '../../types';
 import { parseRequestError } from '../../utils';
 import { createProjectRequest, deleteProject, getProjectInfo, getProjectsList } from '../../utils/requests';
 import { getInitiativesListThunk } from '../initiatives-slice'; 
@@ -39,6 +39,9 @@ type TState = {
     isGetRequestSuccess: boolean;
     isGetRequestFailed: boolean;
   };
+
+  validationErrors: TProjectValidationErrors;
+
   app: {
     modal: {
       isOpen: boolean;
@@ -63,6 +66,21 @@ type TState = {
     loader: boolean;
   };
 }
+
+export const projectValidationErrorInitialState: TProjectValidationErrors = {
+  name: false,
+  date_start: false,
+  date_end: false,
+  purpose: false,
+  tasks: false,
+  description: false,
+  intermediate_dates: [],
+  stages: [],
+  metrics: [],
+  properties: [],
+  roles: [],
+  rights: [],
+};
 
 const initialState: TState = {
   project: {
@@ -114,6 +132,8 @@ const initialState: TState = {
     },
     loader: false,
   },
+
+  validationErrors: projectValidationErrorInitialState,
 };
 
 // const deleteProject = createAsyncThunk(
@@ -402,6 +422,9 @@ export const stateSlice = createSlice({
     },
     closeLoader: (state) => {
       state.app.loader = false;
+    },
+    setProjectValidationErrors: (state, action) => {
+      state.validationErrors = action.payload;
     }
   },
 });
@@ -444,6 +467,7 @@ export const {
   setInitiativeEdit,
   showLoader,
   closeLoader,
+  setProjectValidationErrors,
 } = stateSlice.actions;
 
 export default stateSlice.reducer;

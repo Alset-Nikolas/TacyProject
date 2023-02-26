@@ -11,15 +11,18 @@ import { GanttD3 } from '../../d3/GanttD3/GanttD3';
 import { addPropertie, isStage } from '../../utils';
 import CustomizedButton from '../button/button';
 import { useGetProjectInfoQuery } from '../../redux/state/state-api';
+import { TProjectValidationErrors } from '../../types';
 
 type TIntermediateDatesProps = {
   edit?: boolean;
   create?: boolean;
+  error?: TProjectValidationErrors;
 }
 
 export default function IntermediateDates({
   edit,
   create,
+  error,
 }: TIntermediateDatesProps) {
   const dispatch = useAppDispatch();
   const { currentId } = useAppSelector((store) => store.state.project);
@@ -76,14 +79,19 @@ export default function IntermediateDates({
             </div>
           )}
         
-          {projectForEdit.intermediate_dates.map((el: any, index: number) => (
+          {projectForEdit.intermediate_dates.map((el: any, index: number) => {
+            const currentError = error?.intermediate_dates.find((error) => error.index === index);
+
+            return (
             <TimelineTableRow
               item={el}
               index={index}
               pictogramType={index === projectForEdit.intermediate_dates.length - 1 ? 'add' : 'delete'}
               key={index}
+              error={currentError}
             />
-          ))}
+            );
+          })}
         </div>
       </section>
     );

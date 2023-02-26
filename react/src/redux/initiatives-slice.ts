@@ -44,6 +44,14 @@ type TState = {
     }>,
   },
 
+  validationErrors: {
+    name: boolean;
+    addfields: Array<{
+      id: number;
+      isError: boolean;
+    }>;
+  };
+
   initiative: TInitiative | null;
   currentInitiativeId: number | null;
 
@@ -83,6 +91,11 @@ const initialState: TState = {
     initiative: '',
     roles: [],
     files: [],
+  },
+  
+  validationErrors: {
+    name: false,
+    addfields: [],
   },
 
   initiative: null,
@@ -233,6 +246,9 @@ export const stateSlice = createSlice({
     setInitiativeFilter: (state, action) => {
       state.filter.initiative = action.payload;
     },
+    setInitiativeValidationErrors: (state, action) => {
+      state.validationErrors = action.payload;
+    },
   },
 });
 
@@ -259,6 +275,7 @@ export const {
   setRolesFilter,
   setFilesFilter,
   setInitiativeFilter,
+  setInitiativeValidationErrors,
 } = stateSlice.actions;
 
 export default stateSlice.reducer;

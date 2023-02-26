@@ -1,6 +1,6 @@
 import { SelectChangeEvent } from '@mui/material';
-import { updateProjectForEdit } from '../../redux/state/state-slice';
-import { TRight, TRole } from '../../types';
+import { setProjectValidationErrors, updateProjectForEdit } from '../../redux/state/state-slice';
+import { TProjectForEdit, TProjectValidationErrors, TRight, TRole, TRoleValidationErrors } from '../../types';
 import {
   addComponentItem,
   addPropertie,
@@ -27,9 +27,10 @@ type TProjectsElementsProps = {
   rights: Array<TRight>;
   // properties: Array<any>;
   edit?: boolean;
+  error?: TProjectValidationErrors;
 };
 
-export default function ProjectsElements({ roles, rights, edit }: TProjectsElementsProps) {
+export default function ProjectsElements({ roles, rights, edit, error }: TProjectsElementsProps) {
   const dispatch = useAppDispatch();
   const projectForEdit = useAppSelector((store) => store.state.projectForEdit);
   const SelectStyle = {
@@ -74,6 +75,47 @@ export default function ProjectsElements({ roles, rights, edit }: TProjectsEleme
       console.log(e);
     }
   };
+
+  const handleInputChange = (
+    index: number,
+    propType: keyof TProjectForEdit,
+    key: string, 
+    value: string,
+    currentRoleErrors: TRoleValidationErrors | undefined,
+  ) => {
+    if (error && currentRoleErrors) {
+      const errorPropKey = propType as keyof typeof error;
+      const tempErrorProp = error[errorPropKey];
+
+      if (typeof tempErrorProp !== 'boolean') {
+        const projectPropertyErrors = [ ...tempErrorProp ];
+        const currentErrorPropIndex = tempErrorProp.findIndex((item) => item.index === currentRoleErrors.index);
+
+        if (projectPropertyErrors instanceof Array) {
+          const roleErrors = { ...currentRoleErrors };
+          type Tkey = keyof TRoleValidationErrors;
+          const curKey = key as Tkey
+          let isRemoveError = false;
+          if ('name' in roleErrors && curKey === 'name') {
+            roleErrors[curKey] = false;
+            if (!roleErrors.name) {
+              isRemoveError = true;
+            }
+          }
+          if (isRemoveError && currentErrorPropIndex > -1) {
+            projectPropertyErrors.splice(currentErrorPropIndex, 1);
+          } else {
+            projectPropertyErrors[currentErrorPropIndex] = roleErrors;
+          }
+        }
+        dispatch(setProjectValidationErrors({
+          ...error,
+          [propType]: projectPropertyErrors,
+        }));
+      }
+    }
+    handlePropertieInutChange(index, projectForEdit, propType, key, value, dispatch);
+  }
 
   if (edit) {
     if (!projectForEdit) return (
@@ -127,6 +169,8 @@ export default function ProjectsElements({ roles, rights, edit }: TProjectsEleme
           >
             
             {projectForEdit.roles.map((el, index) => {
+              const currentError = error?.roles.find((error) => el.id !== -1 ? error.id === el.id : error.index === index);
+
               const selectorValue = [];
               if (el.is_approve) selectorValue.push(rightsObj.approve);
               if (el.is_update) selectorValue.push(rightsObj.update);
@@ -140,9 +184,9 @@ export default function ProjectsElements({ roles, rights, edit }: TProjectsEleme
                   className={`${styles.roleInputWrapper}`}
                 >
                   <input
-                    className={`${inputStyles.textInput}`}
+                    className={`${inputStyles.textInput}  ${currentError?.name ? inputStyles.error : ''}`}
                     value={el.name}
-                    onChange={(e) => handlePropertieInutChange(index, projectForEdit, 'roles', 'name', e.target.value, dispatch)}
+                    onChange={(e) => handleInputChange(index, 'roles', 'name', e.target.value, currentError)}
                   />
                   
                 </div>
