@@ -4,7 +4,6 @@ import { createSlice } from '@reduxjs/toolkit';
 import { getRequest, postRequest } from '../utils/requests';
 import { TBoss, TCoordinationHistoryItem, TUser } from '../types';
 import { getUserRightsThunk } from './auth-slice';
-import { getInitiativesListThunk } from './initiatives-slice';
 
 type TState = {
   coordinationHistory: Array<TCoordinationHistoryItem> | null;
@@ -273,67 +272,6 @@ export const coordinateThunk = (
     },
     () => {
       dispatch(postCommentRequestFailed());
-    }
-  );
-};
-
-export const sendForApprovalThunk = (
-  body: {
-    text: string;
-    initiative: number;
-    coordinators: Array<TUser & {id: number}>;
-  }) => (dispatch: AppDispatch, getState: () => RootState) => {
-  const currentInitiativeId = getState().initiatives.currentInitiativeId;
-  const currentProjectId = getState().state.project.currentId;
-
-  dispatch(sendForApprovalRequest());
-  postRequest(
-    `coordination/initiative/sent-for-approval/`,
-    body,
-    (res: AxiosResponse) => {
-      try {
-        if (!currentInitiativeId || !currentProjectId) {
-          throw new Error('Project or initiative is missing')
-        }
-        dispatch(getChatThunk(currentInitiativeId));
-        dispatch(getUserRightsThunk(currentInitiativeId));
-        dispatch(getInitiativesListThunk(currentProjectId));
-        dispatch(sendForApprovalRequestSuccess());
-      } catch (error) {
-        console.log(error);
-        dispatch(sendForApprovalRequestFailed());
-      }
-    },
-    () => {
-      dispatch(sendForApprovalRequestFailed());
-    }
-  );
-};
-
-export const closeInitiativeThunk = (body: { failure: boolean, initiative: number }) => (dispatch: AppDispatch, getState: () => RootState) => {
-  // const project = getState().state.project.value;
-  const initiative = getState().initiatives.initiative;
-  const project = getState().state.project.value;
-
-  dispatch(closeInitiativeRequest());
-  postRequest(
-    `coordination/initiative/switch/`,
-    body,
-    (res: AxiosResponse) => {
-      try {
-        if (!initiative || !project) {
-          throw new Error('Project or initiative is missing');
-        }
-        dispatch(getUserRightsThunk(initiative.initiative.id));
-        dispatch(getInitiativesListThunk(project.id));
-        dispatch(closeInitiativeRequestSuccess());
-      } catch (error) {
-        console.log(error);
-        dispatch(closeInitiativeRequestFailed());
-      }
-    },
-    () => {
-      dispatch(closeInitiativeRequestFailed());
     }
   );
 };

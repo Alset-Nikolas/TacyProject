@@ -57,7 +57,7 @@ export default function EventsTable() {
 
   const onEventClickHandler = (eventId: number) => {
     navigate(`/${paths.events}/info/${eventId}`);
-    if (currentInitiativeId) localStorage.setItem('initiative-id', currentInitiativeId.toString());
+    // if (currentInitiativeId) localStorage.setItem('initiative-id', currentInitiativeId.toString());
   }
  
   useEffect(() => {

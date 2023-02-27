@@ -1,4 +1,4 @@
-import { configureStore, ThunkAction, Action } from '@reduxjs/toolkit';
+import { configureStore, ThunkAction, Action, combineReducers } from '@reduxjs/toolkit';
 import stateReducer from './state/state-slice';
 import authReducer from '../redux/auth-slice';
 import teamReducer from '../redux/team-slice';
@@ -15,26 +15,42 @@ import { initiativesApi } from './initiatives/initiatives-api';
 import { teamApi } from './team/team-api';
 import { authApi } from './auth/auth-api';
 import { eventsApi } from './events/events-api';
+import { persistStore, persistReducer } from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
+
+const persistStateConfig = {
+  key: 'state',
+  storage,
+  whitelist: ['project'],
+};
+
+const persistInitiativesConfig = {
+  key: 'initiatives',
+  storage,
+  whitelist: ['currentInitiativeId'],
+};
+
+const rootReducer = combineReducers({
+  state: persistReducer(persistStateConfig, stateReducer),
+  [stateApi.reducerPath]: stateApi.reducer,
+  auth: authReducer,
+  [authApi.reducerPath]: authApi.reducer,
+  team: teamReducer,
+  [teamApi.reducerPath]: teamApi.reducer,
+  components: componentsReducer,
+  initiatives: persistReducer(persistInitiativesConfig, initiativesReducer),
+  [initiativesApi.reducerPath]: initiativesApi.reducer,
+  risks: risksReducer,
+  events: eventsReducer,
+  [eventsApi.reducerPath]: eventsApi.reducer,
+  coordination: coordinationReducer,
+  notifications: notificationsReducer,
+  graphics: graphicsReducer,
+  personal: personalReducer,
+});
 
 export const store = configureStore({
-  reducer: {
-    state: stateReducer,
-    [stateApi.reducerPath]: stateApi.reducer,
-    auth: authReducer,
-    [authApi.reducerPath]: authApi.reducer,
-    team: teamReducer,
-    [teamApi.reducerPath]: teamApi.reducer,
-    components: componentsReducer,
-    initiatives: initiativesReducer,
-    [initiativesApi.reducerPath]: initiativesApi.reducer,
-    risks: risksReducer,
-    events: eventsReducer,
-    [eventsApi.reducerPath]: eventsApi.reducer,
-    coordination: coordinationReducer,
-    notifications: notificationsReducer,
-    graphics: graphicsReducer,
-    personal: personalReducer,
-  },
+  reducer: rootReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat([
       stateApi.middleware,
@@ -44,6 +60,8 @@ export const store = configureStore({
       eventsApi.middleware,
     ]),
 });
+
+export const persistor = persistStore(store);
 
 export type AppDispatch = typeof store.dispatch;
 export type RootState = ReturnType<typeof store.getState>;

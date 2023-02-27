@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import BasicSettingsView from '../../components/basic-settings-view/basic-settings-view';
 import BasicSettingsEdit from '../../components/basic-settings-edit/basic-settings-edit';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
-import { clearProjectForEdit, closeModal, createProjectThunk, getProjectInfoThunk, setProjectBackup, setProjectForEdit, updateProjectState } from '../../redux/state/state-slice';
+import { clearProjectForEdit, setProjectBackup, setProjectForEdit, updateProjectState } from '../../redux/state/state-slice';
 import { makeProjectFordit } from '../../utils';
 import { useGetProjectInfoQuery, usePostProjectMutation } from '../../redux/state/state-api';
 
@@ -18,9 +18,7 @@ export default function BasicSettingsPage() {
   } = useAppSelector((store) => store.state);
   // const currentId = useAppSelector((store) => store.state.project.currentId);
   const { data: project, refetch: refetchProjectInfo } = useGetProjectInfoQuery(currentId);
-  useEffect(() => {
-    dispatch(getProjectInfoThunk(currentId));
-  }, []);
+  
   // const isDeleteSuccess = useAppSelector((store) => store.state.projectDelete.isGetRequestSuccess);
   // const isCreateSuccess = useAppSelector((store) => store.state.projectCreate.isGetRequestSuccess);
   const [isEdit, setIsEdit] = useState(false);

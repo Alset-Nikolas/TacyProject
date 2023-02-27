@@ -10,15 +10,10 @@ import ProjectsElements from '../projects-elements/projects-elements';
 import TargetEffect from '../target-effect/target-effect';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import {
-  deleteProjectListElement,
-  deleteProjectThunk,
-  getProjectInfoThunk,
   closeModal,
-  getProjectsListThunk,
   openDeleteProjectModal,
   setCurrentProjectId
 } from '../../redux/state/state-slice';
-import ProjectCapacity from '../project-capacity/projects-capacity';
 // Mock data
 // import { mockProjectData as project } from '../../consts';
 

@@ -5,7 +5,6 @@ import { getComponents, getInitiativesList, getRequest, postRequest } from '../u
 import { TComponentsSettings, TInitiative, TPropertie } from '../types';
 
 type TState = {
-  list: Array<TInitiative>;
   personalList: Array<TInitiative>;
   filter: {
     properties: Array<TPropertie & {
@@ -55,10 +54,6 @@ type TState = {
   initiative: TInitiative | null;
   currentInitiativeId: number | null;
 
-  initiativesListRequest: boolean,
-  initiativesListRequestSuccess: boolean,
-  initiativesListRequestFailed: boolean,
-
   personalInitiativesListRequest: boolean,
   personalInitiativesListRequestSuccess: boolean,
   personalInitiativesListRequestFailed: boolean,
@@ -73,7 +68,6 @@ type TState = {
 };
 
 const initialState: TState = {
-  list: [],
   personalList: [],
   filter: {
     properties: [],
@@ -101,10 +95,6 @@ const initialState: TState = {
   initiative: null,
   currentInitiativeId: null,
 
-  initiativesListRequest: false,
-  initiativesListRequestSuccess: false,
-  initiativesListRequestFailed: false,
-
   personalInitiativesListRequest: false,
   personalInitiativesListRequestSuccess: false,
   personalInitiativesListRequestFailed: false,
@@ -130,29 +120,6 @@ export const stateSlice = createSlice({
     },
     setCurrentInitiativeId: (state, action) => {
       state.currentInitiativeId = action.payload;
-    },
-    initiativesListRequest: (state) => {
-      return {
-        ...state,
-        initiativesListRequest: true,
-        initiativesListRequestSuccess: false,
-        initiativesListRequestFailed: false,
-      }
-    },
-    initiativesListRequestSuccess: (state, action) => {
-      return {
-        ...state,
-        list: action.payload,
-        initiativesListRequest: false,
-        initiativesListRequestSuccess: true,
-      }
-    },
-    initiativesListRequestFailed: (state) => {
-      return {
-        ...state,
-        initiativesListRequest: false,
-        initiativesListRequestFailed: true,
-      }
     },
     initiativesByIdRequest: (state) => {
       return {
@@ -203,9 +170,6 @@ export const stateSlice = createSlice({
     clearInitiative: (state) => {
       state.initiative = null;
     },
-    clearInitiativesList: (state) => {
-      state.list = [];
-    },
     addInitiativeRequest: (state) => {
       return {
         ...state,
@@ -255,9 +219,6 @@ export const stateSlice = createSlice({
 export const {
   setInitiativesState,
   setCurrentInitiativeId,
-  initiativesListRequest,
-  initiativesListRequestSuccess,
-  initiativesListRequestFailed,
   personalInitiativesListRequest,
   personalInitiativesListRequestSuccess,
   personalInitiativesListRequestFailed,
@@ -265,7 +226,6 @@ export const {
   initiativesByIdRequestSuccess,
   initiativesByIdRequestFailed,
   clearInitiative,
-  clearInitiativesList,
   addInitiativeRequest,
   addInitiativeRequestSuccess,
   addInitiativeRequestFailed,
@@ -279,38 +239,6 @@ export const {
 } = stateSlice.actions;
 
 export default stateSlice.reducer;
-
-export const getInitiativesListThunk = (id: number) => (dispatch: AppDispatch, getState: () => RootState) => {
-  const project = getState().state.project.value;
-  const initiative = getState().initiatives.initiative?.initiative;
-
-  if (!project) return;
-  if (id !== project.id) return;
-
-  dispatch(initiativesListRequest());
-  getInitiativesList(
-    id,
-    (res: AxiosResponse<{ project_initiatives: Array<TInitiative> }>) => {
-      try {
-        // console.log(res.data);
-        if (!project) {
-          throw new Error('Project is Missing');
-        }
-        if (id !== project.id) {
-          throw new Error('Wrong project id');
-        }
-        if (!initiative && res.data.project_initiatives.length) dispatch(getInitiativeByIdThunk(res.data.project_initiatives[0].initiative.id));
-      } catch (error) {
-        console.log(error);
-        dispatch(initiativesListRequestFailed());
-      }
-      dispatch(initiativesListRequestSuccess(res.data.project_initiatives));
-    },
-    () => {
-      dispatch(initiativesListRequestFailed());
-    }
-  );
-};
 
 export const getPersonalInitiativesListThunk = (projectId: number) => (dispatch: AppDispatch, getState: () => RootState) => {
   const project = getState().state.project.value;

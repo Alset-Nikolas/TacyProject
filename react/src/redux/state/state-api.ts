@@ -1,7 +1,8 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import REACT_APP_BACKEND_URL from '../../consts';
+import { REACT_APP_BACKEND_URL } from '../../consts';
 import { TAuthUser, TComponentsSettings, TCoordinationHistoryItem, TEvent, TFilesSettings, TInitiative, TInitiativeFiles, TProject, TProjectForEdit, TRequestTeamListItem, TRisk, TRole, TTeamMember, TUpdateComponents, TUser, TUserRequest, TUserRights } from '../../types';
 import { setCurrentInitiativeId } from '../initiatives-slice';
+import { store } from '../store';
 import { openErrorModal, openMessageModal, setCurrentProjectId } from './state-slice';
 
 export const stateApi = createApi({
@@ -51,7 +52,7 @@ export const stateApi = createApi({
           const { data: project } = await queryFulfilled;
           // `onSuccess` side-effect
           if (project) {
-            localStorage.setItem('project-id', project.id.toString());
+            // localStorage.setItem('project-id', project.id.toString());
             dispatch(setCurrentProjectId(project.id));
           } else {
             throw new Error('Project posting error');
@@ -89,10 +90,8 @@ export const stateApi = createApi({
         try {
           const { data: projectsList } = await queryFulfilled;
           // `onSuccess` side-effect
-          const savedProjectId = localStorage.getItem('project-id');
-          if (savedProjectId && projectsList.find((item) => item.id === parseInt(savedProjectId))) {
-            dispatch(setCurrentProjectId(parseInt(savedProjectId)));
-          } else if (projectsList.length) {
+          const savedProjectId = store.getState().state.project.currentId;
+          if (!(savedProjectId && projectsList.find((item) => item.id === savedProjectId))) {
             dispatch(setCurrentProjectId(projectsList[0].id));
           }
         } catch (err) {
@@ -102,12 +101,12 @@ export const stateApi = createApi({
       },
       providesTags: ['list'],
     }),
-    getFiles: builder.query<Array<{ id: number, file: string, project: number, file_name: string }>, number>({
+    getFiles: builder.query<Array<{id: number, file: string, project: number, file_name: string}>, number>({
       query: (projectId) => `project/file/?id=${projectId}`,
       providesTags: ['files-list'],
     }),
-    postFiles: builder.mutation<any, { projectId: number, body: FormData }>({
-      query({ projectId, body }) {
+    postFiles: builder.mutation<any, {projectId: number, body: FormData}>({
+      query({projectId, body}) {
         const type = (body.get('file0') as File).type;
         return {
           url: `project/file/?id=${projectId}`,
@@ -120,8 +119,8 @@ export const stateApi = createApi({
       },
       invalidatesTags: ['files-list'],
     }),
-    deleteFiles: builder.mutation<any, { projectId: number, body: Array<{ id: number }> }>({
-      query({ projectId, body }) {
+    deleteFiles: builder.mutation<any, {projectId: number, body: Array<{id: number}>}>({
+      query({projectId, body}) {
         return {
           url: `project/file/?id=${projectId}`,
           method: 'DELETE',
@@ -136,11 +135,9 @@ export const stateApi = createApi({
       async onQueryStarted(voidArg, { dispatch, queryFulfilled }) {
         try {
           const { data: initiativesList } = await queryFulfilled;
-          const cachedInitiativeId = localStorage.getItem('initiative-id');
-          if (cachedInitiativeId) {
-            dispatch(setCurrentInitiativeId(parseInt(cachedInitiativeId)));
-            localStorage.removeItem('initiative-id');
-          } else {
+          const cachedInitiativeId = store.getState().initiatives.currentInitiativeId;
+
+          if (!cachedInitiativeId) {
             if (initiativesList.length) {
               dispatch(setCurrentInitiativeId(initiativesList[0].initiative.id));
             } else {
@@ -181,8 +178,8 @@ export const stateApi = createApi({
       },
       invalidatesTags: ['initiatives-list', 'initiative'],
     }),
-    setRoles: builder.mutation<any, { initiativeId: number, body: Array<{ user: TUser & { id: number }, role: TRole }> }>({
-      query({ initiativeId, body }) {
+    setRoles: builder.mutation<any, { initiativeId: number, body:  Array<{user: TUser & { id: number }, role: TRole}> }>({
+      query({initiativeId, body}) {
         return {
           url: `components/initiative/role/?id=${initiativeId}`,
           method: 'POST',
@@ -195,7 +192,7 @@ export const stateApi = createApi({
           const { data: updatedInitiative } = await queryFulfilled;
           // console.log(updatedInitiative);
           // console.log(initiative);
-          localStorage.setItem('initiative-id', initiativeId.toString());
+          // localStorage.setItem('initiative-id', initiativeId.toString());
           // dispatch(setCurrentInitiativeId(initiativeId));
         } catch (e) {
           console.log(e);
@@ -203,7 +200,7 @@ export const stateApi = createApi({
       },
       invalidatesTags: ['initiatives-list', 'initiative', 'coordination-history'],
     }),
-    getRoles: builder.query<Array<{ user: TUser & { id: number }, role: TRole & { project: number } }>, number>({
+    getRoles: builder.query<Array<{user: TUser & { id: number }, role: TRole & { project: number }}>, number>({
       query: (initiativeId) => `components/initiative/role/?id=${initiativeId}`,
     }),
     getExportUrl: builder.query<{ url: string }, number>({
@@ -262,7 +259,7 @@ export const stateApi = createApi({
       query: (initiativeId) => `components/initiative/file/?id=${initiativeId}`,
       providesTags: () => ['initiative-files'],
     }),
-    postInitiativeFile: builder.mutation<any, { fileId: number, body: FormData }>({
+    postInitiativeFile: builder.mutation<any, {fileId: number, body: FormData}>({
       query({ fileId, body }) {
         return {
           url: `components/initiative/file/?id=${fileId}`,
@@ -281,7 +278,7 @@ export const stateApi = createApi({
       },
       invalidatesTags: ['initiative-files', 'initiatives-list', 'initiative'],
     }),
-    getSortedInitiatives: builder.query<{ project_initiatives: Array<TInitiative> }, {
+    getSortedInitiatives: builder.query<{project_initiatives: Array<TInitiative>}, {
       id: number;
       name?: string;
       status?: Array<number>;
@@ -318,8 +315,8 @@ export const stateApi = createApi({
       query: (projectId) => `/components/settings/?id=${projectId}`,
       providesTags: () => ['components'],
     }),
-    updateComponents: builder.mutation<any, { projectId: number, components: TComponentsSettings }>({
-      query({ projectId, components }) {
+    updateComponents: builder.mutation<any, {projectId: number, components: TComponentsSettings}>({
+      query({projectId, components}) {
         try {
           const { settings, table_registry, table_community } = components;
           const body = {} as TUpdateComponents;
@@ -354,13 +351,13 @@ export const stateApi = createApi({
           body.table_registry = table_registry;
           body.table_community = table_community;
 
-
+        
           return {
             url: `components/settings/`,
             method: 'POST',
             body,
           };
-        } catch (e) {
+        } catch(e) {
           console.log(e);
           return {
             url: `components/settings/`,
@@ -376,13 +373,13 @@ export const stateApi = createApi({
           dispatch(openErrorModal('При сохранении произошла ошибка'));
         }
       },
-      invalidatesTags: ['components', 'initiatives-list', 'initiative', 'team-list', 'project-files-settings', 'risks-list'],
+    invalidatesTags: ['components', 'initiatives-list', 'initiative', 'team-list', 'project-files-settings', 'risks-list'],
     }),
     getTeamList: builder.query<Array<TTeamMember>, { id: number, project: TProject | null }>({
       query: ({ id }) => `/project/community/?id=${id}`,
       transformResponse: (response: { community_info: Array<TRequestTeamListItem<TUserRequest>> }, meta, { project }) => {
         const teamList = response.community_info.map((resItem) => {
-
+            
           const member = {} as TTeamMember;
           member.id = resItem.user.id;
           member.name = `${resItem.user.last_name} ${resItem.user.first_name} ${resItem.user.second_name}`;
@@ -398,7 +395,7 @@ export const stateApi = createApi({
             if (!projectPropertie) throw new Error('Propertie doesn\'t exist');
             const propertieValuesArray = resPropertie.values.map((value) => projectPropertie.items.find((el) => el.id === value.id)!.value);
             if (!propertieValuesArray.indexOf('undefined')) throw new Error('Value doesn\'t exist');
-
+            
             return {
               id: projectPropertie ? projectPropertie.id : -1,
               title: projectPropertie ? projectPropertie.title : 'No propertie',
@@ -417,7 +414,7 @@ export const stateApi = createApi({
       providesTags: () => ['team-list'],
     }),
     postTeamList: builder.mutation<any, { projectId: number, body: any }>({
-      query({ projectId, body }) {
+      query({ projectId, body}) {
         return {
           url: `/project/community/?id=${projectId}`,
           method: 'POST',
@@ -472,7 +469,7 @@ export const stateApi = createApi({
     getDiagramsList: builder.query<{ graphics: Array<any>, statusGraphics: Array<any> }, { projectId: number | null, quantity?: number, project?: TProject }>({
       query: ({ projectId, quantity }) => `grafics/statistic/metrics/?id=${projectId}${typeof quantity !== 'undefined' ? `&quantity=${quantity}` : ''}`,
       transformResponse: (response: { grafics: Array<any>, status_grafic: Array<any> }, meta, { project }) => {
-
+        
         const parseGraphicData = (graphics: Array<any>) => {
           const data: Array<any> = []
           // if (!project) return [];
@@ -512,7 +509,7 @@ export const stateApi = createApi({
           return graphicData;
         }
 
-        const data = { graphics: [] as Array<any>, statusGraphics: [] as Array<any> };
+        const data = {graphics: [] as Array<any>, statusGraphics: [] as Array<any>};
         const graphics = response.grafics;
         const statusGraphics = response.status_grafic;
 
@@ -526,7 +523,7 @@ export const stateApi = createApi({
     getPersonalDiagramsList: builder.query<{ graphics: Array<any>, statusGraphics: Array<any> }, { projectId: number | null, quantity?: number, project?: TProject }>({
       query: ({ projectId, quantity }) => `grafics/statistic/metrics/user/?id=${projectId}${typeof quantity !== 'undefined' ? `&quantity=${quantity}` : ''}`,
       transformResponse: (response: { grafics: Array<any>, status_grafic: Array<any> }, meta, { project }) => {
-
+        
         const parseGraphicData = (graphics: Array<any>) => {
           const data: Array<any> = []
           // if (!project) return [];
@@ -561,7 +558,7 @@ export const stateApi = createApi({
           return graphicData;
         }
 
-        const data = { graphics: [] as Array<any>, statusGraphics: [] as Array<any> };
+        const data = {graphics: [] as Array<any>, statusGraphics: [] as Array<any>};
         const graphics = response.grafics;
         const statusGraphics = response.status_grafic;
 
@@ -623,7 +620,7 @@ export const stateApi = createApi({
       },
       invalidatesTags: ['coordination-history', 'user-rights', 'initiative', 'initiatives-list'],
     }),
-    sendForApproval: builder.mutation<any, { text: string, initiative: number, coordinators: Array<TUser & { id: number }> }>({
+    sendForApproval: builder.mutation<any, { text: string, initiative: number, coordinators: Array<TUser & {id: number}> }>({
       query(body) {
         return {
           url: `coordination/initiative/sent-for-approval/`,
@@ -646,7 +643,7 @@ export const stateApi = createApi({
     getGraphicsSettings: builder.query<{
       grafics: Array<{
         propertie: { id: number, title: string };
-        metrics: Array<{
+        metrics: Array<{ 
           metric: {
             id: number,
             title: string,
@@ -663,14 +660,14 @@ export const stateApi = createApi({
       }>;
     }, number>({
       query: (projectId) => `grafics/settings/?id=${projectId}`,
-
+      
       providesTags: () => ['graphic-settings'],
     }),
     updateGraphicsSettings: builder.mutation<any, {
       projectId: number,
       settings: Array<{
         propertie: { id: number, title: string };
-        metrics: Array<{
+        metrics: Array<{ 
           metric: {
             id: number,
             title: string,
@@ -678,7 +675,7 @@ export const stateApi = createApi({
           activate: boolean,
         }>
       }>,
-      statusSettings: Array<{
+      statusSettings: Array<{ 
         metric: {
           id: number,
           title: string,

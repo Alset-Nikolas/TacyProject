@@ -158,14 +158,14 @@ export default function EventInfoPage() {
       if (isEventDeleteSuccess) navigate(`/${paths.registry}`);
   }, [isEventDeleteSuccess]);
 
-  useEffect(() => {
-    if (!currentInitiativeId) {
-      const initiativeIdFromStorage = localStorage.getItem('initiative-id');
-      if (initiativeIdFromStorage) {
-        dispatch(setCurrentInitiativeId(Number.parseInt(initiativeIdFromStorage)));
-      }
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (!currentInitiativeId) {
+  //     const initiativeIdFromStorage = localStorage.getItem('initiative-id');
+  //     if (initiativeIdFromStorage) {
+  //       dispatch(setCurrentInitiativeId(Number.parseInt(initiativeIdFromStorage)));
+  //     }
+  //   }
+  // }, []);
 
   useEffect(() => {
     if (eventId && eventsList) {

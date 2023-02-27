@@ -4,7 +4,6 @@ import Pictogram from '../../components/pictogram/pictogram';
 import { useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 import { getComponentsThunk } from '../../redux/components-slice';
-import { getInitiativesListThunk } from '../../redux/initiatives-slice';
 import RiskManagement from '../../components/risk-management/risk-management';
 import StatusManagement from '../../components/status-management/status-management';
 import InitiativesTable from '../../components/initiatives-table/initiatives-table';
@@ -26,7 +25,6 @@ export default function ComponentsSettingsPage() {
     skip: !currentId,
   });
   // const components = useAppSelector((store) => store.components.value);
-  const initiativesList = useAppSelector((store) => store.initiatives.list);
 
   const onEditClick = () => {
     navigate(paths.settings.components.edit.absolute);

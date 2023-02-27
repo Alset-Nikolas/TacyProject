@@ -1,7 +1,8 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
-import REACT_APP_BACKEND_URL from '../../consts';
+import { REACT_APP_BACKEND_URL } from '../../consts';
 import { TInitiative, TUser, TRole } from '../../types';
 import { setCurrentInitiativeId } from '../initiatives-slice';
+import { store } from '../store';
 
 export const initiativesApi = createApi({
   reducerPath: 'initiativesQuery',
@@ -26,19 +27,16 @@ export const initiativesApi = createApi({
           //   dispatch(setCurrentProjectId(parseInt(savedProjectId)));
           // } else if (projectsList.length) {
           //   dispatch(setCurrentProjectId(projectsList[0].id));
-          const cachedInitiativeId = localStorage.getItem('initiative-id');
-          if (cachedInitiativeId) {
-            dispatch(setCurrentInitiativeId(parseInt(cachedInitiativeId)));
-            localStorage.removeItem('initiative-id');
-          } else {
-            dispatch(setCurrentInitiativeId(initiativesList[0].initiative.id));
-          }
+            const cachedInitiativeId = store.getState().initiatives.currentInitiativeId;
+            if (!cachedInitiativeId) {
+              dispatch(setCurrentInitiativeId(initiativesList[0].initiative.id));
+            }
           // }
         } catch (err) {
           // `onError` side-effect
           console.log(err);
         }
-      },
+      },      
     }),
     getPersonalInitiativesList: builder.query<Array<TInitiative>, number>({
       query: (id) => `components/initiative/info/list/user/?id=${id}`,
@@ -74,8 +72,8 @@ export const initiativesApi = createApi({
       // },
       invalidatesTags: ['list'],
     }),
-    setRoles: builder.mutation<any, { initiativeId: number, body: Array<{ user: TUser & { id: number }, role: TRole }> }>({
-      query({ initiativeId, body }) {
+    setRoles: builder.mutation<any, { initiativeId: number, body:  Array<{user: TUser & { id: number }, role: TRole}> }>({
+      query({initiativeId, body}) {
         return {
           url: `components/initiative/role/?id=${initiativeId}`,
           method: 'POST',
@@ -83,7 +81,7 @@ export const initiativesApi = createApi({
         }
       }
     }),
-    getRoles: builder.query<Array<{ user: TUser & { id: number }, role: TRole & { project: number } }>, number>({
+    getRoles: builder.query<Array<{user: TUser & { id: number }, role: TRole & { project: number }}>, number>({
       query: (initiativeId) => `components/initiative/role/?id=${initiativeId}`,
     }),
   }),

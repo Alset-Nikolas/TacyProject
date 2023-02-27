@@ -16,11 +16,11 @@ export default function ProjectSelector() {
   const dispatch = useAppDispatch();
   const { data: projectsList } = useGetProjectsListQuery();
   const selectItems = projectsList ? [...projectsList.map((el) => el.name), ''] : [''];
-  const savedProjectId = localStorage.getItem('project-id');
-  const [selectedId, setSlectedId] = useState(savedProjectId ? Number.parseInt(savedProjectId) : null);
+  // const savedProjectId = localStorage.getItem('project-id');
+  const { currentId } = useAppSelector((store) => store.state.project);
+  const [selectedId, setSlectedId] = useState(currentId ? currentId : null);
   const [isSkipFetch, setSkipIsFetch] = useState(true);
   const value = projectsList && projectsList.find((el) => el.id === selectedId)?.name;
-  const { currentId } = useAppSelector((store) => store.state.project);
 
   const onSelectorChange = (e: SelectChangeEvent<string>) => {
     const selectedListItem =  projectsList && projectsList.find((el) => el.name === e.target.value);

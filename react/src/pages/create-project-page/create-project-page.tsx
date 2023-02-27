@@ -15,7 +15,6 @@ import {
 } from '../../utils/hooks';
 import {
   emptyProjectForEdit,
-  getProjectInfoThunk,
   openErrorModal,
   projectValidationErrorInitialState,
   setProjectValidationErrors,
@@ -320,7 +319,6 @@ export default function CreateProjectPage() {
   };
 
   const onCancelClick = () => {
-    dispatch(getProjectInfoThunk());
     returnToMainPage();
   };
 

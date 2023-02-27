@@ -1,5 +1,5 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
-import REACT_APP_BACKEND_URL from '../consts';
+import { REACT_APP_BACKEND_URL } from '../consts';
 import { TProject, TProjectForEdit, TRequestTeamListItem, TUser } from '../types';
 
 export async function getProjectInfo(
@@ -41,10 +41,10 @@ export async function getProjectInfo(
       console.log(error);
       errorCallback(error);
     })
-  // .then(() => {
-  //   // always executed
-  //   // alwaysCallback();
-  // });
+    // .then(() => {
+    //   // always executed
+    //   // alwaysCallback();
+    // });
 }
 
 export async function getProjectsList(
@@ -86,10 +86,10 @@ export async function getProjectsList(
       console.log(error);
       errorCallback(error);
     })
-  // .then(() => {
-  //   // always executed
-  //   // alwaysCallback();
-  // });
+    // .then(() => {
+    //   // always executed
+    //   // alwaysCallback();
+    // });
 }
 
 export function createProjectRequest(
@@ -129,7 +129,7 @@ export function authUser(
   // console.log(REACT_APP_BACKEND_URL);
 
   const client = axios.create({ baseURL: REACT_APP_BACKEND_URL });
-
+  
   client
     .post(
       '/auth/login/',

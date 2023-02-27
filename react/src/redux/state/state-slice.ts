@@ -4,7 +4,6 @@ import { AxiosError, AxiosResponse } from 'axios';
 import { TProject, TProjectForEdit, TProjectValidationErrors } from '../../types';
 import { parseRequestError } from '../../utils';
 import { createProjectRequest, deleteProject, getProjectInfo, getProjectsList } from '../../utils/requests';
-import { getInitiativesListThunk } from '../initiatives-slice'; 
 import { AppDispatch, RootState } from '../store';
 
 type TState = {
@@ -249,11 +248,6 @@ export const stateSlice = createSlice({
       }
     },
     setCurrentProjectId: (state, action) => {
-      if (action.payload) {
-        localStorage.setItem('project-id', action.payload.toString());
-      } else {
-        localStorage.removeItem('project-id');
-      }
       state.project.currentId = action.payload;
     },
     projectRequest: (state) => {
@@ -471,28 +465,6 @@ export const {
 } = stateSlice.actions;
 
 export default stateSlice.reducer;
-
-export const getProjectInfoThunk = (id?: number | null) => (dispatch: AppDispatch) => {
-  dispatch(projectRequest());
-  try {
-      if (id) {
-        getProjectInfo(
-          (res: AxiosResponse) => {
-            dispatch(projectRequestSuccess(res.data));
-            dispatch(getInitiativesListThunk(id));
-          },
-          () => {
-            dispatch(projectRequestFailed());
-          },
-          id,
-        );
-      } else {
-        throw new Error('Project doesn\'t exist');
-      }
-  } catch (error) {
-    dispatch(projectRequestFailed());
-  }
-};
 
 export const getProjectsListThunk = () => (dispatch: AppDispatch) => {
   dispatch(projectsListRequest());

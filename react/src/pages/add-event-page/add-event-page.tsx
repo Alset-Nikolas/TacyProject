@@ -87,7 +87,7 @@ export default function AddEventPage() {
     })
     tempEventState.metric_fields = convertedMetrics
     // dispatch(addEventThunk(newEventState));
-    if (currentInitiativeId) localStorage.setItem('initiative-id', currentInitiativeId.toString());
+    // if (currentInitiativeId) localStorage.setItem('initiative-id', currentInitiativeId.toString());
     addEvent(tempEventState);
   }
 

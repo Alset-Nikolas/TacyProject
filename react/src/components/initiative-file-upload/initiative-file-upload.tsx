@@ -33,13 +33,13 @@ const InitiativeFileUpload:FC<TFileUploadProps> = ({ fileUploadHandler, index, f
     const formData = new FormData();
     if (files) {
       formData.append('file', files[0]);
-      if (initiativeId) localStorage.setItem('initiative-id', initiativeId.toString());
+      // if (initiativeId) localStorage.setItem('initiative-id', initiativeId.toString());
       postFile({ fileId: file.id, body: formData })
     }
   };
 
   const removeNewFile = (index: number) => {
-    if (initiativeId) localStorage.setItem('initiative-id', initiativeId.toString());
+    // if (initiativeId) localStorage.setItem('initiative-id', initiativeId.toString());
     deleteFile(file.id);
   };
 

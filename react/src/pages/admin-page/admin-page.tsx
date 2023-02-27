@@ -1,19 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import CustomizedButton from '../../components/button/button';
-import CustomizedSelect from '../../components/select/Select';
 
 // Styles
 import styles from './admin-page.module.scss';
-import textStyles from '../../styles/text.module.scss';
 import { paths } from '../../consts';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
-import {
-  emptyProjectForEdit,
-  getProjectInfoThunk,
-  getProjectsListThunk,
-} from '../../redux/state/state-slice';
-import { SelectChangeEvent } from '@mui/material';
 import ProjectSelector from '../../components/project-selector/project-selector';
 
 export default function AdminPage() {

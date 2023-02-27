@@ -184,7 +184,7 @@ export default function InitiativeCoordination() {
       // dispatch(sendForApprovalThunk({ ...commentState, coordinator: coordinatorId }))
     } else {
       // dispatch(coordinateThunk({...commentState, text: '1'}));
-      if (currentInitiativeId) localStorage.setItem('initiative-id', currentInitiativeId.toString());
+      // if (currentInitiativeId) localStorage.setItem('initiative-id', currentInitiativeId.toString());
       coordinate({...commentState, text: '1'});
     }
     setCommentState((prevState) => {
@@ -197,7 +197,7 @@ export default function InitiativeCoordination() {
 
   const sendForApproveHandler = () => {
     sendForApproval({ ...coordinatorsState, initiative: currentInitiativeId ? currentInitiativeId : -1 });
-    if (currentInitiativeId) localStorage.setItem('initiative-id', currentInitiativeId.toString());
+    // if (currentInitiativeId) localStorage.setItem('initiative-id', currentInitiativeId.toString());
     setCoordinatorsState((prevState) => {
       return {
         ...prevState,
@@ -474,7 +474,7 @@ export default function InitiativeCoordination() {
                       //   initiative: initiative ? initiative?.initiative.id : -1,
                       //   failure: !userRights?.init_failure,
                       // });
-                      if (currentInitiativeId) localStorage.setItem('initiative-id', currentInitiativeId.toString());
+                      // if (currentInitiativeId) localStorage.setItem('initiative-id', currentInitiativeId.toString());
                       switchInitiativeState({
                         initiative: initiative ? initiative?.initiative.id : -1,
                         failure: !userRights?.init_failure,
