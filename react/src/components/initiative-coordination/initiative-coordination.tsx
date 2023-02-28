@@ -141,7 +141,14 @@ export default function InitiativeCoordination() {
       isError: isSendForApprovalError,
       isLoading: isSendForApprovalInProgress,
     } ] = useSendForApprovalMutation();
-  const [ postComment ] = usePostCommentMutation();
+  const [
+    postComment,
+    {
+      isError: isPostCommentError,
+      data: postCommentResponse,
+      error: postCommentErrorResponse,
+    },
+  ] = usePostCommentMutation();
 
   const inputChangeHandler = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -174,6 +181,8 @@ export default function InitiativeCoordination() {
           text: '',
         }
       });
+    } else {
+      dispatch(openErrorModal('Вы не можете отправлять сообщения'));
     }
   };
 
@@ -276,12 +285,21 @@ export default function InitiativeCoordination() {
     } else {
       dispatch(closeLoader());
     }
+    if (isPostCommentError && postCommentErrorResponse) {
+      if ('data' in postCommentErrorResponse && (postCommentErrorResponse?.data as any).initiative.msg) {
+        dispatch(openErrorModal((postCommentErrorResponse?.data as any).initiative.msg));
+      } else {
+        dispatch(openErrorModal('Ошибка при отправке сообщения'));
+      }
+      
+    }
   }, [
     closeInitiativeRequestFailed,
     isSendForApprovalError,
     isSendForApprovalInProgress,
     isCoordinateError,
     isCoordinateInProgress,
+    isPostCommentError,
   ])
 
   useEffect(() => {
@@ -624,6 +642,7 @@ export default function InitiativeCoordination() {
                   value={commentState.text}
                   className={`${styles.textInput}`}
                   onChange={inputChangeHandler}
+                  disabled={userRights?.init_failure || !userRights?.user_add_comment}
                   ref={chatInputRef}
                 />
                 <Pictogram

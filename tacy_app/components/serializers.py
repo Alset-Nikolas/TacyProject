@@ -766,9 +766,9 @@ class ListInitiativeSerializer(serializers.Serializer):
     project_initiatives = InitiativeSerializer(many=True)
 
     def create_excel(self, user, data):
-        def get_column_initiative(initiative, line, header):
+        def get_column_initiative(initiative, line, header, line_id):
             line += [
-                initiative.get("id"),
+                line_id,
                 initiative.get("name"),
                 initiative.get("status", {}).get("name"),
             ]
@@ -876,7 +876,9 @@ class ListInitiativeSerializer(serializers.Serializer):
         ):
             line = []
             header = []
-            get_column_initiative(line_table.get("initiative"), line, header)
+            get_column_initiative(
+                line_table.get("initiative"), line, header, i
+            )
             get_column_properties_fields(
                 line_table.get("properties_fields"), line, header
             )

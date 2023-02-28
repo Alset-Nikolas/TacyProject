@@ -393,6 +393,7 @@ class MetricsProject(models.Model):
     def add_delta_value(cls, metric_project_id, delta):
         m = MetricsProject.get_metric_by_id(metric_project_id)
         m.value += float(delta)
+        m.value = round(m.value, 4)
         m.save()
 
 

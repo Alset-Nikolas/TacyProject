@@ -6,7 +6,7 @@ import CustomizedButton from "../../components/button/button";
 import { getEventsListThunk } from "../../redux/evens-slice";
 import InitiativeManagement from "../../components/initiative-management/initiative-management";
 import DateInput from "../../components/date-input/date-input";
-import { useAddEventMutation, useDeleteEventMutation, useGetComponentsQuery, useGetEventsListQuery } from "../../redux/state/state-api";
+import { useAddEventMutation, useDeleteEventMutation, useGetComponentsQuery, useGetEventsListQuery, useGetProjectInfoQuery } from "../../redux/state/state-api";
 import Checkbox from '../../components/ui/checkbox/checkbox';
 import moment from "moment";
 import { openErrorModal } from "../../redux/state/state-slice";
@@ -26,6 +26,9 @@ export default function EventInfoPage() {
     currentInitiativeId
   } = useAppSelector((store) => store.initiatives);
   const { data: eventsList } = useGetEventsListQuery(currentInitiativeId ? currentInitiativeId : -1);
+  const { data: project } = useGetProjectInfoQuery(currentId ? currentId : -1, {
+    skip: !currentId, 
+  });
   const [ currentEvent, setCurrentEvent ] = useState(eventId && eventsList ? eventsList.find((item) => item.event.id === Number.parseInt(eventId)) : null);
   const [
     addEvent,
@@ -303,18 +306,22 @@ export default function EventInfoPage() {
                   className={`${styles.section}`}
                 >
                   {!newEventState.metric_fields?.length && 'Список метрик пуст'}
-                  {newEventState.metric_fields?.map((field, index) => (
-                    <div
-                      key={field.metric.id}
-                      className={`${styles.label}`}
-                    >
-                      <li>{field.metric.title}</li>
-                      <input
-                        value={field.value}
-                        onChange={(e) => onMetricsInputChange(e.target.value, index)}
-                      />
-                    </div>
-                  ))}
+                  {newEventState.metric_fields?.map((field, index) => {
+                    const foundMetric = project?.metrics.find((metric) => metric.id === field.metric.id);
+                    if (!foundMetric?.is_aggregate) return null;
+                    return (
+                      <div
+                        key={field.metric.id}
+                        className={`${styles.label}`}
+                      >
+                        <li>{field.metric.title}</li>
+                        <input
+                          value={field.value}
+                          onChange={(e) => onMetricsInputChange(e.target.value, index)}
+                        />
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>

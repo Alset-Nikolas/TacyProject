@@ -128,7 +128,7 @@ export default function DocumentsSettingsPage() {
 
           const [key, value] = el;
           
-          if (key === 'status') {
+          if (key === 'status' && (value as TStatusField).value >= 0) {
             newRenderFileSetting.push([{
               id: (value as TStatusField).id,
               title: (value as TStatusField).name
@@ -138,24 +138,27 @@ export default function DocumentsSettingsPage() {
         })
       })
 
-      tempFilesSettings.forEach((el,index) => {
+      tempFilesSettings.forEach((el) => {
         const entries = Object.entries(el);
-        entries.forEach((el) => {
+        const index = newRenderFileSetting.findIndex((fileSetting) => fileSetting[0].id === el.status.id);
+        if (index !== -1) {
+          entries.forEach((el) => {
 
-          const [key, value] = el;
+            const [key, value] = el;
 
-          if (key === 'settings_file' && value instanceof Array) {
-            value.forEach((fileInfo) => {
-              newRenderFileSetting[index].push({
-                id: fileInfo.id,
-                title: fileInfo.title,
-              });
-            })
-          }
-        })
+            if (key === 'settings_file' && value instanceof Array) {
+              value.forEach((fileInfo) => {
+                newRenderFileSetting[index].push({
+                  id: fileInfo.id,
+                  title: fileInfo.title,
+                });
+              })
+            }
+          });
+        }
       })
 
-      newRenderFileSetting.splice(0, 2);
+      // newRenderFileSetting.splice(0, 2);
 
       let maxLength = 0;
       newRenderFileSetting.forEach((el) => {

@@ -142,12 +142,12 @@ export default function TeamSettingsPage() {
       value={teamState}
     >
     <div className={`${styles.wrapper}`}>
-      {!value?.id && (
+      {!project && (
         <div>
           Проект не выбран
         </div>
       )}
-      {value?.id && (
+      {project && (
         <>
           <TeamTable
             teamList={teamState}

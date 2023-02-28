@@ -351,7 +351,7 @@ class Initiatives(models.Model):
         settings = project.settings_initiatives.first()
         files = (
             SettingsFilesInitiative.objects.filter(settings_project=settings)
-            .order_by("title")
+            .order_by("status__value")
             .all()
         )
         if init_status.value < 0:
@@ -539,6 +539,7 @@ class InitiativesMetricsFields(models.Model):
             .first()
         )
         el.value += float(delta)
+        el.value = round(el.value, 4)
         el.save()
         MetricsProject.add_delta_value(metric_id, delta)
 
