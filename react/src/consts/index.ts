@@ -170,5 +170,5 @@ export const dateFormat = 'DD.MM.YYYY';
 // export const REACT_APP_BACKEND_BASE_URL = 'http://31.177.78.111';
 
 
-export const REACT_APP_BACKEND_URL = 'http://localhost/api';
-export const REACT_APP_BACKEND_BASE_URL = 'http://localhost';
+export const REACT_APP_BACKEND_URL = 'http://31.177.78.111/api';
+export const REACT_APP_BACKEND_BASE_URL = 'http://31.177.78.111';

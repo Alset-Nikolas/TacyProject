@@ -5,7 +5,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = (
     "django-insecure-kaqkqa27i$9yn560@(_fxi0#(d4=i70mlg#w)a5ekfj-dswmyy"
 )
-IP_SERVER = "0.0.0.0"
+IP_SERVER = "31.177.78.111"
 DOMAIN_NAME_SERVER = "mbook.ddns.net"
 ALLOWED_HOSTS = [
     IP_SERVER,
