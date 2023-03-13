@@ -5,15 +5,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = (
     "django-insecure-kaqkqa27i$9yn560@(_fxi0#(d4=i70mlg#w)a5ekfj-dswmyy"
 )
-IP_SERVER = "31.177.78.111"
-DOMAIN_NAME_SERVER = "mbook.ddns.net"
-ALLOWED_HOSTS = [
-    IP_SERVER,
-    "127.0.0.1",
-    "localhost",
-    "0.0.0.0",
-    DOMAIN_NAME_SERVER,
-]
+IP_SERVER = "130.193.38.183"
+ALLOWED_HOSTS = [IP_SERVER, "127.0.0.1", "localhost", "0.0.0.0"]
 DEBUG = False
 
 CORS_ALLOW_CREDENTIALS = True
@@ -41,6 +34,7 @@ CORS_ORIGIN_WHITELIST = ("localhost:8080",)
 CORS_ORIGIN_ALLOW_ALL = True
 
 AUTH_USER_MODEL = "users.User"
+
 
 INSTALLED_APPS = [
     "django.contrib.admin",
@@ -79,6 +73,7 @@ ROOT_URLCONF = "tacy_app.urls"
 
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
 
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
@@ -114,6 +109,7 @@ DATABASES = {
         "PORT": "5432",
     }
 }
+
 
 SWAGGER_SETTINGS = {
     "api_path": "/docs",
@@ -181,9 +177,12 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 
 ######ТУТ
+EMAIL_HOST_USER = "hvatovnikolaj804@gmail.com"
+EMAIL_HOST_PASSWORD = "sqerryyonexanbye"
 
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
 SITE_DOMAIN = f"http://{IP_SERVER}"
+
 SITE_FULL_NAME = "Site name"
