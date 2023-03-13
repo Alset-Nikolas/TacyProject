@@ -1,3 +1,4 @@
+import moment from 'moment';
 import { ChangeEvent } from 'react';
 import { isReturnStatement } from 'typescript';
 import { updateSettings } from '../redux/components-slice';
@@ -16,7 +17,8 @@ import {
   TSettings,
   TAdditionalField,
   TStatusField,
-  TRole
+  TRole,
+  TUser
 } from "../types";
 
 export const handleInputChange = (
@@ -61,7 +63,12 @@ export const handlePropertieInutChange = (
 
     const propsArrayElement = {...propsArray[index]};
 
-    propsArrayElement[key] = value;
+    if (propType === 'metrics' && key === 'target_value') {
+      const numberMatch = value.match(/-?[0-9]*[.]?[0-9]*/);
+      propsArrayElement[key] = numberMatch ? numberMatch[0] : value.slice(0, value.length-2);
+    } else {
+      propsArrayElement[key] = value;
+    }
     propsArray[index] = propsArrayElement;
 
     dispatch(updateProjectForEdit({
@@ -493,4 +500,16 @@ export function parseRequestError(response: any): any {
   });
 
   return errorMessages;
+}
+
+export const formatDate = (date: string | Date, dateFormat: string) => moment(new Date(date)).format(dateFormat);
+
+export const makeShortedName = (person: TUser) => {
+  const {
+    last_name: lastName,
+    first_name: firstName,
+    second_name: secondName,
+  } = person; 
+  
+  return `${lastName} ${firstName ? firstName[0] + '.' : ''} ${secondName ? secondName[0] + '.' : ''}`;
 }

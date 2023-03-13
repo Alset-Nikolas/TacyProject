@@ -29,6 +29,7 @@ import InitiativesFilter from "../initiatives-filter/initiatives-filter";
 // Styles
 import styles from './initiatives-table.module.scss';
 import sectionStyles from '../../styles/sections.module.scss';
+import { makeShortedName } from "../../utils";
 //
 
 type TInitiativesTableProps = {
@@ -388,7 +389,7 @@ export default function InitiativesTable({ externalInitiativesList, addButton }:
                     })}
                     {components && components.table_registry.roles.map((role, roleIndex) => {
                       const currentRole = item.roles.find((el) => el.role.id === role.id);
-                      const memberNames = currentRole?.community.map((el) => `${el.user_info?.user.last_name} ${el.user_info?.user.first_name[0]}. ${el.user_info?.user.second_name[0]}.`);
+                      const memberNames = currentRole?.community.map((el) => el.user_info ? makeShortedName(el.user_info.user) : '');
                       if (!currentRole || !role.initiative_activate) return null;
                       return (
                       <td

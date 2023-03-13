@@ -5,11 +5,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = (
     "django-insecure-kaqkqa27i$9yn560@(_fxi0#(d4=i70mlg#w)a5ekfj-dswmyy"
 )
-ALLOWED_HOSTS = ["31.177.78.111", "127.0.0.1", "localhost"]
+IP_SERVER = "0.0.0.0"
+DOMAIN_NAME_SERVER = "mbook.ddns.net"
+ALLOWED_HOSTS = [
+    IP_SERVER,
+    "127.0.0.1",
+    "localhost",
+    "0.0.0.0",
+    DOMAIN_NAME_SERVER,
+]
+DEBUG = False
 
-DEBUG = True
-
-# CORS_URLS_REGEX = r"^/api/.*$"
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
     "accept",
@@ -25,7 +31,13 @@ CORS_ALLOW_HEADERS = [
 CORS_ALLOW_METHODS = ["DELETE", "GET", "OPTIONS", "PATCH", "POST", "PUT"]
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://localhost:8080",
+    "http://localhost",
+    f"http://{IP_SERVER}",
+    f"http://{IP_SERVER}:3000",
+    f"http://{IP_SERVER}:8080",
 ]
+CORS_ORIGIN_WHITELIST = ("localhost:8080",)
 CORS_ORIGIN_ALLOW_ALL = True
 
 AUTH_USER_MODEL = "users.User"
@@ -104,6 +116,7 @@ DATABASES = {
 }
 
 SWAGGER_SETTINGS = {
+    "api_path": "/docs",
     "SECURITY_DEFINITIONS": {
         "Bearer": {
             "type": "apiKey",
@@ -140,14 +153,13 @@ USE_L10N = True
 
 USE_TZ = True
 
-STATIC_URL = "/static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATIC_URL = "/back_static/"
+STATIC_ROOT = os.path.join(BASE_DIR, "back_staticfiles")
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 
 USE_L10N = False
 DATE_INPUT_FORMATS = ("%d.%m.%Y", "%Y-%m-%d")
-# DATE_INPUT_FORMATS = ("%d.%m.%Y",)
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework.authentication.TokenAuthentication",
@@ -161,9 +173,8 @@ REST_FRAMEWORK = {
     "DATETIME_FORMAT": "%Y-%m-%dT%H:%M:%S.%fZ",
 }
 
-STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 MEDIA_URL = "/media/"
-MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+MEDIA_ROOT = os.path.join(BASE_DIR, "mediafiles")
 
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
@@ -174,10 +185,5 @@ EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-SITE_DOMAIN = "http://31.177.78.111"
+SITE_DOMAIN = f"http://{IP_SERVER}"
 SITE_FULL_NAME = "Site name"
-
-# if DEBUG:
-#     SITE_DOMAIN = "http://127.0.0.1:3000"
-#     EMAIL_BACKEND = "django.core.mail.backends.filebased.EmailBackend"
-#     EMAIL_FILE_PATH = os.path.join(BASE_DIR, "sent_emails")

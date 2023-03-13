@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { paths } from "../../consts";
+import { dateFormat, paths } from "../../consts";
 import { GanttD3 } from "../../d3/GanttD3/GanttD3";
 import { getEventsListThunk } from "../../redux/evens-slice";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
@@ -21,6 +21,7 @@ import {
   useGetProjectInfoQuery
 } from "../../redux/state/state-api";
 import Pictogram from "../pictogram/pictogram";
+import { formatDate } from "../../utils";
 
 export default function EventsTable() {
   const localion = useLocation();
@@ -171,12 +172,12 @@ export default function EventsTable() {
                       <td
                         className={`${styles.dateCol}`}
                       >
-                        {moment(event.event.date_start).format('DD.MM.YYYY')}
+                        {formatDate(event.event.date_start, dateFormat)}
                       </td>
                       <td
                         className={`${styles.dateCol}`}
                       >
-                        {moment(event.event.date_end).format('DD.MM.YYYY')}
+                        {formatDate(event.event.date_end, dateFormat)}
                       </td>
                       {event.addfields.map((addfield) => (
                         <td

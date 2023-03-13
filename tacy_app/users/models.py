@@ -63,21 +63,9 @@ class User(AbstractBaseUser, PermissionsMixin):
         null=True,
         default=None,
     )
-    first_name = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True,
-    )
-    last_name = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True,
-    )
-    second_name = models.CharField(
-        max_length=100,
-        blank=True,
-        null=True,
-    )
+    first_name = models.CharField(max_length=100, default="noname")
+    last_name = models.CharField(max_length=100, default="noname")
+    second_name = models.CharField(max_length=100, default="noname")
     phone = models.CharField(
         max_length=100,
         blank=True,
@@ -98,7 +86,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     USERNAME_FIELD = "email"
-    # REQUIRED_FIELDS = ("email",)
     objects = UserManager()
 
     class Meta:

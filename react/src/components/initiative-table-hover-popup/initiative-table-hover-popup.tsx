@@ -2,6 +2,7 @@ import { FC, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 import { useGetComponentsQuery, useGetProjectInfoQuery } from "../../redux/state/state-api";
 import { TUser } from "../../types";
+import { makeShortedName } from "../../utils";
 import { useAppSelector } from "../../utils/hooks";
 
 // Styles
@@ -126,7 +127,7 @@ export const InitiativeTableHoverPopup:FC<TInitiativeTableHoverPopupProps> = ({ 
                 <div
                   className={`${styles.name}`}
                 >
-                  {`${item.user_info?.user.last_name} ${item.user_info?.user.first_name[0]}. ${item.user_info?.user.second_name[0]}.`}
+                  {item.user_info ? makeShortedName(item.user_info?.user) : ''}
                 </div>
                 <div
                   className={`${styles.status}`}

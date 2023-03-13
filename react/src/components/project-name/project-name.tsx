@@ -2,7 +2,7 @@ import { ChangeEvent } from 'react';
 import moment from 'moment';
 import textStyles from '../../styles/text.module.scss';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
-import { handleInputChange } from '../../utils';
+import { formatDate, handleInputChange } from '../../utils';
 import DateInput from '../date-input/date-input';
 import { useGetProjectInfoQuery } from '../../redux/state/state-api';
 import { TProjectValidationErrors } from '../../types';
@@ -12,6 +12,7 @@ import styles from './project-name.module.scss';
 import sectionStyles from '../../styles/sections.module.scss';
 import inputStyles from '../../styles/inputs.module.scss';
 import { setProjectValidationErrors } from '../../redux/state/state-slice';
+import { dateFormat } from '../../consts';
 
 type TProjectNameProps = {
   edit?: boolean;
@@ -161,10 +162,10 @@ export default function ProjectName({
         {project.name}
       </div>
       <div className={`${styles.date}`}>
-        <span className={`${styles.contentBoldText}`}>Дата начала:</span> {moment(dateStart).format('DD.MM.YYYY')}
+        <span className={`${styles.contentBoldText}`}>Дата начала:</span> {formatDate(dateStart, dateFormat)}
       </div>
       <div className={`${styles.date}`}>
-        <span className={`${styles.contentBoldText}`}>Дата окончания:</span> {moment(dateEnd).format('DD.MM.YYYY')}
+        <span className={`${styles.contentBoldText}`}>Дата окончания:</span> {formatDate(dateEnd, dateFormat)}
       </div>
     </div>
   );

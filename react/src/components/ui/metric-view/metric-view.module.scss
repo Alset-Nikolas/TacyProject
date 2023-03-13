@@ -3,7 +3,7 @@
   flex-direction: column;
   gap: 2px;
   align-items: center;
-  width: 107px;
+  min-width: 107px;
 }
 
 .title {
@@ -23,7 +23,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 101px;
+  min-width: 101px;
   height: 72px;
   font-weight: 500;
   font-size: 20px;

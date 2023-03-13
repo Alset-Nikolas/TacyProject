@@ -34,6 +34,8 @@ import Checkbox from "../ui/checkbox/checkbox";
 //Styles
 import sectionStyles from '../../styles/sections.module.scss';
 import styles from './initiative-coordination.module.scss';
+import { formatDate, makeShortedName } from "../../utils";
+import { dateFormat } from "../../consts";
 //
 
 export default function InitiativeCoordination() {
@@ -350,6 +352,9 @@ export default function InitiativeCoordination() {
                       const isApprovement = element.action === 'Инициатива согласована'
                       const isSendToApprove = element.action === "Отправить на согласование";
                       const elementsDate = new Date(element.date);
+                      const shortedAuthorName = element.author_text ? makeShortedName(element.author_text) : '';
+                      const shortedCoordinatorName = element.coordinator ? makeShortedName(element.coordinator) : '';
+                      
                       if (!isServiceMessage && !isApprovement && !isSendToApprove) return null;
                       // if (isServiceMessage) {
                       //   return (
@@ -367,21 +372,21 @@ export default function InitiativeCoordination() {
                           className={`${styles.historyRow}`}
                         >
                           <div>
-                            {moment(elementsDate).format('DD.MM.YYYY')}
+                            {formatDate(elementsDate, dateFormat)}
                           </div>
                           <div>
                             {element.status?.name ? element.status.name : 'null'}
                           </div>
                           <div>
                             {isServiceMessage && element.text}
-                            {isSendToApprove && `${element.author_text?.last_name} ${element.author_text?.first_name[0]}. ${element.author_text?.second_name[0]}. ${element.text}`}
+                            {isSendToApprove && `${shortedAuthorName} ${element.text}`}
                             {isApprovement && element.action}
                           </div>
                           <div>
                             {rolePersonList?.find((item) => item.user.id === element.coordinator?.id)?.role.name}
                           </div>
                           <div>
-                            {!isServiceMessage && `${element.coordinator?.last_name} ${element.coordinator?.first_name[0]}. ${element.coordinator?.second_name[0]}.`}
+                            {!isServiceMessage && `${shortedCoordinatorName}`}
                           </div>
                         </li>
                       );
@@ -548,6 +553,8 @@ export default function InitiativeCoordination() {
                     const nextElement = coordinationHistory[index + 1];
                     const prevDate = nextElement ? new Date(nextElement.date) : null;
                     const isPreviousDay = prevDate && (date.getDate() !== prevDate.getDate());
+                    const shortedAuthorName = element.author_text ? makeShortedName(element.author_text) : '';
+                    const shortedCoordinatorName = element.coordinator ? makeShortedName(element.coordinator) : '';
                     // const statusName = components?.settings?.initiative_status.find((status) => status.id === element.status)?.name;
                     return (
                       <div
@@ -566,14 +573,14 @@ export default function InitiativeCoordination() {
                                 {element.status?.name ? element.status.name : 'null'}
                                 &nbsp;
                                 {isSendToApprove ? 
-                                  `${element.author_text?.last_name} ${element.author_text?.first_name[0]}. ${element.author_text?.second_name[0]}. ${element.text}`
+                                  `${shortedAuthorName} ${element.text}`
                                   :
                                   element.action
                                 }
                                 &nbsp;
                                 {rolePersonList?.find((item) => item.user.id === element.coordinator?.id)?.role.name}
                                 &nbsp;
-                                {`${element.coordinator?.last_name} ${element.coordinator?.first_name[0]}. ${element.coordinator?.second_name[0]}.`}
+                                {`${shortedCoordinatorName}`}
                               </div>
                             )}
                             {isServiceMessage && (
@@ -597,7 +604,7 @@ export default function InitiativeCoordination() {
                                   <div
                                     className={styles.avatar}
                                   >
-                                    {element.author_text?.last_name[0]}
+                                    {element.author_text?.last_name ? element.author_text?.last_name[0] : '?'}
                                   </div>
                                 </Tooltip>
                               )}
@@ -619,7 +626,7 @@ export default function InitiativeCoordination() {
                                   <div
                                     className={`${styles.avatar} ${styles.own}`}
                                   >
-                                    {element.author_text?.last_name[0]}
+                                    {element.author_text?.last_name ? element.author_text?.last_name[0] : '?'}
                                   </div>
                                 </Tooltip>
                               )}
@@ -730,7 +737,7 @@ export default function InitiativeCoordination() {
                             <div
                               className={`${styles.modalCell}`}
                             >
-                              {`${member.user_info.user.last_name} ${member.user_info.user.first_name[0]}. ${member.user_info.user.second_name[0]}.`}
+                              {makeShortedName(member.user_info.user)}
                             </div>
                             {foundMember?.properties.map((propertie) => (
                               <div

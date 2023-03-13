@@ -6,6 +6,8 @@ import { fills } from "../../utils/fills";
 import { dateScale, getCoordinate } from "../../utils/utilities";
 import { TIntermediateDate } from "../../types";
 import { Tooltip } from "@mui/material";
+import { dateFormat } from "../../consts";
+import { formatDate } from "../../utils";
 
 type TGanttD3XAxisProps = {
   data?: Array<TIntermediateDate>;
@@ -109,7 +111,7 @@ export const GanttD3XAxis = ({ data, itemsCount, daysNumber, startDate, endDate,
     return (
       <g key={item.title+item.date}>
         <Tooltip
-          title={`Дата: ${moment(date).format('DD.MM.YYYY')} Название: ${item.title}`}
+          title={`Дата: ${formatDate(date, dateFormat)} Название: ${item.title}`}
           placement="bottom"
         >
         <g>

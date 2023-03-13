@@ -23,6 +23,7 @@ import { TPropertie, TRole, TRolesAllocationModalMembersList, TTeamMember, TUser
 import { closeModal, openRolesAllocationModal } from "../../redux/state/state-slice";
 import Modal from "../modal/modal";
 import RolesPopupContainer from "../roles-popup-container/roles-popup-container";
+import { makeShortedName } from "../../utils";
 
 
 export default function RolesAlloction() {
@@ -84,7 +85,7 @@ export default function RolesAlloction() {
         if (role.id === item.role.id) newState.push({
           id: item.user.id,
           active: true,
-          user_name: `${item.user.last_name} ${item.user.first_name[0]}. ${item.user.second_name[0]}.`,
+          user_name: makeShortedName(item.user),
           user: item.user,
           properties: membersProperties ? membersProperties : [],
         });
@@ -473,7 +474,7 @@ export default function RolesAlloction() {
                                         width: '100%',
                                       }}
                                     >
-                                      {`${member.user_info?.user.last_name} ${member.user_info?.user.first_name[0]}. ${member.user_info?.user.second_name[0]}.`}
+                                      {member.user_info ? makeShortedName(member.user_info?.user) : ''}
                                     </div>
                                   </div>
                                   {components?.table_community.settings_addfields_community.map((addfield, index) => {

@@ -1,5 +1,6 @@
 // Styles
 import moment from 'moment';
+import { dateFormat } from '../../consts';
 import styles from './notifications.module.scss';
 
 type TNotificationsRowProps = {
@@ -25,7 +26,7 @@ export default function NotificationsRow({ notification }: TNotificationsRowProp
         {moment(jsDate).format('hh:mm')}
       </div>
       <div className={`${styles.date}`}>
-        {moment(jsDate).format('DD.MM.YYYY')}
+        {moment(jsDate).format(dateFormat)}
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { paths } from "../../consts";
+import { dateFormat, paths } from "../../consts";
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import CustomizedButton from "../../components/button/button";
 import { getEventsListThunk } from "../../redux/evens-slice";
@@ -14,6 +14,7 @@ import { openErrorModal } from "../../redux/state/state-slice";
 //Styles
 import styles from './event-info-page.module.scss';
 import { setCurrentInitiativeId } from "../../redux/initiatives-slice";
+import { formatDate } from "../../utils";
 //
 
 export default function EventInfoPage() {
@@ -42,8 +43,8 @@ export default function EventInfoPage() {
   const [newEventState, setNewEventState] = useState({
     event: currentEvent ? {
       ...currentEvent.event,
-      date_start: moment(currentEvent.event.date_start).format('DD.MM.YYYY'),
-      date_end: moment(currentEvent.event.date_end).format('DD.MM.YYYY'),
+      date_start: formatDate(currentEvent.event.date_start, dateFormat),
+      date_end: formatDate(currentEvent.event.date_end, dateFormat),
     } : null,
     metric_fields: currentEvent ? currentEvent.metric_fields.map((field) => {
       return {
@@ -181,8 +182,8 @@ export default function EventInfoPage() {
       setNewEventState({
         event: {
           ...currentEvent.event,
-          date_start: moment(currentEvent.event.date_start).format('DD.MM.YYYY'),
-          date_end: moment(currentEvent.event.date_end).format('DD.MM.YYYY'),
+          date_start: formatDate(currentEvent.event.date_start, dateFormat),
+          date_end: formatDate(currentEvent.event.date_end, dateFormat),
         },
         metric_fields: currentEvent.metric_fields.map((field) => {
           return {

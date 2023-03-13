@@ -463,6 +463,9 @@ class DeleteProjectView(views.APIView):
         manual_parameters=[],
         request_body=UserProjectIdSerializer,
     )
+    def delete_dir_project(self, project_id):
+        path_dir = f"files/project/{project_id}"
+
     def delete(self, request):
 
         id_serializer = UserProjectIdSerializer(
@@ -473,6 +476,7 @@ class DeleteProjectView(views.APIView):
             Project, id=id_serializer.validated_data["id"]
         )
         self.check_object_permissions(self.request, project)
+
         project.delete()
         return Response({"msg": "Проект удален"}, status=status.HTTP_200_OK)
 

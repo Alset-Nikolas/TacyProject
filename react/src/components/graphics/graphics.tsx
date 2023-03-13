@@ -1,8 +1,14 @@
-import { IconButton, Tooltip } from "@mui/material";
-import { ChangeEvent, MouseEvent, useEffect, useState } from "react";
-import { getGraphicsThunk } from "../../redux/graphics-slice";
-import { useGetDiagramsListQuery, useGetProjectInfoQuery, useLazyGetDiagramsListQuery } from "../../redux/state/state-api";
-import { useAppDispatch, useAppSelector } from "../../utils/hooks";
+import { Tooltip } from "@mui/material";
+import {
+  ChangeEvent,
+  useEffect,
+  useState,
+} from "react";
+import {
+  useGetProjectInfoQuery,
+  useLazyGetDiagramsListQuery,
+} from "../../redux/state/state-api";
+import { useAppSelector } from "../../utils/hooks";
 import CustomizedButton from "../button/button";
 import CustomBarChart from "../custom-bar-chart/custom-bar-chart";
 import SectionContent from "../section/section-content/section-content";

@@ -15,7 +15,7 @@ User = get_user_model()
 
 
 def directory_path(instance, filename):
-    return f"files/project/{instance.project.name}/{filename}"
+    return f"files/project/{instance.project.id}/{filename}"
 
 
 class Project(models.Model):
@@ -243,8 +243,6 @@ class ProjectFiles(models.Model):
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,
-        blank=True,
-        null=True,
         related_name="files",
         verbose_name="Проект",
     )

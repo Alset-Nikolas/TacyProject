@@ -693,7 +693,7 @@ export const stateApi = createApi({
       invalidatesTags: ['graphic-settings', 'diagrams', 'personal-diagrams'],
     }),
     getAuthInfoById: builder.query<TAuthUser, number>({
-      query: (projectId) => `auth/info/?id=${projectId}`,
+      query: (projectId) => `auth/info/${projectId !== -1 ? `?id=${projectId}` : ''}`,
       providesTags: () => ['auth'],
     }),
   }),

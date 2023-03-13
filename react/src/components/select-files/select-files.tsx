@@ -15,7 +15,6 @@ type TSelectUnitsProps = {
 };
 
 const SelectMenuProps = {
-  // disableScrollLock: true,
   PaperProps: {
     sx: {
       borderRadius: 0,

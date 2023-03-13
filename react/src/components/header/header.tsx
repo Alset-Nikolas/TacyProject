@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { paths } from '../../consts';
+import { useGetAuthInfoByIdQuery } from '../../redux/state/state-api';
 import { useAppSelector } from '../../utils/hooks';
 // import Avatar from '../avatar/avatar';
 import Pictogram from '../pictogram/pictogram';
 import styles from './header.module.scss';
 
 export default function Header() {
-  const user = useAppSelector((store) => store.auth.user);
+  const { currentId } = useAppSelector((store) => store.state.project);
+  const { data: userInfo } = useGetAuthInfoByIdQuery(currentId ? currentId : -1);
+  const { user } = userInfo ? userInfo : { user: null };
   const [locationFlag, setLoacationFlag] = useState({
     status: false,
     registry: false,
@@ -97,7 +100,7 @@ export default function Header() {
         </ul>
       </nav>
       <div className={`${styles.controls}`}>
-        {user && user.user.is_superuser && (
+        {user && user.is_superuser && (
           <Link to={paths.settings.basic.absolute} >
             <Pictogram
               type="settings"

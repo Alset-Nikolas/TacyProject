@@ -46,7 +46,7 @@ export default function GraphicsSettingsPage() {
   const [selectorValue, setSelectorValue] = useState<Array<Array<string>>>(initialSelectorValue(newSettingState));
 
   const SelectStyle = {
-    minWidth: '223px',
+    width: '223px',
     height: '32px',
     border: '1px solid #504F4F',
     borderRadius: 0,

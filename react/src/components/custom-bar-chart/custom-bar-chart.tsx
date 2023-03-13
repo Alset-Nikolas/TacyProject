@@ -20,12 +20,19 @@ export default function CustomBarChart({ data }: TCustomBarChartProps) {
     value: number;
     prevVal: number;
   }>;
+  let valueMin = 0;
+  let valueMax = 0;
   data.forEach((el, index) => {
+    if (el.value < valueMin) valueMin = el.value;
+    if (el.value > valueMax) valueMax = el.value;
+
     processedData.push({
       ...el,
+      name_short: el.name_short.length > 10 ? el.name_short.slice(0, 10) : el.name_short,
       prevVal: (index > 0 && index !== data.length - 1) ? processedData[index-1].value + processedData[index-1].prevVal : 0,
     });
   });
+  const valueRange = Math.abs(valueMin) + Math.abs(valueMax);
 
   return (
     <div>
@@ -33,7 +40,7 @@ export default function CustomBarChart({ data }: TCustomBarChartProps) {
         {/* <CartesianGrid strokeDasharray="3 3" /> */}
         <XAxis dataKey="name_short" />
         <YAxis
-          domain={['auto', (dataMax: number) => (dataMax + dataMax * 0.1)]}
+          domain={[valueMin < 0 ? (dataMin: number) => dataMin - valueRange * 0.15 : 'auto', (dataMax: number) => dataMax > 0 ? (dataMax + valueRange * 0.15) : 0]}
           tick={false}
           width={0}
         />

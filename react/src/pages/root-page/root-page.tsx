@@ -9,7 +9,7 @@ import Header from '../../components/header/header';
 import ModalInfo from '../../components/modal-info/modal-info';
 import { paths } from '../../consts';
 import { getUserInfoByIdThunk, getUserInfoThunk, setIsAuth } from '../../redux/auth-slice';
-import { useGetProjectInfoQuery, useGetProjectsListQuery } from '../../redux/state/state-api';
+import { useGetAuthInfoByIdQuery, useGetProjectInfoQuery, useGetProjectsListQuery } from '../../redux/state/state-api';
 import { useAppDispatch, useAppSelector } from '../../utils/hooks';
 
 // styles
@@ -22,6 +22,9 @@ export default function RootPage() {
   const dispatch = useAppDispatch();
   const savedProjectId = currentId ? currentId : null;
   useGetProjectsListQuery();
+  const { isError: isAuthError } = useGetAuthInfoByIdQuery(currentId ? currentId : -1, {
+    skip: !currentId,
+  });
 
   useGetProjectInfoQuery(savedProjectId, {
     skip: savedProjectId === null,
@@ -50,8 +53,13 @@ export default function RootPage() {
 
   useEffect(() => {
     window.scroll(0,0);
-
   }, [location.pathname])
+
+  useEffect(() => {
+    if (isAuthError) {
+      navigate(`/${paths.logout}`);
+    }
+  }, [isAuthError]);
 
   return (
     <div className={`${styles.wrapper}`}>
