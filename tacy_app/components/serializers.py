@@ -518,7 +518,6 @@ class RolesUserInInitiativeSerializer(serializers.ModelSerializer):
             .exclude(id__in=items_not_delete)
             .all()
         ):
-
             coordinator_delete = (
                 init.stages_coordination.filter(coordinator_stage=role_in_init)
                 .filter(activate=False)
@@ -688,7 +687,6 @@ class SettingsInitiativeSerializer(serializers.ModelSerializer):
         return attrs
 
     def validate_status(self, status):
-
         # if not (list(x["value"] for x in status) == list(range(len(status)))):
         #     raise serializers.ValidationError(
         #         {
@@ -755,8 +753,6 @@ class SettingsInitiativeSerializer(serializers.ModelSerializer):
         CommunitySettingsAddFields.create_or_update(
             project, table_community.get("settings_addfields_community")
         )
-
-        # todo table_community
 
 
 class ListInitiativeSerializer(serializers.Serializer):
@@ -976,7 +972,6 @@ class RiskInfoSerializer(serializers.Serializer):
 
 
 class ListRiskSerializer(serializers.Serializer):
-
     initiative_risks = RiskInfoSerializer(many=True)
 
 
@@ -996,14 +991,12 @@ class MainEventSerializer(serializers.ModelSerializer):
         ]
 
     def __validate_dates(self, attrs):
-
         if attrs.get("date_end") < attrs.get("date_start"):
             raise serializers.ValidationError(
                 {"date_start": "date_start <= date_end"}
             )
 
     def validate(self, attrs):
-
         id = attrs.get("id", None)
         self.__validate_dates(attrs)
         if id > 0:
@@ -1124,7 +1117,6 @@ class EventSerializer(serializers.Serializer):
 
 
 class ListEventSerializer(serializers.Serializer):
-
     initiative_events = EventSerializer(many=True)
 
 
