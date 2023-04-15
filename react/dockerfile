@@ -5,7 +5,7 @@ RUN npm install
 COPY . /react
 EXPOSE 3000
 RUN npm run build
-
+CMD ["npm", "start"]
 # FROM nginx:alpine
 
 # #!/bin/sh
