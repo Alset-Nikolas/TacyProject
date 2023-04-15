@@ -467,7 +467,6 @@ class DeleteProjectView(views.APIView):
         path_dir = f"files/project/{project_id}"
 
     def delete(self, request):
-
         id_serializer = UserProjectIdSerializer(
             data=self.request.data, context={"user": request.user}
         )

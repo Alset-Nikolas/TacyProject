@@ -248,7 +248,6 @@ class Initiatives(models.Model):
         for new_file in SettingsFilesInitiative.objects.filter(
             settings_project=settings_initiatives
         ).all():
-
             if (
                 not InitiativesFiles.objects.filter(initiative=self)
                 .filter(title=new_file)
@@ -267,6 +266,15 @@ class Initiatives(models.Model):
         self.update_properties()
         self.update_addfields()
         self.update_files()
+
+        if self.status is None:
+            status = (
+                SettingsStatusInitiative.get_start_statuses_by_id_initiative(
+                    self.id
+                )
+            )
+            self.status = status
+            self.save()
 
     @classmethod
     def get_user_initiatievs(cls, user, project):
@@ -871,7 +879,6 @@ class Risks(models.Model):
         for new_field in SettingsAddFeldsRisks.objects.filter(
             settings_project=settings_initiatives
         ).all():
-
             if (
                 not RisksAddFields.objects.filter(risk=self)
                 .filter(title=new_field)

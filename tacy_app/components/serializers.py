@@ -240,6 +240,7 @@ class CommunityAddFieldsSerializer(serializers.ModelSerializer):
     class Meta:
         model = CommunitySettingsAddFields
         fields = ["id", "title"]
+        ref_name = "community-add"
 
 
 class TableCommunitySerializer(serializers.Serializer):
