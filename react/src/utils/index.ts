@@ -405,7 +405,7 @@ export function addComponentItem(
   if (key === 'initiative_status') {
     newItem = {
       id: -1,
-      value: itemsArray.length - 2,
+      value: itemsArray.length,
       name: '',
       settings_project: -1,
     };
@@ -442,9 +442,9 @@ export function removeComponentItem(
         settings_project: number;
       };
       
-      newEl.value = index - 2;
-      if (newEl.name === 'Согласовано') newEl.value = -1;
-      if (newEl.name === 'Отозвано') newEl.value = -2;
+      newEl.value = index;
+      // if (newEl.name === 'Согласовано') newEl.value = -1;
+      // if (newEl.name === 'Отозвано') newEl.value = -2;
       
       return newEl;
     });

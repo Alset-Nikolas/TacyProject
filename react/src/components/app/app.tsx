@@ -24,11 +24,13 @@ import TeamPage from '../../pages/team-page/team-page';
 import TeamSettingsPage from '../../pages/team-settings-page/team-settings-page';
 import Logout from '../logout/logout';
 import DocumentsSettingsPage from '../../pages/documents-settings-page/documents-settings-page';
+import ErrorPage from '../error-boundary/error-boundary';
 
 const router = createBrowserRouter([
   {
     path: "/",
     element: <RootPage />,
+    errorElement: <ErrorPage />,
     children: [
       {
         path: "settings",

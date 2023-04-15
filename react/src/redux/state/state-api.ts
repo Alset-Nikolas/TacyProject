@@ -342,7 +342,7 @@ export const stateApi = createApi({
               type: addfield.type,
             };
           });
-          body.status = [...settings.initiative_status].splice(2, settings.initiative_status.length - 2).map((status) => {
+          body.status = [...settings.initiative_status].map((status) => {
             return {
               name: status.name,
               value: status.value,

@@ -42,7 +42,7 @@ export default function TeamRow({ index, member, edit, header, removeMember, set
   const modal = useAppSelector((store) => store.state.app.modal);
   const dispatch = useAppDispatch();
   const selectStyle = {
-    width: '186px',
+    width: '100%',
     height: '24px',
     border: '1px solid #504F4F',
     borderRadius: '3px',
@@ -358,8 +358,9 @@ export default function TeamRow({ index, member, edit, header, removeMember, set
             </td>
           );
         })}
-        {!!project.properties.length && project.properties.map((propertie, propIndex) => {
-          const outputPropertie = properties.find((prop) => prop.title === propertie.title);
+        {components?.table_community.properties.map((propertie) => {
+          const outputPropertie = properties.find((prop) => prop.id === propertie.id);
+          const propIndex = components ? components.table_community.properties.findIndex(el => el.id === propertie.id) : -1;
           if (!outputPropertie) {
             return <td key={`null_${propIndex}`}>У пользователя нет такого свойства</td>;
           }
@@ -367,7 +368,7 @@ export default function TeamRow({ index, member, edit, header, removeMember, set
             console.log(`propertie ${propIndex} is undefined`);
             return <td key={`null_${propIndex}`}>Данное свойство не существует</td>;
           }
-          if (!components?.table_community.properties[propIndex].is_community_activate) return null;
+          if (propIndex === -1 || !components?.table_community.properties[propIndex].is_community_activate) return null;
           return (
             <td
               className={`${styles.cell} ${propIndex === properties.length - 1 ? styles.last : ''}`}
