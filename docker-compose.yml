@@ -48,18 +48,28 @@ services:
       - PGADMIN_LISTEN_PORT=5555
     ports:
       - "5555:5555"
+  # frontend:
+  #   restart: unless-stopped
+  #   container_name: "tacy_forntend_container"
+  #   build:
+  #     context: ./react
+  #   volumes:
+  #     - react_build:/react/build
+  #   ports:
+  #     - "3000:3000"
+  #   expose:
+  #     - 3000
+  #   stdin_open: true
   frontend:
-    restart: unless-stopped
+    image: alsetnikolas/tacy_front:latest
     container_name: "tacy_forntend_container"
-    build:
-      context: ./react
     volumes:
       - react_build:/react/build
     ports:
       - "3000:3000"
     expose:
       - 3000
-    stdin_open: true
+
   nginx:
     image: nginx:latest
     container_name: nginx
@@ -87,3 +97,4 @@ volumes:
     # sudo docker-compose -f docker-compose.yml build; sudo docker-compose -f docker-compose.yml up --force-recreate
 
 
+    # docker build -t alsetnikolas/tacy_front .
