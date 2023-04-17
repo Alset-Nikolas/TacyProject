@@ -75,7 +75,7 @@ class CoordinationInitiativeHistory(models.Model):
     @classmethod
     def check_person_add_comment(cls, initiative_id, user):
         initiative: Initiatives = Initiatives.get_by_id(initiative_id)
-        if initiative.author == user or initiative.is_superuser:
+        if initiative.author == user or user.is_superuser:
             return True
 
         return StagesCoordinationInitiative.user_is_coordinator(
