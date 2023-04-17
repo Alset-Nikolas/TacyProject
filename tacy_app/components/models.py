@@ -1112,10 +1112,6 @@ class SettingsStatusInitiative(models.Model):
                     init.status = start_status
                     init.save()
 
-        cls.generate_defauld_status(
-            SettingsComponents.objects.get(pk=settings_components)
-        )
-
 
 def add_field_create_or_update_base(cls, settings_components, info):
     ids_not_delete = []

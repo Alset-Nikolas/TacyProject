@@ -726,6 +726,10 @@ class SettingsInitiativeSerializer(serializers.ModelSerializer):
             settings_components.id, status
         )
 
+        SettingsStatusInitiative.generate_defauld_status(
+            settings_components,
+        )
+
         for propertie in table_registry.get("properties", []):
             propertie_obj = PropertiesProject.get_property_by_id(
                 propertie.get("id")
