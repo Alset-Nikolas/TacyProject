@@ -77,14 +77,14 @@ class Initiatives(models.Model):
         help_text="Введите название инициативы",
     )
     current_state = models.CharField(
-        max_length=500,
+        max_length=1000,
         verbose_name="Текущее состояние инициативы",
         help_text="Введите текущее состояние инициативы",
         blank=True,
         null=True,
     )
     reasons = models.CharField(
-        max_length=500,
+        max_length=1000,
         verbose_name="Предпосылки инициативы",
         help_text="Введите предпосылкт инициативы",
         blank=True,
@@ -1111,6 +1111,7 @@ class SettingsStatusInitiative(models.Model):
                     )
                     init.status = start_status
                     init.save()
+        cls.generate_defauld_status(settings_components)
 
 
 def add_field_create_or_update_base(cls, settings_components, info):
