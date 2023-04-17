@@ -416,7 +416,7 @@ class InitiativesAddFields(models.Model):
         null=True,
     )
     value = models.CharField(
-        max_length=500,
+        max_length=1500,
         blank=True,
         null=True,
     )
