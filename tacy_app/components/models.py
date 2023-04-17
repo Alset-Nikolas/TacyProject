@@ -91,7 +91,7 @@ class Initiatives(models.Model):
         null=True,
     )
     description = models.CharField(
-        max_length=500,
+        max_length=1000,
         verbose_name="Описание инициативы",
         help_text="Введите описание инициативы",
         blank=True,
@@ -307,6 +307,11 @@ class Initiatives(models.Model):
 
     @classmethod
     def get_status_failure(cls, init):
+        print(
+            SettingsStatusInitiative.get_status_failure_by_id_initiative(
+                init.id
+            )
+        )
         init.status = (
             SettingsStatusInitiative.get_status_failure_by_id_initiative(
                 init.id
@@ -1070,7 +1075,8 @@ class SettingsStatusInitiative(models.Model):
     @classmethod
     def create_or_update(cls, settings_components, info):
         ids_not_delete = []
-        for value, el_info in enumerate(info):
+        value = 0
+        for el_info in info:
             name_field = el_info.get("name")
             old_el = (
                 cls.objects.filter(settings_project_id=settings_components)
@@ -1082,8 +1088,12 @@ class SettingsStatusInitiative(models.Model):
                 el_info["value"] = value
                 old_el = cls.objects.create(**el_info)
             else:
+                if old_el.value < 0:
+                    ids_not_delete.append(old_el.id)
+                    continue
                 old_el.value = value
                 old_el.save()
+            value += 1
             ids_not_delete.append(old_el.id)
         for item in (
             cls.objects.filter(settings_project_id=settings_components)

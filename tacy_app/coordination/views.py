@@ -318,25 +318,31 @@ class Switch(views.APIView):
             data=request.data, context={"user": user}
         )
         serializer.is_valid(raise_exception=True)
-        initiative = Initiatives.get_by_id(request.data.get("initiative"))
+
+        initiative = get_object_or_404(
+            Initiatives, pk=request.data.get("initiative")
+        )
         initiative.failure = request.data.get("failure")
         initiative.save()
         text = "отозвана" if initiative.failure else "активна"
+        print("ДО", initiative.status)
         if initiative.failure:
+            print("Ставим статус failure")
             Initiatives.get_status_failure(initiative)
             for metric_obj in initiative.metric_fields.all():
                 metric_id = metric_obj.metric.id
                 delta = metric_obj.value
                 MetricsProject.add_delta_value(metric_id, -delta)
         else:
+            print("Ставим статус start")
             Initiatives.get_status_start(initiative)
             for metric_obj in initiative.metric_fields.all():
                 metric_id = metric_obj.metric.id
                 delta = metric_obj.value
                 MetricsProject.add_delta_value(metric_id, delta)
-
+        print("POSLE", initiative.status)
         return Response(
-            f"Инициатива {text}",
+            f"Инициатива {text} initiative_status{initiative.status}",
             200,
         )
 
