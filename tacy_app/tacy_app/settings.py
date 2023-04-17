@@ -8,7 +8,7 @@ SECRET_KEY = (
 IP_SERVER = "31.177.78.111"
 # IP_SERVER = "localhost"
 ALLOWED_HOSTS = [IP_SERVER, "127.0.0.1", "localhost", "0.0.0.0"]
-DEBUG = True
+DEBUG = False
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
