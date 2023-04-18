@@ -658,7 +658,8 @@ export type TPersonalStats = {
     get_status: string;
   }>;
   metrics_user_stat: Array<{
-    title: string;
+    // title: string;
+    metric: TMetrica;
     value: number;
   }>;
 }

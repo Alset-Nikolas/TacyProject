@@ -5,10 +5,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = (
     "django-insecure-kaqkqa27i$9yn560@(_fxi0#(d4=i70mlg#w)a5ekfj-dswmyy"
 )
-# IP_SERVER = "31.177.78.111"
-IP_SERVER = "localhost"
+IP_SERVER = "31.177.78.111"
+# IP_SERVER = "localhost"
 ALLOWED_HOSTS = [IP_SERVER, "127.0.0.1", "localhost", "0.0.0.0"]
-DEBUG = True
+DEBUG = False
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
@@ -179,7 +179,7 @@ EMAIL_HOST = "smtp.gmail.com"
 
 ######ТУТ
 EMAIL_HOST_USER = "alset.nikolas@gmail.com"
-EMAIL_HOST_PASSWORD = "xbahegequzojrrca"
+EMAIL_HOST_PASSWORD = ""
 
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True

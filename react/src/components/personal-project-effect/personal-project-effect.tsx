@@ -22,7 +22,7 @@ export default function PersonalProjectEffect() {
     <section className={`${styles.wrapper}`}>
       <ProjectsEffectComponent
         title="Статистика моих инициатив"
-        metrics={metrics as Array<TMetrica> || []}
+        metrics={metrics.map((el) => { return { ...el.metric, value: el.value } }) as Array<TMetrica> || []}
       />
     </section>
   );
