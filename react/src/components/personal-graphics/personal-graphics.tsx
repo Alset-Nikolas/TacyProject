@@ -74,7 +74,7 @@ export default function PersonalGraphics() {
       {!diagramData?.graphics.length && !diagramData?.statusGraphics.length && (
         <div>Атрибуты инициатив отвутствуют</div>
       )}
-      {!!diagramData?.graphics.length || diagramData?.statusGraphics.length && (
+      {(!!diagramData?.graphics.length || diagramData?.statusGraphics.length) && (
       <div>
         {/* <div>
           {graphics[currentPropertieIndex].propertieName}

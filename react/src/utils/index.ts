@@ -442,7 +442,7 @@ export function removeComponentItem(
         settings_project: number;
       };
       
-      newEl.value = index;
+      if (newEl.value > -1) newEl.value = index;
       // if (newEl.name === 'Согласовано') newEl.value = -1;
       // if (newEl.name === 'Отозвано') newEl.value = -2;
       

@@ -56,7 +56,6 @@ class PropertiesItemsProjectSerializer(serializers.ModelSerializer):
         )
 
     def validate_id(self, id):
-
         if id > 0 and not PropertiesItemsProject.get_property_item_by_id(id):
             raise serializers.ValidationError(
                 {
@@ -513,7 +512,6 @@ class ProperitsUserSerializer(serializers.Serializer):
         )
 
         for value_obj in data["values"]:
-
             p_value_obj = PropertiesItemsProject.get_property_item_by_id(
                 id=value_obj.get("id")
             )
@@ -598,6 +596,7 @@ class UpdateCommunityProjectSerializer(serializers.ModelSerializer):
             user: User = User.get_user_by_email(user_info["email"])
             new_account = bool(not user)
             user: User = User.create_or_update_user(project, user_info)
+
             if new_account:
                 EmailManage.send_invitation_new_account(
                     user=user, context={"project": project}
@@ -652,7 +651,6 @@ class UpdateCommunityProjectSerializer(serializers.ModelSerializer):
 
 
 class PropertiesUserSerializer(serializers.Serializer):
-
     right = serializers.IntegerField(
         label="right",
         write_only=True,

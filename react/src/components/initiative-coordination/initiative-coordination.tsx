@@ -22,6 +22,7 @@ import {
   useSendForApprovalMutation,
   useSwitchInitiativeStateMutation,
   useGetAuthInfoByIdQuery,
+  useGetComponentsQuery,
 } from "../../redux/state/state-api";
 import Pictogram from "../pictogram/pictogram";
 import { MessageSeparator } from "../message-separator/message-separator";
@@ -88,6 +89,9 @@ export default function InitiativeCoordination() {
   const [coordinatorName, setCoordinatorName] = useState(bossesNamesList.length ? bossesNamesList[0].name : '');
   const { data: initiativeFiles } = useGetInitiativeFilesQuery(currentInitiativeId ? currentInitiativeId : -1, {
     skip: !currentInitiativeId,
+  });
+  const { data: components } = useGetComponentsQuery(currentId ? currentId : -1, {
+    skip: !currentId,
   });
   const isFilesUploaded = () => {
     let isUploaded = true;
@@ -704,11 +708,14 @@ export default function InitiativeCoordination() {
                             ФИО
                           </div>
                           {
-                            project?.properties.map((propertie) => (
-                              <div className={`${styles.modalHeaderCell}`} key={propertie.id}>
-                                {propertie.title}
-                              </div>
-                            ))
+                            components?.table_community.properties.map((propertie) => {
+                              if (!propertie.is_community_activate) return null;
+                              return (
+                                <div className={`${styles.modalHeaderCell}`} key={propertie.id}>
+                                  {propertie.title}
+                                </div>
+                              );
+                            })
                           }
                         </div>
                       )}
@@ -739,14 +746,19 @@ export default function InitiativeCoordination() {
                             >
                               {makeShortedName(member.user_info.user)}
                             </div>
-                            {foundMember?.properties.map((propertie) => (
-                              <div
-                                key={`${member.user_info?.user.id}_${propertie.id}`}
-                                className={`${styles.modalCell}`}
-                              >
-                                {propertie.values.map((el) => el.value).join(', ')}
-                              </div>
-                            ))}
+                            {components?.table_community.properties.map((propertie) => {
+                              if (!propertie.is_community_activate) return null;
+                              const outputPropertie = foundMember?.properties.find((prop) => prop.id === propertie.id);
+
+                              return (
+                                <div
+                                  key={`${member.user_info?.user.id}_${propertie.id}`}
+                                  className={`${styles.modalCell}`}
+                                >
+                                  {outputPropertie?.values.map((el) => el.value).join(', ')}
+                                </div>
+                              );
+                            })}
                           </div>
                         );
                       })}

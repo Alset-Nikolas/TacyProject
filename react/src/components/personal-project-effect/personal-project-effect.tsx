@@ -14,9 +14,9 @@ export default function PersonalProjectEffect() {
   const { data: project } = useGetProjectInfoQuery(currentId);
   const metrics = useAppSelector((store) => store.personal.personalStats.metrics_user_stat);
 
-  // useEffect(() => {
-  //   if (project) dispatch(getPersonalStatsThunk(project.id));
-  // }, [project]);
+  useEffect(() => {
+    if (project) dispatch(getPersonalStatsThunk(project.id));
+  }, [project]);
 
   return (
     <section className={`${styles.wrapper}`}>

@@ -660,7 +660,7 @@ class UserStatisticsInitiativesView(views.APIView):
         events = []
         for m in MetricsProject.objects.filter(project=project).all():
             if m.active:
-                metrics_user_stat[m.title] = 0
+                metrics_user_stat[m] = 0
         for initiative in inits:
             user_initiatives.append(
                 {
@@ -673,13 +673,14 @@ class UserStatisticsInitiativesView(views.APIView):
                 }
             )
             for m_obj in initiative.metric_fields.all():
-                title = m_obj.metric.title
-                if title in metrics_user_stat:
-                    metrics_user_stat[m_obj.metric.title] += m_obj.value
+                metric = m_obj.metric
+                if metric in metrics_user_stat:
+                    metrics_user_stat[m_obj.metric] += m_obj.value
             events += initiative.events.all()
         metrics_user_stat_format = []
-        for k, v in metrics_user_stat.items():
-            metrics_user_stat_format.append({"title": k, "value": v})
+
+        for metric, v in metrics_user_stat.items():
+            metrics_user_stat_format.append({"metric": metric, "value": v})
         return {
             "user_initiatives": user_initiatives,
             "metrics_user_stat": metrics_user_stat_format,
@@ -1415,7 +1416,6 @@ class ListEventView(views.APIView):
         ],
     )
     def get(self, request):
-
         id = request.GET.get("id", None)
         initiative = get_object_or_404(Initiatives, id=id)
         events = initiative.events.all()

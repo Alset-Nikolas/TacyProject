@@ -11,7 +11,7 @@ type TCustomBarChartProps = {
 export default function CustomBarChart({ data }: TCustomBarChartProps) {
   const labelMap = new Map(data.map((el) => {
     if (el.name === 'Total') return [el.name_short, 'Cумма'];
-    return [el.name_short, el.name];
+    return [el.name_short.length > 10 ? el.name_short.slice(0, 10) : el.name_short, el.name];
   }));
 
   const processedData = [] as Array<{
@@ -25,6 +25,7 @@ export default function CustomBarChart({ data }: TCustomBarChartProps) {
   data.forEach((el, index) => {
     if (el.value < valueMin) valueMin = el.value;
     if (el.value > valueMax) valueMax = el.value;
+    console.log(el.name_short.slice(0, 10));
 
     processedData.push({
       ...el,

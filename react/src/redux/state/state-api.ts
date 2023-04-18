@@ -342,7 +342,7 @@ export const stateApi = createApi({
               type: addfield.type,
             };
           });
-          body.status = [...settings.initiative_status].map((status) => {
+          body.status = [...settings.initiative_status].filter((el) => el.value > -1).map((status) => {
             return {
               name: status.name,
               value: status.value,

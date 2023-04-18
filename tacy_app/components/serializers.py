@@ -37,6 +37,7 @@ import xlsxwriter
 import os
 from projects.serializers import ProperitsUserSerializer
 from coordination.models import TYPE_SERVICE_MESSAGE
+from projects.serializers import MetrcsProjectSerializer
 
 User = get_user_model()
 
@@ -1125,7 +1126,7 @@ class ListEventSerializer(serializers.Serializer):
 
 
 class MetricItemUserStat(serializers.Serializer):
-    title = serializers.CharField()
+    metric = MetrcsProjectSerializer()
     value = serializers.FloatField()
 
 
