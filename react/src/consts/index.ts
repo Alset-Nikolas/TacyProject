@@ -59,22 +59,22 @@ export const mockProjectData = {
   "intermediate_dates": [
     {
       "title": "title12",
-      "date": "2022-10-14"
+      "date":"2022-10-14"
     },
     {
       "title": "title2",
-      "date": "2022-10-15"
+      "date":"2022-10-15"
     }
   ],
   "metrics": [
     {
-      "title": "c3",
-      "value": 5.0,
-      "target_value": 5.0,
-      "active": true
+        "title": "c3",
+        "value": 5.0,
+        "target_value": 5.0,
+        "active": true
     }
   ],
-  "properties": [
+  "properties":[
     {
       "title": "Подразделения",
       "values": [
@@ -90,49 +90,49 @@ export const mockProjectData = {
   ],
   "roles": [
     {
-      "id": 237,
-      "name": "Наблюдать",
-      "coverage": 0,
-      "project": 14
+        "id": 237,
+        "name": "Наблюдать",
+        "coverage": 0,
+        "project": 14
     },
     {
-      "id": 238,
-      "name": "Эксперт по направлению",
-      "coverage": 1,
-      "project": 14
+        "id": 238,
+        "name": "Эксперт по направлению",
+        "coverage": 1,
+        "project": 14
     },
     {
-      "id": 239,
-      "name": "Функциональный эксперт",
-      "coverage": 2,
-      "project": 14
+        "id": 239,
+        "name": "Функциональный эксперт",
+        "coverage": 2,
+        "project": 14
     },
     {
-      "id": 240,
-      "name": "Дирекор",
-      "coverage": 3,
-      "project": 14
+        "id": 240,
+        "name": "Дирекор",
+        "coverage": 3,
+        "project": 14
     }
   ],
   "rights": [
-    {
-      "id": 193,
-      "name": "Создать инициативу",
-      "project": 14,
-      "flags": 217
-    },
-    {
-      "id": 194,
-      "name": "Согласовать инициативу",
-      "project": 14,
-      "flags": 218
-    },
-    {
-      "id": 195,
-      "name": "Просмотр",
-      "project": 14,
-      "flags": 219
-    }
+      {
+          "id": 193,
+          "name": "Создать инициативу",
+          "project": 14,
+          "flags": 217
+      },
+      {
+          "id": 194,
+          "name": "Согласовать инициативу",
+          "project": 14,
+          "flags": 218
+      },
+      {
+          "id": 195,
+          "name": "Просмотр",
+          "project": 14,
+          "flags": 219
+      }
   ],
 };
 
@@ -164,7 +164,7 @@ export const rights = {
   admin: 'Администрировать',
 };
 
-export const dateFormat = 'DD.MM.YYYY';
+export  const dateFormat = 'DD.MM.YYYY';
 
 export const REACT_APP_BACKEND_URL = 'http://31.177.78.111:8000/api';
 export const REACT_APP_BACKEND_BASE_URL = 'http://31.177.78.111';

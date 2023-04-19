@@ -79,8 +79,8 @@
 }
 
 .tableWrapper::-webkit-scrollbar {
-  height: 3px;
-  width: 3px;
+  height: 6px;
+  width: 6px;
 }
 
 .tableWrapper::-webkit-scrollbar-track {
@@ -88,8 +88,8 @@
 }
 
 .tableWrapper::-webkit-scrollbar-thumb {
-  background-color: #17598C;
-  border-radius: 1.5px;
+  background-color: rgba(23,89,140, 0.5);
+  border-radius: 3px;
 }
 
 .tableRow{

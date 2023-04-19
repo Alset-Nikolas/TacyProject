@@ -14,7 +14,7 @@
 }
 
 .tableWrapper::-webkit-scrollbar {
-  height: 3px;
+  height: 6px;
 }
 
 .tableWrapper::-webkit-scrollbar-track {
@@ -23,9 +23,9 @@
 
 .tableWrapper::-webkit-scrollbar-thumb {
   /*border-radius: 100px;*/
-  background-color: #17598C;
+  background-color: rgba(23,89,140, 0.5);
   height: 100%;
-  border-radius: 1.5px;
+  border-radius: 3px;
 }
 
 .toEventsLinkWrapper {
