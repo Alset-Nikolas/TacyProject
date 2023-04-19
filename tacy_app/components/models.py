@@ -330,6 +330,7 @@ class Initiatives(models.Model):
                     init.id
                 )
             )
+        init.stages_coordination.all().delete()
         init.status = status
         init.save()
 
