@@ -61,7 +61,7 @@ services:
   #     - 3000
   #   stdin_open: true
   frontend:
-    image: alsetnikolas/tacy_front:latest
+    image: alsetnikolas/tacy_front:v3
     container_name: "tacy_forntend_container"
     volumes:
       - react_build:/react/build
