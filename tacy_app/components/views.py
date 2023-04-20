@@ -50,17 +50,12 @@ def get_project_by_id_or_active(request) -> tp.Optional[Project]:
         иначе - активный проект у пользователя
     """
     user = request.user
-    project_id: int = request.GET.get("id", None)
-    if not project_id:
-        return user.project_active
+    project_id: int = request.GET.get("id")
     UserProjectIdSerializer(
         data={"id": project_id},
         context={"user": user},
     ).is_valid(raise_exception=True)
-    project = get_object_or_404(Project, id=project_id)
-    user.project_active = project
-    user.save()
-    return project
+    return get_object_or_404(Project, id=project_id)
 
 
 # ++++++++++++++++++++++НАСТРОЙКИ+++++++++++++++++++++++++++

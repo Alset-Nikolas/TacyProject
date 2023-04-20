@@ -353,7 +353,7 @@ export const stateApi = createApi({
 
         
           return {
-            url: `components/settings/`,
+            url: `components/settings/?id=${projectId}`,
             method: 'POST',
             body,
           };
