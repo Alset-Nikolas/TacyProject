@@ -1117,17 +1117,23 @@ class SettingsStatusInitiative(models.Model):
 def add_field_create_or_update_base(cls, settings_components, info):
     ids_not_delete = []
     for el_info in info:
-        title_field = el_info.get("title")
+        id_field = el_info.get("id")
+
         old_el = (
-            cls.objects.filter(settings_project_id=settings_components)
-            .filter(title=title_field)
-            .first()
+            (
+                cls.objects.filter(settings_project_id=settings_components)
+                .filter(id=id_field)
+                .first()
+            )
+            if id_field > 0
+            else None
         )
         if not old_el:
             el_info["settings_project_id"] = settings_components
             old_el = cls.objects.create(**el_info)
         else:
             old_el.type = el_info.get("type")
+            old_el.title = el_info.get("title")
             old_el.save()
         ids_not_delete.append(old_el.id)
 

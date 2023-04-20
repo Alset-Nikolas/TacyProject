@@ -326,18 +326,21 @@ export const stateApi = createApi({
           body.project = projectId;
           body.addfields = settings.initiative_addfields.map((addfield) => {
             return {
+              id: addfield.id,
               title: addfield.title,
               type: addfield.type,
             };
           });
           body.events_addfields = settings.event_addfields.map((addfield) => {
             return {
+              id: addfield.id,
               title: addfield.title,
               type: addfield.type,
             };
           });
           body.risks_addfields = settings.risks_addfields.map((addfield) => {
             return {
+              id: addfield.id,
               title: addfield.title,
               type: addfield.type,
             };

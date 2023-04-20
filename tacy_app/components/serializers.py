@@ -47,24 +47,30 @@ class AddFeldsInitiativesSerializer(serializers.ModelSerializer):
     Серилизатор дополнительных полей инициативы
     """
 
+    id = serializers.IntegerField()
+
     class Meta:
         # depth = 1
         model = SettingsAddFeldsInitiative
-        fields = ["title", "type"]
+        fields = ["id", "title", "type"]
 
 
 class AddFeldsEventsSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+
     class Meta:
         # depth = 1
         model = SettingsAddFeldsEvent
-        fields = ["title", "type"]
+        fields = ["id", "title", "type"]
 
 
 class AddFeldsRisksSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField()
+
     class Meta:
         # depth = 1
         model = SettingsAddFeldsRisks
-        fields = ["title", "type"]
+        fields = ["id", "title", "type"]
 
 
 class StatusInitiativeSerializer(serializers.ModelSerializer):
