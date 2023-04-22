@@ -333,7 +333,7 @@ class Switch(views.APIView):
                 metric_id = metric_obj.metric.id
                 delta = metric_obj.value
                 MetricsProject.add_delta_value(metric_id, -delta)
-            
+
         else:
             print("Ставим статус start")
             Initiatives.get_status_start(initiative)

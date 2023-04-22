@@ -430,6 +430,7 @@ class InitiativesAddFields(models.Model):
                 name="unique field initiatives title",
             )
         ]
+        ordering = ["pk"]
 
     @classmethod
     def get_by_id(cls, id):
@@ -523,6 +524,7 @@ class InitiativesMetricsFields(models.Model):
                 name="unique field metric title",
             )
         ]
+        ordering = ["pk"]
 
     @classmethod
     def create(cls, initiative_id, info):
@@ -740,6 +742,7 @@ class EventsAddFields(models.Model):
                 name="unique field event title",
             )
         ]
+        ordering = ["pk"]
 
     @classmethod
     def get_by_id(cls, id):
@@ -929,6 +932,7 @@ class RisksAddFields(models.Model):
                 name="unique field risk title",
             )
         ]
+        ordering = ["pk"]
 
     @classmethod
     def create(cls, risk_id, addfields):
@@ -1129,6 +1133,7 @@ def add_field_create_or_update_base(cls, settings_components, info):
             else None
         )
         if not old_el:
+            el_info.pop("id")
             el_info["settings_project_id"] = settings_components
             old_el = cls.objects.create(**el_info)
         else:
@@ -1181,6 +1186,7 @@ class SettingsAddFeldsInitiative(models.Model):
 
     class Meta:
         db_table = "project_settings_initiative_add_fields"
+        ordering = ["pk"]
 
     @classmethod
     def create_or_update(cls, settings_components, info):

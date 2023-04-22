@@ -880,7 +880,7 @@ class ListInitiativeSerializer(serializers.Serializer):
         header = []
         line = []
         for i, line_table in enumerate(
-            data.get("project_initiatives"), start=2
+            data.get("project_initiatives"), start=1
         ):
             line = []
             header = []

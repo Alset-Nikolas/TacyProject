@@ -69,7 +69,7 @@ class SentForApprovalSerializer(serializers.Serializer):
                     "msg": "Инициативы с таким id нету",
                 }
             )
-        if initiative_obj.author != user:
+        if initiative_obj.author != user and not user.is_superuser:
             raise serializers.ValidationError(
                 {
                     "initiative": "initiative.author != user",

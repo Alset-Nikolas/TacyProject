@@ -618,13 +618,19 @@ class ListInitiativesView(views.APIView):
             ]
         }
         s = ListInitiativeSerializer(instance=inst)
+
         return Response(s.data, 200)
 
 
 class ListInitiativesFileView(ListInitiativesView):
     def get(self, request):
         project = get_project_by_id_or_active(request)
-        list_inits = project.initiatives.all()
+        list_inits = (
+            project.initiatives.order_by("pk", "-date_registration")
+            .distinct("pk")
+            .all()
+        )
+
         [x.check_updates() for x in list_inits]
         inst = {
             "project_initiatives": [
