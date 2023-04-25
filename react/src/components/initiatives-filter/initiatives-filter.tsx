@@ -12,7 +12,7 @@ import { useGetComponentsQuery, useGetProjectInfoQuery, useGetTeamListQuery, use
 import { useAppDispatch, useAppSelector } from "../../utils/hooks";
 import { TPropertie } from "../../types";
 import { SelectChangeEvent } from "@mui/material";
-import { setFilesFilter, setfilterProperties, setInitiativeFilter, setRolesFilter, setSortMetrics, setStatusFilter } from "../../redux/initiatives-slice";
+import { setFilesFilter, setfilterProperties, setFilters, setInitiativeFilter, setRolesFilter, setSortMetrics, setStatusFilter } from "../../redux/initiatives-slice";
 
 type TInitiativesFilterProps = {
   setIsShowFilteredList: any;
@@ -206,9 +206,36 @@ const InitiativesFilter:FC<TInitiativesFilterProps> = ({ setIsShowFilteredList, 
     dispatch(setFilesFilter(newValues));
   }
 
+  const clearFilters = () => {
+    const filters = {
+      properties: project ? project.properties.map((property) => {
+        return {
+          ...property,
+          selectedItems: [],
+        }
+      }) : [],
+      metrics: {
+        metric: {
+          id: -1,
+          name: 'Не выбрано',
+        },
+        type: {
+          title: 'По возрастанию',
+          value: 0,
+        }
+      },
+      status: [],
+      initiative: '',
+      roles: project ? project.roles.map((role) => {return { role: role.id, items: [], isApproved: -1 }}) : [],
+      files: [],
+    };
+
+    dispatch(setFilters(filters));
+  };
+
   useEffect(() => {
     if (!rolesFilter.length) dispatch(setRolesFilter(project ? project.roles.map((role) => {return { role: role.id, items: [], isApproved: -1 }}) : []));
-    dispatch(setfilterProperties(project ? project.properties.map((property) => {
+    if (!filterProperties.length) dispatch(setfilterProperties(project ? project.properties.map((property) => {
       return {
         ...property,
         selectedItems: [],
@@ -351,8 +378,14 @@ const InitiativesFilter:FC<TInitiativesFilterProps> = ({ setIsShowFilteredList, 
           display: 'flex',
           justifyContent: 'flex-end',
           marginTop: 20,
+          gap: 40,
         }}
       >
+        <CustomizedButton
+          value="Сбросить"
+          color="transparent"
+          onClick={() => clearFilters()}
+        />
         <CustomizedButton
           value="Применить"
           color="blue"

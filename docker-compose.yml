@@ -61,7 +61,7 @@ services:
   #     - 3000
   #   stdin_open: true
   frontend:
-    image: alsetnikolas/tacy_front:v7
+    image: alsetnikolas/tacy_front:v8
     container_name: "tacy_forntend_container"
     volumes:
       - react_build:/react/build
@@ -98,3 +98,5 @@ volumes:
 
 
     # docker build -t alsetnikolas/tacy_front .
+
+    #sudo docker commit 349f41847a97 alsetnikolas/tacy_front:v3

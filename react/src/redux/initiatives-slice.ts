@@ -192,6 +192,9 @@ export const stateSlice = createSlice({
         addInitiativeRequestFailed: true,
       }
     },
+    setFilters: (state, action) => {
+      state.filter = action.payload;
+    },
     setfilterProperties: (state, action) => {
       state.filter.properties = action.payload;
     },
@@ -229,6 +232,7 @@ export const {
   addInitiativeRequest,
   addInitiativeRequestSuccess,
   addInitiativeRequestFailed,
+  setFilters,
   setfilterProperties,
   setSortMetrics,
   setStatusFilter,

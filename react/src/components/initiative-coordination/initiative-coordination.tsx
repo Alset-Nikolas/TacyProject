@@ -105,10 +105,12 @@ export default function InitiativeCoordination() {
     });
     return isUploaded;
   }
-  const coordinationButtonIsDisabled = !(userRights?.user_rights_flag.is_approve && userRights?.user_now_apprwed || userRights?.user_is_author) ||
-    userRights.init_failure ||
+  const coordinationButtonIsDisabled = !(
+    ((userRights?.user_rights_flag.is_approve && userRights?.user_now_apprwed) || userRights?.user_is_author || userRights?.user_is_superuser) ||
+    userRights?.init_failure ||
     initiative?.initiative.status?.value === -1 ||
-    !isFilesUploaded();
+    !isFilesUploaded()
+  );
   const [coordinatorsState, setCoordinatorsState] = useState<{text: string, coordinators: Array<TUser & {id: number}>, initiative: number}>({
     text: '1',
     initiative: currentInitiativeId ? currentInitiativeId : -1,
@@ -194,7 +196,7 @@ export default function InitiativeCoordination() {
 
   const postCoordinateHandler = () => {
     // const coordinatorId = bossesNamesList.find((member) => member.name === coordinatorName)?.id;
-    if (userRights?.user_is_author /* && coordinatorId */) {
+    if ((userRights?.user_is_author && !userRights?.user_now_apprwed) || (userRights?.user_is_superuser && !userRights?.user_now_apprwed)) {
       dispatch(openCoordinationModal())
       // dispatch(sendForApprovalThunk({ ...commentState, coordinator: coordinatorId }))
     } else {
