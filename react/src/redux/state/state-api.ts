@@ -584,7 +584,7 @@ export const stateApi = createApi({
           body,
         };
       },
-      invalidatesTags: ['initiative', 'initiatives-list', 'coordination-history', 'user-rights'],
+      invalidatesTags: ['initiative', 'initiatives-list', 'coordination-history', 'user-rights', 'initiative-files'],
     }),
     authUser: builder.mutation<any, { email: string, password: string }>({
       query(credentials) {

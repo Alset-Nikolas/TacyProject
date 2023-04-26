@@ -105,12 +105,23 @@ export default function InitiativeCoordination() {
     });
     return isUploaded;
   }
-  const coordinationButtonIsDisabled = !(
-    ((userRights?.user_rights_flag.is_approve && userRights?.user_now_apprwed) || userRights?.user_is_author || userRights?.user_is_superuser) ||
-    userRights?.init_failure ||
-    initiative?.initiative.status?.value === -1 ||
-    !isFilesUploaded()
-  );
+  const coordinationButtonIsDisabled = () => {
+    if (userRights === undefined) return false;
+    if (initiative === undefined) return false;
+    if (!initiative.initiative.status) return false;
+
+    console.log((userRights.user_rights_flag.is_approve && userRights.user_now_apprwed) || userRights.user_is_author || userRights.user_is_superuser);
+    console.log(userRights.init_failure);
+    console.log(initiative.initiative.status.value < 0);
+    console.log(!isFilesUploaded());
+
+    return (
+      !((userRights.user_rights_flag.is_approve && userRights.user_now_apprwed) || userRights.user_is_author || userRights.user_is_superuser) ||
+      userRights.init_failure ||
+      initiative.initiative.status.value < 0 ||
+      !isFilesUploaded()
+    );
+  }
   const [coordinatorsState, setCoordinatorsState] = useState<{text: string, coordinators: Array<TUser & {id: number}>, initiative: number}>({
     text: '1',
     initiative: currentInitiativeId ? currentInitiativeId : -1,
@@ -493,30 +504,34 @@ export default function InitiativeCoordination() {
                 <div
                   className={`${styles.commentButtonsWrapper}`}
                 >
-                  <CustomizedButton
-                    className={`${styles.button}`}
-                    value={`${userRights?.init_failure ? 'Восстановить' : "Отозвать"}`}
-                    color="transparent"
-                    disabled={!userRights?.user_is_author && !userRights?.user_is_superuser}
-                    onClick={() => {
-                      // closeInitiative({
-                      //   initiative: initiative ? initiative?.initiative.id : -1,
-                      //   failure: !userRights?.init_failure,
-                      // });
-                      // if (currentInitiativeId) localStorage.setItem('initiative-id', currentInitiativeId.toString());
-                      switchInitiativeState({
-                        initiative: initiative ? initiative?.initiative.id : -1,
-                        failure: !userRights?.init_failure,
-                      })
-                    }}
-                  />
-                  <CustomizedButton
-                    className={`${styles.button}`}
-                    value="Согласовать"
-                    color="blue"
-                    disabled={coordinationButtonIsDisabled}
-                    onClick={postCoordinateHandler}
-                  />
+                  <div>
+                    {(userRights?.user_is_author || userRights?.user_is_superuser) && <CustomizedButton
+                      className={`${styles.button}`}
+                      value={`${userRights?.init_failure ? 'Восстановить' : "Отозвать"}`}
+                      color="transparent"
+                      disabled={userRights?.user_now_apprwed}
+                      onClick={() => {
+                        // closeInitiative({
+                        //   initiative: initiative ? initiative?.initiative.id : -1,
+                        //   failure: !userRights?.init_failure,
+                        // });
+                        // if (currentInitiativeId) localStorage.setItem('initiative-id', currentInitiativeId.toString());
+                        switchInitiativeState({
+                          initiative: initiative ? initiative?.initiative.id : -1,
+                          failure: !userRights?.init_failure,
+                        })
+                      }}
+                    />}
+                  </div>
+                  <div>
+                    <CustomizedButton
+                      className={`${styles.button}`}
+                      value="Согласовать"
+                      color="blue"
+                      disabled={coordinationButtonIsDisabled()}
+                      onClick={postCoordinateHandler}
+                    />
+                  </div>
                 </div>
               </div>
               {/* )} */}

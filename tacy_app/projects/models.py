@@ -80,7 +80,6 @@ class Project(models.Model):
 
     @classmethod
     def update_or_create_project(cls, project, update_correct_info):
-
         if project:
             project.name = update_correct_info["name"]
             project.date_start = update_correct_info["date_start"]
@@ -192,15 +191,29 @@ class Project(models.Model):
                     if title not in res:
                         res[title] = []
                     res[title].append(val)
-            for title, values in res.items():
-                for value in values:
-
+            for user, roles in res.items():
+                for role in roles:
                     query_role = operator.and_(
-                        (Q(user_roles__user=title)),
-                        (Q(user_roles__role=value)),
+                        (Q(user_roles__user=user)),
+                        (Q(user_roles__role=role)),
                     )
 
                     inits = inits.filter(query_role)
+                # if "-1" not in values:
+                #     for role in roles:
+                #         query_role = operator.and_(
+                #             (Q(user_roles__user=user)),
+                #             (Q(user_roles__role=role)),
+                #         )
+
+                #         inits = inits.filter(query_role)
+                # else:
+                #     query_properties = operator.and_(
+                #         (Q(user_roles__user=user)),
+                #         (Q(user_roles__role=None)),
+                #     )
+                #     inits = inits.filter(query_properties)
+
         if properties_filter:
             properties_filter = [
                 item.split(",") for item in properties_filter.split(";")
@@ -212,20 +225,31 @@ class Project(models.Model):
                     if title not in res:
                         res[title] = []
                     res[title].append(val)
+
             for title, values in res.items():
                 for value in values:
                     query_properties = operator.and_(
                         (Q(properties_fields__title=title)),
                         (Q(properties_fields__values=value)),
                     )
-
                     inits = inits.filter(query_properties)
-            inits = inits.filter(query_properties)
+                # if "-1" not in values:
+                #     for value in values:
+                #         query_properties = operator.and_(
+                #             (Q(properties_fields__title=title)),
+                #             (Q(properties_fields__values=value)),
+                #         )
+                #         inits = inits.filter(query_properties)
+                # else:
+                #     query_properties = operator.and_(
+                #         (Q(properties_fields__title=title)),
+                #         (Q(properties_fields__values=None)),
+                #     )
+                #     inits = inits.filter(query_properties)
         if files_filter:
             files_filter = files_filter.split(",")
             for item in files_filter:
                 if item != "":
-
                     query_files = operator.and_(
                         (Q(files__title=item)),
                         (~Q(files__file__in=["", None])),
@@ -692,7 +716,6 @@ class PropertiesСommunityProject(models.Model):
     def create_or_update_properties_user_in_community(
         cls, community, properties
     ):
-
         ids_not_delete = []
         for prop in properties:
             title_obj = prop.get("title")
