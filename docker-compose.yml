@@ -1,27 +1,27 @@
 version: "3"
 
 services:
-  backend:
-    container_name: tacy_backend_container
-    # command: "gunicorn tacy_app.tacy_app:application --bind 0.0.0.0:8000"
-    build:
-      context: ./tacy_app
-    restart: always
+  # backend:
+  #   container_name: tacy_backend_container
+  #   # command: "gunicorn tacy_app.tacy_app:application --bind 0.0.0.0:8000"
+  #   build:
+  #     context: ./tacy_app
+  #   restart: always
 
-    ports:
-      - "8000:8000"
-    depends_on:
-      - db
-    env_file:
-      - ./tacy_app/.env
-    expose:
-      - 8000
-    volumes:
-      - .:/tacy_app
-      - django_media_volume:/tacy_app/tacy_app/mediafiles
-      - django_media_volume_2:/tacy_app/tacy_app/media
-      - django_static_volume:/tacy_app/tacy_app/back_static
-      - django_static_volume_2:/tacy_app/tacy_app/back_staticfiles
+  #   ports:
+  #     - "8000:8000"
+  #   depends_on:
+  #     - db
+  #   env_file:
+  #     - ./tacy_app/.env
+  #   expose:
+  #     - 8000
+  #   volumes:
+  #     - .:/tacy_app
+  #     - django_media_volume:/tacy_app/tacy_app/mediafiles
+  #     - django_media_volume_2:/tacy_app/tacy_app/media
+  #     - django_static_volume:/tacy_app/tacy_app/back_static
+  #     - django_static_volume_2:/tacy_app/tacy_app/back_staticfiles
 
   db:
     container_name: "tacy_backend_postgres_container"
