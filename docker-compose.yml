@@ -33,7 +33,7 @@ services:
       POSTGRES_PASSWORD: "qwerty"
       PGDATA: "/var/lib/postgresql/data/pgdata"
     volumes:
-      - ./tacy_app/docker_postgres_init.sql:/docker-entrypoint-initdb.d/docker_postgres_init.sql
+      - "./tacy_app/docker_postgres_init.sql:/docker-entrypoint-initdb.d/init.sql"
       - "./postgres:/var/lib/postgresql/data"
     ports:
       - "5432:5432"
