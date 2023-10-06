@@ -60,35 +60,35 @@ services:
   #   expose:
   #     - 3000
   #   stdin_open: true
-  frontend:
-    image: alsetnikolas/tacy_front:v13
-    container_name: "tacy_forntend_container"
-    volumes:
-      - react_build:/react/build
-    ports:
-      - "3000:3000"
-    expose:
-      - 3000
+  # frontend:
+  #   image: alsetnikolas/tacy_front:v13
+  #   container_name: "tacy_forntend_container"
+  #   volumes:
+  #     - react_build:/react/build
+  #   ports:
+  #     - "3000:3000"
+  #   expose:
+  #     - 3000
 
-  nginx:
-    image: nginx:latest
-    container_name: nginx
-    ports:
-      - 80:8080
-    depends_on:
-      - backend
-      - frontend
-    # command: "ls -la /tacy_app/media/files/project/"
-    volumes:
-      - ./nginx/nginx-setup.conf:/etc/nginx/conf.d/default.conf:ro
-      - react_build:/var/www/react
-      - django_media_volume:/tacy_app/tacy_app/mediafiles
-      - django_media_volume_2:/tacy_app/tacy_app/media
-      - django_static_volume:/tacy_app/tacy_app/back_static
-      - django_static_volume_2:/tacy_app/tacy_app/back_staticfiles
+  # nginx:
+  #   image: nginx:latest
+  #   container_name: nginx
+  #   ports:
+  #     - 80:8080
+  #   depends_on:
+  #     - backend
+  #     - frontend
+  #   # command: "ls -la /tacy_app/media/files/project/"
+  #   volumes:
+  #     - ./nginx/nginx-setup.conf:/etc/nginx/conf.d/default.conf:ro
+  #     - react_build:/var/www/react
+  #     - django_media_volume:/tacy_app/tacy_app/mediafiles
+  #     - django_media_volume_2:/tacy_app/tacy_app/media
+  #     - django_static_volume:/tacy_app/tacy_app/back_static
+  #     - django_static_volume_2:/tacy_app/tacy_app/back_staticfiles
 
 volumes:
-  react_build:
+  # react_build:
   django_media_volume:
   django_media_volume_2:
   django_static_volume:
